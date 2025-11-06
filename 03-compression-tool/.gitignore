@@ -1,0 +1,16 @@
+# Build artifacts
+*.o
+cccompress
+
+# Compressed files
+*.huf
+*.decoded
+
+# Test files
+demo.txt
+test*.txt
+
+# Debug files
+*.dSYM/
+vgcore.*
+core
