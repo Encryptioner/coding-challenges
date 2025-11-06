@@ -27,7 +27,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 6. [Sort Tool](./06-sort-tool) - Sort lines of text files
 7. [Calculator](./07-calculator) - Command-line calculator ✓
 8. [Redis Server](./08-redis-server) - In-memory data structure store ✓
-9. [grep](./09-grep) - Pattern matching tool
+9. [grep](./09-grep) - Pattern matching tool ✓
 10. [uniq Tool](./10-uniq-tool) - Filter duplicate lines
 11. [Web Server](./11-web-server) - HTTP server implementation
 12. [URL Shortener](./12-url-shortener) - Shorten and redirect URLs
@@ -124,7 +124,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 
 ## Progress
 
-- ✓ Completed: 3
+- ✓ Completed: 4
 - In Progress: 0
 - Total: 94
 
