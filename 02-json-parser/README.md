@@ -374,6 +374,10 @@ All dependencies are typically pre-installed or easily available on Unix-like sy
 ├── test.sh                 # Test suite
 ├── README.md               # This file
 ├── CHALLENGE.md            # Challenge description
+├── docs/                   # Tutorial documentation
+│   ├── algorithm.md        # Algorithm explanation
+│   ├── tutorial.md         # Step-by-step tutorial
+│   └── examples.md         # Practical examples
 ├── tests/                  # Test files
 │   ├── step1/              # Step 1 tests
 │   ├── step2/              # Step 2 tests
@@ -402,6 +406,16 @@ To add new JSON features or modify behavior:
 3. **Add parser rules** as new `parser_parse_*()` functions
 4. **Update grammar validation** in existing parse functions
 5. **Add tests** in `test.sh`
+
+## Documentation
+
+For in-depth learning and tutorials, see the `docs/` directory:
+
+- **[Algorithm Guide](docs/algorithm.md)**: Deep dive into lexing and parsing algorithms, grammar rules, and complexity analysis
+- **[Tutorial](docs/tutorial.md)**: Step-by-step guide to building a JSON parser from scratch with hands-on exercises
+- **[Examples](docs/examples.md)**: Practical examples, real-world use cases, shell scripting, and integration patterns
+
+These guides provide intuitive, tutorial-friendly explanations perfect for learning compiler design principles.
 
 ## Learning Resources
 
