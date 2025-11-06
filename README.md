@@ -26,7 +26,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 5. [Load Balancer](./05-load-balancer) - Distribute traffic across servers
 6. [Sort Tool](./06-sort-tool) - Sort lines of text files
 7. [Calculator](./07-calculator) - Command-line calculator ✓
-8. [Redis Server](./08-redis-server) - In-memory data structure store
+8. [Redis Server](./08-redis-server) - In-memory data structure store ✓
 9. [grep](./09-grep) - Pattern matching tool
 10. [uniq Tool](./10-uniq-tool) - Filter duplicate lines
 11. [Web Server](./11-web-server) - HTTP server implementation
@@ -124,7 +124,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 
 ## Progress
 
-- ✓ Completed: 2
+- ✓ Completed: 3
 - In Progress: 0
 - Total: 94
 
