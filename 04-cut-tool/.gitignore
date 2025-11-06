@@ -1,0 +1,20 @@
+# Build artifacts
+cccut
+*.o
+*.a
+*.so
+*.dylib
+
+# Test files
+test*.txt
+test*.csv
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Distribution packages
+*.tar.gz
+dist/
