@@ -1,0 +1,34 @@
+# Build artifacts
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+
+# Executables (without extensions)
+*/calc
+*/calc-static
+*/shell
+*/wc
+
+# Static binaries
+*-static
+
+# Distribution packages
+*.tar.gz
+*.zip
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test output
+test-output/
+*.log
