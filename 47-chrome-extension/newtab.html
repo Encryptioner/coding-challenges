@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coding Challenges New Tab</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header/Branding -->
+        <div class="header">
+            <h1 class="brand">Coding Challenges<span class="cursor">_</span></h1>
+        </div>
+
+        <!-- Time and Date Display -->
+        <div class="time-section">
+            <div class="time" id="time">00:00:00</div>
+            <div class="date" id="date">Loading...</div>
+        </div>
+
+        <!-- Dynamic Content: GitHub PRs -->
+        <div class="prs-section">
+            <h2 class="section-title">Community Solutions (Open PRs)</h2>
+            <div id="prs-container" class="prs-container">
+                <div class="loading">Loading pull requests...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -69,7 +69,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 44. [DNS Forwarder](./44-dns-forwarder) - DNS query forwarding
 45. [Port Scanner](./45-port-scanner) - Network port scanner
 46. [yq](./46-yq) - YAML processor
-47. [Chrome Extension](./47-chrome-extension) - Browser extension
+47. [Chrome Extension](./47-chrome-extension) - Browser extension ✓
 48. [Data Privacy Vault](./48-data-privacy-vault) - Secure data storage
 49. [Password Cracker](./49-password-cracker) - Password security testing
 50. [Xargs](./50-xargs) - Build and execute commands
@@ -124,7 +124,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 
 ## Progress
 
-- ✓ Completed: 7
+- ✓ Completed: 8
 - In Progress: 0
 - Total: 94
 
