@@ -48,7 +48,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 25. [NATS Message Broker](./25-nats-message-broker) - Messaging system
 
 ### Development Tools (26-50)
-26. [Git](./26-git) - Version control system
+26. [Git](./26-git) - Version control system ✓
 27. [Rate Limiter](./27-rate-limiter) - API rate limiting
 28. [NTP Client](./28-ntp-client) - Network time synchronization
 29. [Scheduling Automation](./29-scheduling-automation) - Task scheduler
@@ -124,7 +124,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 
 ## Progress
 
-- ✓ Completed: 4
+- ✓ Completed: 5
 - In Progress: 0
 - Total: 94
 
