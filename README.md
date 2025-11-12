@@ -19,7 +19,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 ## Challenges
 
 ### System Tools & CLI Utilities (1-15)
-1. [wc Tool](./01-wc-tool) - Word, line, character, and byte counter
+1. [wc Tool](./01-wc-tool) - Word, line, character, and byte counter ✓
 2. [JSON Parser](./02-json-parser) - Parse and validate JSON
 3. [Compression Tool](./03-compression-tool) - File compression utility
 4. [cut Tool](./04-cut-tool) - Cut out selected portions of lines
@@ -124,7 +124,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 
 ## Progress
 
-- ✓ Completed: 5
+- ✓ Completed: 6
 - In Progress: 0
 - Total: 94
 

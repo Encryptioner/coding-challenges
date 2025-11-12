@@ -18,11 +18,16 @@ This is a monorepo containing implementations for 94 coding challenges from [Cod
 ### Starting a New Challenge
 
 When implementing a new challenge:
-1. Navigate to the appropriate numbered folder
+1. Navigate to or create the appropriate numbered folder (e.g., `01-wc-tool/`)
 2. Fetch the challenge details from `https://codingchallenges.fyi/challenges/challenge-name/`
-3. Create the project structure appropriate for the chosen language/technology
-4. Add a README.md in the challenge folder explaining the implementation
-5. Update the root README.md to mark progress (update the completed count and add ✓ to the challenge)
+3. Create the required documentation structure:
+   - `challenge.md` - Challenge requirements and specifications
+   - `README.md` - Implementation documentation
+   - `docs/` directory with tutorial-style documentation
+4. Implement the solution in the appropriate language/technology
+5. Create build system (Makefile, package.json, etc.)
+6. Create comprehensive test suite
+7. Update the root README.md to mark progress (update the completed count and add ✓ to the challenge)
 
 ### Challenge Independence
 
@@ -94,14 +99,69 @@ The Makefile auto-detects the platform and configures appropriate compiler flags
 
 ## Documentation Standards
 
-Based on the 14-shell implementation, each challenge should include:
-- A README.md with:
-  - Feature list
-  - Build/installation instructions
-  - Usage examples
-  - Platform-specific notes (if applicable)
-  - Testing instructions
-- Additional documentation in a `docs/` folder for complex topics
+Each challenge MUST include the following documentation:
+
+### Required Files
+
+1. **challenge.md** - Challenge specification and requirements
+   - Original challenge description and goals
+   - Features to implement
+   - Test cases and acceptance criteria
+   - Step-by-step implementation guide
+   - Links to related resources
+
+2. **README.md** - Implementation documentation
+   - Overview of the implementation
+   - Feature list with checkmarks
+   - Build/installation instructions
+   - Usage examples with code blocks
+   - Command-line options and flags
+   - Platform-specific notes (if applicable)
+   - Testing instructions
+   - Project structure explanation
+
+3. **docs/** - Tutorial-style documentation directory
+   - Each challenge should have comprehensive tutorial documentation
+   - Typical docs include:
+     - `implementation.md` - Design decisions and code walkthrough
+     - `examples.md` - Practical usage examples and scenarios
+     - `algorithms.md` or `internals.md` - Deep dive into algorithms/architecture
+   - Documentation should be educational and approachable
+   - Include code examples, diagrams (ASCII art), and step-by-step explanations
+   - Aim for 600-900+ lines per doc file for thorough coverage
+
+### Documentation Style
+
+- Write in tutorial style: explain concepts, not just facts
+- Use clear headings and table of contents
+- Include practical examples with expected output
+- Add code snippets with syntax highlighting (markdown)
+- Use tables for comparing options/features
+- Include troubleshooting sections where relevant
+- Cross-reference between documents
+
+### Example Structure
+
+```
+NN-challenge-name/
+├── challenge.md           # Challenge requirements (required)
+├── README.md              # Implementation overview (required)
+├── main.c / main.py       # Main implementation
+├── Makefile / build files # Build system
+├── test.sh                # Test suite
+└── docs/                  # Tutorial documentation (required)
+    ├── implementation.md  # Design and code walkthrough
+    ├── examples.md        # Practical examples
+    └── algorithms.md      # Deep dive into algorithms
+```
+
+### Reference Implementations
+
+See these challenges for documentation examples:
+- `07-calculator/` - Shunting Yard algorithm implementation
+- `08-redis-server/` - RESP protocol and server architecture
+- `09-grep/` - Regular expressions and pattern matching
+- `26-git/` - Git internals and object model
 
 ## Testing
 
