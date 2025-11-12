@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Chat App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <h1 class="logo">📹 Video Chat</h1>
+        <div class="connection-status" id="connection-status">
+            <span class="status-dot" id="status-dot"></span>
+            <span id="status-text">Disconnected</span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Join Room Section -->
+        <div class="join-section" id="join-section">
+            <div class="join-card">
+                <h2>Join a Video Call</h2>
+                <p>Enter a room ID to join or create a new room</p>
+
+                <div class="form-group">
+                    <label for="room-input">Room ID</label>
+                    <input
+                        type="text"
+                        id="room-input"
+                        placeholder="Enter room ID or leave empty for random"
+                        autocomplete="off"
+                    >
+                </div>
+
+                <button class="btn btn-primary" id="join-btn">Join Call</button>
+
+                <div class="info-box">
+                    <p><strong>💡 Tip:</strong> Share the room ID with someone to video chat with them!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Video Chat Section -->
+        <div class="video-section" id="video-section" style="display: none;">
+            <!-- Room Info -->
+            <div class="room-info">
+                <div class="room-id-display">
+                    <span>Room ID: <strong id="current-room-id"></strong></span>
+                    <button class="btn-icon" id="copy-room-btn" title="Copy room ID">📋</button>
+                </div>
+                <div class="participants">
+                    <span id="participant-count">1 participant</span>
+                </div>
+            </div>
+
+            <!-- Videos Grid -->
+            <div class="videos-grid" id="videos-grid">
+                <!-- Remote Video -->
+                <div class="video-container" id="remote-video-container" style="display: none;">
+                    <video id="remote-video" autoplay playsinline></video>
+                    <div class="video-label">Remote User</div>
+                    <div class="video-status" id="remote-status">Connecting...</div>
+                </div>
+
+                <!-- Local Video -->
+                <div class="video-container local-video" id="local-video-container">
+                    <video id="local-video" autoplay playsinline muted></video>
+                    <div class="video-label">You</div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <button class="control-btn" id="toggle-video-btn" title="Toggle Camera">
+                    <span class="icon">📹</span>
+                    <span class="label">Camera</span>
+                </button>
+
+                <button class="control-btn" id="toggle-audio-btn" title="Toggle Microphone">
+                    <span class="icon">🎤</span>
+                    <span class="label">Microphone</span>
+                </button>
+
+                <button class="control-btn btn-danger" id="leave-btn" title="Leave Call">
+                    <span class="icon">📞</span>
+                    <span class="label">Leave</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Error Section -->
+        <div class="error-section" id="error-section" style="display: none;">
+            <div class="error-card">
+                <div class="error-icon">⚠️</div>
+                <h2>Oops! Something went wrong</h2>
+                <p id="error-message"></p>
+                <button class="btn btn-primary" id="retry-btn">Try Again</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>

@@ -102,7 +102,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 75. [Duplicate File Finder](./75-duplicate-file-finder) - Find duplicate files
 
 ### Applications & Advanced Tools (76-94)
-76. [Video Chat App](./76-video-chat-app) - Real-time video communication
+76. [Video Chat App](./76-video-chat-app) - Real-time video communication ✓
 77. [Static Site Generator](./77-static-site-generator) - Generate static websites
 78. [Uptime Monitoring](./78-uptime-monitoring) - Service monitoring
 79. [Socat](./79-socat) - Socket utility
@@ -124,7 +124,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 
 ## Progress
 
-- ✓ Completed: 8
+- ✓ Completed: 9
 - In Progress: 0
 - Total: 94
 

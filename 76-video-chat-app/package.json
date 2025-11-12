@@ -1,0 +1,24 @@
+{
+  "name": "video-chat-app",
+  "version": "1.0.0",
+  "description": "Simple peer-to-peer video chat application using WebRTC",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "webrtc",
+    "video-chat",
+    "peer-to-peer",
+    "websocket"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.14.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
