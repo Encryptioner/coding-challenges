@@ -37,7 +37,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 
 ### Network & Communication (16-25)
 16. [IRC Client](./16-irc-client) - Internet Relay Chat client
-17. [Memcached Server](./17-memcached-server) - Distributed memory caching
+17. [Memcached Server](./17-memcached-server) - Distributed memory caching ✓
 18. [Spotify Client](./18-spotify-client) - Music streaming client
 19. [Discord Bot](./19-discord-bot) - Automated Discord bot
 20. [LinkedIn Carousel Generator](./20-linkedin-carousel-generator) - Generate carousel posts
@@ -124,7 +124,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 
 ## Progress
 
-- ✓ Completed: 6
+- ✓ Completed: 7
 - In Progress: 0
 - Total: 94
 
