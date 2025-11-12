@@ -4,10 +4,13 @@ const state = {
     myId: null,
     roomId: null,
     localStream: null,
+    screenStream: null,
     peerConnection: null,
     remotePeerId: null,
     isAudioEnabled: true,
-    isVideoEnabled: true
+    isVideoEnabled: true,
+    isSharingScreen: false,
+    originalVideoTrack: null
 };
 
 // Configuration
@@ -28,6 +31,7 @@ const elements = {
     leaveBtn: document.getElementById('leave-btn'),
     toggleVideoBtn: document.getElementById('toggle-video-btn'),
     toggleAudioBtn: document.getElementById('toggle-audio-btn'),
+    shareScreenBtn: document.getElementById('share-screen-btn'),
     copyRoomBtn: document.getElementById('copy-room-btn'),
     retryBtn: document.getElementById('retry-btn'),
     localVideo: document.getElementById('local-video'),
@@ -52,6 +56,7 @@ function init() {
     elements.leaveBtn.addEventListener('click', handleLeave);
     elements.toggleVideoBtn.addEventListener('click', toggleVideo);
     elements.toggleAudioBtn.addEventListener('click', toggleAudio);
+    elements.shareScreenBtn.addEventListener('click', toggleScreenShare);
     elements.copyRoomBtn.addEventListener('click', copyRoomId);
     elements.retryBtn.addEventListener('click', () => {
         hideError();
@@ -383,6 +388,12 @@ function cleanup() {
         state.localStream = null;
     }
 
+    // Stop screen stream if active
+    if (state.screenStream) {
+        state.screenStream.getTracks().forEach(track => track.stop());
+        state.screenStream = null;
+    }
+
     // Close peer connection
     if (state.peerConnection) {
         state.peerConnection.close();
@@ -394,12 +405,18 @@ function cleanup() {
     state.remotePeerId = null;
     state.isAudioEnabled = true;
     state.isVideoEnabled = true;
+    state.isSharingScreen = false;
+    state.originalVideoTrack = null;
 
     // Clear videos
     elements.localVideo.srcObject = null;
     elements.remoteVideo.srcObject = null;
     elements.remoteVideoContainer.style.display = 'none';
     elements.videosGrid.classList.remove('multi-user');
+
+    // Reset screen share button
+    elements.shareScreenBtn.classList.remove('active');
+    elements.shareScreenBtn.querySelector('.label').textContent = 'Share Screen';
 
     // Reset URL
     window.history.pushState({}, '', window.location.pathname);
@@ -439,6 +456,88 @@ function toggleAudio() {
             'info'
         );
     }
+}
+
+// Toggle Screen Share
+async function toggleScreenShare() {
+    if (!state.isSharingScreen) {
+        // Start screen sharing
+        try {
+            state.screenStream = await navigator.mediaDevices.getDisplayMedia({
+                video: {
+                    cursor: 'always'
+                },
+                audio: false
+            });
+
+            const screenTrack = state.screenStream.getVideoTracks()[0];
+
+            // Save original video track
+            state.originalVideoTrack = state.localStream.getVideoTracks()[0];
+
+            // Replace video track in peer connection
+            if (state.peerConnection) {
+                const sender = state.peerConnection.getSenders().find(s => {
+                    return s.track && s.track.kind === 'video';
+                });
+
+                if (sender) {
+                    await sender.replaceTrack(screenTrack);
+                }
+            }
+
+            // Update local video display
+            elements.localVideo.srcObject = state.screenStream;
+
+            // Handle screen share stop (user clicks browser's stop button)
+            screenTrack.onended = () => {
+                stopScreenShare();
+            };
+
+            state.isSharingScreen = true;
+            elements.shareScreenBtn.classList.add('active');
+            elements.shareScreenBtn.querySelector('.label').textContent = 'Stop Sharing';
+            showToast('Screen sharing started', 'success');
+
+        } catch (error) {
+            console.error('Error sharing screen:', error);
+            if (error.name === 'NotAllowedError') {
+                showToast('Screen sharing permission denied', 'error');
+            } else {
+                showToast('Failed to share screen', 'error');
+            }
+        }
+    } else {
+        // Stop screen sharing
+        stopScreenShare();
+    }
+}
+
+// Stop Screen Share
+function stopScreenShare() {
+    if (state.screenStream) {
+        state.screenStream.getTracks().forEach(track => track.stop());
+        state.screenStream = null;
+    }
+
+    // Restore original video track
+    if (state.originalVideoTrack && state.peerConnection) {
+        const sender = state.peerConnection.getSenders().find(s => {
+            return s.track && s.track.kind === 'video';
+        });
+
+        if (sender) {
+            sender.replaceTrack(state.originalVideoTrack);
+        }
+    }
+
+    // Restore local video display
+    elements.localVideo.srcObject = state.localStream;
+
+    state.isSharingScreen = false;
+    elements.shareScreenBtn.classList.remove('active');
+    elements.shareScreenBtn.querySelector('.label').textContent = 'Share Screen';
+    showToast('Screen sharing stopped', 'info');
 }
 
 // Copy Room ID

@@ -42,10 +42,19 @@ A simple peer-to-peer video chat application built with WebRTC, WebSocket, and v
 - [x] Responsive design (desktop & mobile)
 - [x] Real-time connection status indicator
 - [x] Media controls (mute/unmute, camera on/off)
+- [x] **Screen sharing** with one-click toggle
 - [x] Room sharing via link
 - [x] Toast notifications
 - [x] Error handling with user-friendly messages
 - [x] Loading states and animations
+
+### 🚀 Advanced Features
+
+- [x] **Screen Sharing**: Share your screen with remote peer
+  - One-click screen share toggle
+  - Seamless switch between camera and screen
+  - Automatic cleanup when browser stop button clicked
+  - Track replacement without reconnection
 
 ## Architecture
 
@@ -133,12 +142,25 @@ A simple peer-to-peer video chat application built with WebRTC, WebSocket, and v
 **Media Controls:**
 - **Camera Button**: Toggle your camera on/off
 - **Microphone Button**: Mute/unmute your microphone
+- **Share Screen Button**: Share your screen or stop sharing
+  - Click once to start sharing your screen
+  - Select which window/screen to share
+  - Click again (or browser's stop button) to stop sharing
+  - Automatically switches back to camera when stopped
 - **Leave Button**: End the call and return to lobby
 
 **Room Info:**
 - **Room ID**: Displayed at the top (click 📋 to copy link)
 - **Participant Count**: Shows number of connected users
 - **Connection Status**: Indicator in top-right corner
+
+**Screen Sharing:**
+1. Click the "Share Screen" button
+2. Select the screen, window, or tab you want to share
+3. Click "Share" in the browser dialog
+4. Your screen is now visible to the remote user
+5. To stop: Click "Stop Sharing" button or browser's stop button
+6. Video automatically switches back to your camera
 
 ### Sharing Room Link
 
@@ -540,6 +562,26 @@ describe('Video Chat App', () => {
 
 ## Going Further
 
+### ✅ Implemented Enhancements
+
+**Screen Sharing:** ✅ **IMPLEMENTED**
+- Share your entire screen, specific window, or browser tab
+- One-click toggle between camera and screen
+- Automatic track replacement without reconnection
+- Handles browser stop button gracefully
+- Seamless switch back to camera
+
+```javascript
+// Implementation available in app.js
+async function toggleScreenShare() {
+    state.screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: { cursor: 'always' },
+        audio: false
+    });
+    // Replace track and update UI
+}
+```
+
 ### Enhancements to Add
 
 **Multi-Party Calls:**
@@ -548,18 +590,6 @@ describe('Video Chat App', () => {
 const peers = new Map(); // peerId => RTCPeerConnection
 
 // Or use SFU (Selective Forwarding Unit) for better scalability
-```
-
-**Screen Sharing:**
-```javascript
-async function shareScreen() {
-    const screenStream = await navigator.mediaDevices.getDisplayMedia({
-        video: true
-    });
-    // Replace video track with screen track
-    const videoTrack = screenStream.getVideoTracks()[0];
-    sender.replaceTrack(videoTrack);
-}
 ```
 
 **Text Chat:**
