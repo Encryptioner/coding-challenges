@@ -103,7 +103,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 
 ### Applications & Advanced Tools (76-94)
 76. [Video Chat App](./76-video-chat-app) - Real-time video communication ✓
-77. [Static Site Generator](./77-static-site-generator) - Generate static websites
+77. [Static Site Generator](./77-static-site-generator) - Generate static websites ✓
 78. [Uptime Monitoring](./78-uptime-monitoring) - Service monitoring
 79. [Socat](./79-socat) - Socket utility
 80. [Optical Character Recognition](./80-optical-character-recognition) - Text extraction from images
@@ -124,7 +124,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 
 ## Progress
 
-- ✓ Completed: 9
+- ✓ Completed: 10
 - In Progress: 0
 - Total: 94
 
