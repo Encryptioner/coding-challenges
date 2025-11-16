@@ -12,13 +12,13 @@ This repository includes a complete GitHub Pages deployment system with interact
 
 ### Step 2: Add Workflow File
 
-The workflow file `.github/workflows/deploy-pages.yml` has been created but needs to be added to the main branch:
+A workflow template is provided in `.github/workflow-templates/deploy-pages.yml`. This file needs to be copied to `.github/workflows/` on the main branch:
 
 **Option A: Create via Web Interface**
-1. Go to `.github/workflows/` in the repository
+1. Go to `.github/workflows/` in the repository (create the directory if needed)
 2. Click **Add file** → **Create new file**
 3. Name it: `deploy-pages.yml`
-4. Copy the content from the local file
+4. Copy the content from `.github/workflow-templates/deploy-pages.yml`
 5. Commit directly to `main` branch
 
 **Option B: Merge via Pull Request**
