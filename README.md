@@ -106,7 +106,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 77. [Static Site Generator](./77-static-site-generator) - Generate static websites ✓
 78. [Uptime Monitoring](./78-uptime-monitoring) - Service monitoring
 79. [Socat](./79-socat) - Socket utility
-80. [Optical Character Recognition](./80-optical-character-recognition) - Text extraction from images
+80. [Optical Character Recognition](./80-optical-character-recognition) - Text extraction from images ✓
 81. [Brainfuck Interpreter](./81-brainfuck-interpreter) - Esoteric language interpreter
 82. [Markdown to PDF](./82-markdown-to-pdf) - Convert markdown to PDF
 83. [Markdown Presentation Tool](./83-markdown-presentation-tool) - Presentation from markdown
@@ -124,7 +124,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 
 ## Progress
 
-- ✓ Completed: 10
+- ✓ Completed: 11
 - In Progress: 0
 - Total: 94
 
