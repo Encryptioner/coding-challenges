@@ -77,7 +77,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 ### Advanced Systems (51-75)
 51. [HTTP Forward Proxy](./51-http-forward-proxy) - HTTP proxy server
 52. [Docker](./52-docker) - Container runtime
-53. [Spell Checker (Bloom Filter)](./53-spell-checker-bloom-filter) - Spell checking using bloom filters
+53. [Spell Checker (Bloom Filter)](./53-spell-checker-bloom-filter) - Spell checking using bloom filters ✓
 54. [Tar](./54-tar) - Archive utility
 55. [Xxd](./55-xxd) - Hexdump utility
 56. [Chess Game](./56-chess-game) - Chess implementation
@@ -124,7 +124,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 
 ## Progress
 
-- ✓ Completed: 12
+- ✓ Completed: 13
 - In Progress: 0
 - Total: 94
 
