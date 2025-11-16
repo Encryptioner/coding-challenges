@@ -32,8 +32,14 @@ This repository includes a complete GitHub Pages deployment system with interact
 3. Add workflow file to `.github/workflows/` (see [DEPLOYMENT.md](./DEPLOYMENT.md))
 4. Visit `https://[username].github.io/coding-challenges/`
 
+**Deployment Status:**
+- ⚠️ **Not Active Yet** - Requires workflow file on master branch (see [AUTO-DEPLOY-STATUS.md](./AUTO-DEPLOY-STATUS.md))
+- Run `./enable-auto-deploy.sh` for activation guide
+- Once active: Every push to master automatically deploys!
+
 **Documentation:**
-- [DEPLOYMENT.md](./DEPLOYMENT.md) - Complete deployment guide
+- [AUTO-DEPLOY-STATUS.md](./AUTO-DEPLOY-STATUS.md) - **Start here!** Current status & activation steps
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - Complete deployment guide (400+ lines)
 - [.github/GITHUB_PAGES_SETUP.md](./.github/GITHUB_PAGES_SETUP.md) - Setup instructions
 - [.github/pages/README.md](./.github/pages/README.md) - Technical documentation
 
@@ -152,6 +158,43 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 - ✓ Completed: 13
 - In Progress: 0
 - Total: 94
+
+## Deployment & Scripts
+
+Quick reference for deployment-related commands:
+
+### Local Testing
+```bash
+# Test deployment readiness (recommended first step)
+./deploy-github-pages.sh
+
+# Check auto-deployment status
+cat AUTO-DEPLOY-STATUS.md
+
+# View activation guide
+./enable-auto-deploy.sh
+
+# Build site manually
+.github/scripts/build-site.sh
+
+# Preview locally
+cd dist && python3 -m http.server 8000
+```
+
+### Auto-Deployment
+- **Status:** ⚠️ Not active yet (see [AUTO-DEPLOY-STATUS.md](./AUTO-DEPLOY-STATUS.md))
+- **Activate:** Add workflow file to `.github/workflows/` on master branch
+- **After Activation:** Every push to master automatically deploys
+- **URL:** `https://[username].github.io/coding-challenges/`
+
+### Key Files
+| File | Purpose |
+|------|---------|
+| `deploy-github-pages.sh` | Verify deployment readiness & test locally |
+| `enable-auto-deploy.sh` | Interactive activation guide |
+| `AUTO-DEPLOY-STATUS.md` | Current deployment status |
+| `DEPLOYMENT.md` | Complete deployment documentation |
+| `CLAUDE.md` | Repository guide for Claude Code |
 
 ## Getting Started
 
