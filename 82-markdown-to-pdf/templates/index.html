@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown to PDF Converter</title>
+    <link rel="stylesheet" href="../static/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>📝 Markdown to PDF Converter</h1>
+            <div class="header-actions">
+                <button id="settingsBtn" class="btn btn-secondary">⚙️ Settings</button>
+                <button id="exportBtn" class="btn btn-primary">📄 Export PDF</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Editor Pane -->
+            <div class="editor-pane">
+                <div class="pane-header">
+                    <h2>✏️ Editor</h2>
+                    <div class="editor-toolbar">
+                        <button class="toolbar-btn" onclick="insertMarkdown('**', '**')" title="Bold">
+                            <strong>B</strong>
+                        </button>
+                        <button class="toolbar-btn" onclick="insertMarkdown('*', '*')" title="Italic">
+                            <em>I</em>
+                        </button>
+                        <button class="toolbar-btn" onclick="insertMarkdown('`', '`')" title="Code">
+                            <code>&lt;/&gt;</code>
+                        </button>
+                        <button class="toolbar-btn" onclick="insertMarkdown('[', '](url)')" title="Link">
+                            🔗
+                        </button>
+                        <button class="toolbar-btn" onclick="insertMarkdown('## ', '')" title="Heading">
+                            H
+                        </button>
+                        <button class="toolbar-btn" onclick="insertList()" title="List">
+                            ≡
+                        </button>
+                    </div>
+                </div>
+                <textarea id="markdownEditor"
+                          placeholder="Type your markdown here...
+
+# Sample Document
+
+This is a **bold** word and this is *italic*.
+
+## Features
+
+- Lists
+- **Bold** and *italic*
+- `Code blocks`
+- [Links](https://example.com)
+- And more!"></textarea>
+                <div class="editor-stats">
+                    <span id="wordCount">Words: 0</span>
+                    <span id="charCount">Characters: 0</span>
+                </div>
+            </div>
+
+            <!-- Preview Pane -->
+            <div class="preview-pane">
+                <div class="pane-header">
+                    <h2>👁️ Preview</h2>
+                    <div class="preview-toolbar">
+                        <button class="toolbar-btn" onclick="refreshPreview()" title="Refresh">
+                            🔄
+                        </button>
+                    </div>
+                </div>
+                <div id="preview" class="preview-content">
+                    <p class="preview-placeholder">Your rendered markdown will appear here...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>⚙️ Document Settings</h2>
+                    <button class="close-btn" onclick="closeSettings()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <!-- Font Settings -->
+                    <div class="settings-section">
+                        <h3>Font Family</h3>
+                        <select id="fontFamily" onchange="updatePreview()">
+                            <option value="Georgia, serif">Serif (Georgia)</option>
+                            <option value="Arial, sans-serif">Sans-serif (Arial)</option>
+                            <option value="'Helvetica Neue', Helvetica, sans-serif">Helvetica</option>
+                            <option value="'Times New Roman', Times, serif">Times New Roman</option>
+                            <option value="'Courier New', Courier, monospace">Monospace</option>
+                        </select>
+                    </div>
+
+                    <!-- Font Sizes -->
+                    <div class="settings-section">
+                        <h3>Font Sizes</h3>
+                        <div class="settings-grid">
+                            <div class="setting-item">
+                                <label for="bodySize">Body Text:</label>
+                                <input type="number" id="bodySize" value="16" min="10" max="24" onchange="updatePreview()">
+                                <span>px</span>
+                            </div>
+                            <div class="setting-item">
+                                <label for="h1Size">Heading 1:</label>
+                                <input type="number" id="h1Size" value="32" min="20" max="48" onchange="updatePreview()">
+                                <span>px</span>
+                            </div>
+                            <div class="setting-item">
+                                <label for="h2Size">Heading 2:</label>
+                                <input type="number" id="h2Size" value="24" min="16" max="36" onchange="updatePreview()">
+                                <span>px</span>
+                            </div>
+                            <div class="setting-item">
+                                <label for="h3Size">Heading 3:</label>
+                                <input type="number" id="h3Size" value="20" min="14" max="30" onchange="updatePreview()">
+                                <span>px</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Colors -->
+                    <div class="settings-section">
+                        <h3>Colors</h3>
+                        <div class="settings-grid">
+                            <div class="setting-item">
+                                <label for="bgColor">Background:</label>
+                                <input type="color" id="bgColor" value="#ffffff" onchange="updatePreview()">
+                            </div>
+                            <div class="setting-item">
+                                <label for="textColor">Text:</label>
+                                <input type="color" id="textColor" value="#333333" onchange="updatePreview()">
+                            </div>
+                            <div class="setting-item">
+                                <label for="headingColor">Headings:</label>
+                                <input type="color" id="headingColor" value="#2c3e50" onchange="updatePreview()">
+                            </div>
+                            <div class="setting-item">
+                                <label for="linkColor">Links:</label>
+                                <input type="color" id="linkColor" value="#0366d6" onchange="updatePreview()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Presets -->
+                    <div class="settings-section">
+                        <h3>Presets</h3>
+                        <div class="preset-buttons">
+                            <button class="btn btn-secondary" onclick="applyPreset('default')">Default</button>
+                            <button class="btn btn-secondary" onclick="applyPreset('dark')">Dark</button>
+                            <button class="btn btn-secondary" onclick="applyPreset('minimal')">Minimal</button>
+                            <button class="btn btn-secondary" onclick="applyPreset('serif')">Classic Serif</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="resetSettings()">Reset to Default</button>
+                    <button class="btn btn-primary" onclick="closeSettings()">Done</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../static/js/parser.js"></script>
+    <script src="../static/js/app.js"></script>
+</body>
+</html>
