@@ -12,6 +12,31 @@ This repository contains implementations for various coding challenges that cove
 - Games and interactive applications
 - DevOps and infrastructure tools
 
+## 🌐 GitHub Pages Deployment
+
+This repository includes a complete GitHub Pages deployment system with interactive documentation viewers!
+
+**🚀 Quick Deploy:** Run `./deploy-github-pages.sh` to verify deployment readiness and get step-by-step instructions.
+
+**Features:**
+- 📖 Interactive split-pane documentation viewer (docs + live demos side-by-side)
+- 🎮 Live web-based implementations (#47, #76, #77, #80, #82)
+- 📱 Mobile-responsive design
+- 🔍 Filterable challenge grid
+- 📋 One-click code copying
+- 📚 Comprehensive tutorials
+
+**Deploy Steps:**
+1. Run `./deploy-github-pages.sh` to test locally
+2. Enable GitHub Pages in repository Settings
+3. Add workflow file to `.github/workflows/` (see [DEPLOYMENT.md](./DEPLOYMENT.md))
+4. Visit `https://[username].github.io/coding-challenges/`
+
+**Documentation:**
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - Complete deployment guide
+- [.github/GITHUB_PAGES_SETUP.md](./.github/GITHUB_PAGES_SETUP.md) - Setup instructions
+- [.github/pages/README.md](./.github/pages/README.md) - Technical documentation
+
 ## Repository Structure
 
 Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) containing the implementation and related files.
