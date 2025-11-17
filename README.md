@@ -148,14 +148,14 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 88. [Top](./88-top) - Process monitoring tool
 89. [ELIZA](./89-eliza) - Natural language chatbot
 90. [SMTP Server](./90-smtp-server) - Email server ✓
-91. [Monkeytype](./91-monkeytype) - Typing practice tool
-92. [LOC Counter](./92-loc-counter) - Count lines of code
-93. [Which](./93-which) - Locate commands
+91. [DNS Resolver](./91-dns-resolver) - RFC 1035 DNS resolver ✓
+92. [Discord Bot](./92-discord-bot) - Coding challenges helper bot ✓
+93. [Rate Limiter](./93-rate-limiter) - API rate limiting with multiple algorithms ✓
 94. [Forth Interpreter](./94-forth-interpreter) - Stack-based language interpreter
 
 ## Progress
 
-- ✓ Completed: 16
+- ✓ Completed: 19
 - In Progress: 0
 - Total: 94
 
