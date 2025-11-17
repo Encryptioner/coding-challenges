@@ -147,7 +147,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 87. [Code Comment Remover](./87-code-comment-remover) - Strip code comments
 88. [Top](./88-top) - Process monitoring tool
 89. [ELIZA](./89-eliza) - Natural language chatbot
-90. [SMTP Server](./90-smtp-server) - Email server
+90. [SMTP Server](./90-smtp-server) - Email server ✓
 91. [Monkeytype](./91-monkeytype) - Typing practice tool
 92. [LOC Counter](./92-loc-counter) - Count lines of code
 93. [Which](./93-which) - Locate commands
@@ -155,7 +155,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 
 ## Progress
 
-- ✓ Completed: 13
+- ✓ Completed: 14
 - In Progress: 0
 - Total: 94
 

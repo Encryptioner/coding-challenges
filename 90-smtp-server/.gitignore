@@ -1,0 +1,10 @@
+# Build artifacts
+ccsmtp
+test_client
+*.o
+
+# Email storage
+mail/
+
+# Test output
+*.log
