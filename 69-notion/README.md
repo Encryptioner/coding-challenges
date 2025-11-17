@@ -2,6 +2,21 @@
 
 A simplified version of Notion - an all-in-one workspace for notes, documents, and knowledge management. Built as part of the [CodingChallenges.fyi](https://codingchallenges.fyi/challenges/challenge-notion) challenge series.
 
+## ⚡ Enhanced Backend
+
+**NEW**: The backend has been significantly enhanced with full API support for advanced features! See [ENHANCEMENTS.md](./ENHANCEMENTS.md) for complete documentation.
+
+**Backend Features (100% Complete)**:
+- ✅ Tags system with color coding
+- ✅ Version history tracking
+- ✅ Image upload functionality
+- ✅ Export to Markdown and HTML
+- ✅ Page templates support
+- ✅ User preferences (dark mode ready)
+- ✅ Enhanced page metadata (icons, covers)
+
+**Note**: Frontend UI for these features requires implementation. The API is fully functional and documented.
+
 ## Features
 
 ### Core Functionality
@@ -138,44 +153,132 @@ A simplified version of Notion - an all-in-one workspace for notes, documents, a
 
 ## API Endpoints
 
-The backend provides a RESTful API:
+The backend provides a comprehensive RESTful API with enhanced features:
 
-### Get All Pages
+### Pages API
+
+**Get All Pages**
 ```
 GET /api/pages
+Query Params: ?template=true (filter templates), ?tag=tagname (filter by tag)
+Response: { pages: [...] } (includes tags for each page)
 ```
 
-### Get Single Page
+**Get Single Page**
 ```
 GET /api/pages/:id
+Response: { page: { ..., tags: [...] } }
 ```
 
-### Create Page
+**Create Page**
 ```
 POST /api/pages
-Body: { title, content, parent_id }
+Body: { title, content, parent_id, is_template, tags, icon, cover_image }
+Response: { page: { ..., tags: [...] } }
 ```
 
-### Update Page
+**Update Page**
 ```
 PUT /api/pages/:id
-Body: { title, content }
+Body: { title, content, tags, icon, cover_image }
+Note: Automatically creates version history entry
+Response: { page: { ..., tags: [...] } }
 ```
 
-### Delete Page
+**Delete Page**
 ```
 DELETE /api/pages/:id
+Note: Cascades to child pages
+Response: { success: true }
 ```
 
-### Duplicate Page
+**Duplicate Page**
 ```
 POST /api/pages/:id/duplicate
+Note: Copies content and tags, increments name
+Response: { page: { ..., tags: [...] } }
 ```
 
-### Move Page
+**Move Page**
 ```
 PUT /api/pages/:id/move
 Body: { parent_id, position }
+Response: { page: {...} }
+```
+
+### Tags API (NEW)
+
+**Get All Tags**
+```
+GET /api/tags
+Response: { tags: [...] }
+```
+
+**Create Tag**
+```
+POST /api/tags
+Body: { name, color }
+Response: { tag: {...} }
+```
+
+**Delete Tag**
+```
+DELETE /api/tags/:id
+Response: { success: true }
+```
+
+### Version History API (NEW)
+
+**Get Page Versions**
+```
+GET /api/pages/:id/versions
+Response: { versions: [...] } (last 20 versions)
+```
+
+**Restore Version**
+```
+POST /api/pages/:id/restore/:versionId
+Response: { page: {...} }
+```
+
+### File Upload API (NEW)
+
+**Upload Image**
+```
+POST /api/upload
+Content-Type: multipart/form-data
+Body: image file (max 10MB)
+Supported: JPEG, PNG, GIF, WebP, SVG
+Response: { url: "/uploads/filename.jpg" }
+```
+
+### Export API (NEW)
+
+**Export to Markdown**
+```
+GET /api/pages/:id/export/markdown
+Response: Markdown file download
+```
+
+**Export to HTML**
+```
+GET /api/pages/:id/export/html
+Response: Standalone HTML file download
+```
+
+### Preferences API (NEW)
+
+**Get Preferences**
+```
+GET /api/preferences
+Response: { preferences: { theme: "light", ... } }
+```
+
+**Update Preference**
+```
+PUT /api/preferences/:key
+Body: { value: "dark" }
+Response: { success: true }
 ```
 
 ## Technology Stack

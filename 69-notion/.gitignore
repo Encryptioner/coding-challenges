@@ -6,6 +6,9 @@ package-lock.json
 server/notion.db
 *.db
 
+# Uploads
+public/uploads/
+
 # Logs
 *.log
 npm-debug.log*
