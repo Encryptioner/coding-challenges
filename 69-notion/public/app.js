@@ -7,10 +7,15 @@ let currentPage = null;
 let quill = null;
 let saveTimeout = null;
 let selectedMoveParent = null;
+let allTags = [];
+let currentFilter = 'all';
+let currentTagFilter = null;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
   initializeEditor();
+  loadTheme();
+  loadTags();
   loadPages();
   setupEventListeners();
 });
@@ -22,7 +27,7 @@ function initializeEditor() {
     ['bold', 'italic', 'underline', 'strike'],
     ['blockquote', 'code-block'],
     [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-    ['link'],
+    ['link', 'image'],
     ['clean']
   ];
 
@@ -33,6 +38,9 @@ function initializeEditor() {
       toolbar: toolbarOptions
     }
   });
+
+  // Custom image handler
+  quill.getModule('toolbar').addHandler('image', handleImageUpload);
 
   // Auto-save on content change
   quill.on('text-change', () => {
@@ -61,6 +69,31 @@ function setupEventListeners() {
   document.getElementById('btnDuplicate').addEventListener('click', duplicateCurrentPage);
   document.getElementById('btnDelete').addEventListener('click', deleteCurrentPage);
   document.getElementById('btnMove').addEventListener('click', showMoveModal);
+  document.getElementById('btnTemplate').addEventListener('click', toggleTemplate);
+  document.getElementById('btnVersions').addEventListener('click', showVersionsModal);
+
+  // Export dropdown
+  document.getElementById('btnExport').addEventListener('click', toggleExportMenu);
+  document.getElementById('exportMarkdown').addEventListener('click', exportAsMarkdown);
+  document.getElementById('exportHTML').addEventListener('click', exportAsHTML);
+
+  // Tags
+  document.getElementById('btnAddTag').addEventListener('click', showTagModal);
+  document.getElementById('btnCreateTag').addEventListener('click', createTag);
+  document.getElementById('closeTagModal').addEventListener('click', hideTagModal);
+  document.getElementById('closeTagModalBtn').addEventListener('click', hideTagModal);
+
+  // Theme toggle
+  document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+  // Filter dropdown
+  document.getElementById('filterBtn').addEventListener('click', toggleFilterMenu);
+  document.querySelectorAll('.filter-menu-item[data-filter]').forEach(item => {
+    item.addEventListener('click', function() {
+      setFilter(this.dataset.filter);
+    });
+  });
+  document.getElementById('filterByTagItem').addEventListener('click', showTagFilterMenu);
 
   // Move modal
   document.getElementById('closeMoveModal').addEventListener('click', hideMoveModal);
@@ -73,10 +106,36 @@ function setupEventListeners() {
   // Sidebar toggle
   document.getElementById('toggleSidebar').addEventListener('click', toggleSidebar);
 
-  // Close modal on background click
+  // Version history modal
+  document.getElementById('closeVersionsModal').addEventListener('click', hideVersionsModal);
+  document.getElementById('closeVersionsModalBtn').addEventListener('click', hideVersionsModal);
+
+  // Close modals on background click
   document.getElementById('moveModal').addEventListener('click', (e) => {
     if (e.target.id === 'moveModal') {
       hideMoveModal();
+    }
+  });
+
+  document.getElementById('tagModal').addEventListener('click', (e) => {
+    if (e.target.id === 'tagModal') {
+      hideTagModal();
+    }
+  });
+
+  document.getElementById('versionsModal').addEventListener('click', (e) => {
+    if (e.target.id === 'versionsModal') {
+      hideVersionsModal();
+    }
+  });
+
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.export-dropdown')) {
+      document.getElementById('exportMenu').classList.remove('show');
+    }
+    if (!e.target.closest('.filter-dropdown')) {
+      document.getElementById('filterMenu').classList.remove('show');
     }
   });
 }
@@ -85,11 +144,27 @@ function setupEventListeners() {
 async function loadPages() {
   try {
     showLoading(true);
-    const response = await fetch(`${API_URL}/pages`);
+
+    // Build query string based on current filter
+    let url = `${API_URL}/pages`;
+    const params = new URLSearchParams();
+
+    if (currentFilter === 'templates') {
+      params.append('template', 'true');
+    } else if (currentFilter === 'tag' && currentTagFilter) {
+      params.append('tag', currentTagFilter);
+    }
+
+    if (params.toString()) {
+      url += '?' + params.toString();
+    }
+
+    const response = await fetch(url);
     const data = await response.json();
     pages = data.pages;
 
     renderPagesList();
+    renderTemplatesList();
 
     // Load first page if exists
     if (pages.length > 0 && !currentPage) {
@@ -199,6 +274,35 @@ async function loadPage(pageId) {
     document.getElementById('pageTitle').value = currentPage.title;
     quill.root.innerHTML = currentPage.content || '';
     updateLastEdited();
+
+    // Update cover and icon
+    const coverImg = document.getElementById('pageCover');
+    const iconLarge = document.getElementById('pageIconLarge');
+
+    if (currentPage.cover_image) {
+      coverImg.src = currentPage.cover_image;
+      coverImg.style.display = 'block';
+    } else {
+      coverImg.style.display = 'none';
+    }
+
+    if (currentPage.icon) {
+      iconLarge.textContent = currentPage.icon;
+      iconLarge.style.display = 'block';
+    } else {
+      iconLarge.style.display = 'none';
+    }
+
+    // Update template button
+    const templateBtn = document.getElementById('templateBtnText');
+    if (currentPage.is_template) {
+      templateBtn.textContent = 'Remove from Templates';
+    } else {
+      templateBtn.textContent = 'Save as Template';
+    }
+
+    // Render tags
+    renderPageTags();
 
     // Show editor, hide welcome
     document.getElementById('welcomeScreen').style.display = 'none';
@@ -533,6 +637,516 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+// ===== THEME MANAGEMENT =====
+
+// Load theme from preferences
+async function loadTheme() {
+  try {
+    const response = await fetch(`${API_URL}/preferences`);
+    const data = await response.json();
+    const theme = data.preferences.theme || 'light';
+    applyTheme(theme);
+  } catch (error) {
+    console.error('Error loading theme:', error);
+    applyTheme('light');
+  }
+}
+
+// Apply theme
+function applyTheme(theme) {
+  document.body.setAttribute('data-theme', theme);
+  const icon = document.getElementById('themeIcon');
+  const text = document.getElementById('themeText');
+
+  if (theme === 'dark') {
+    icon.className = 'fas fa-sun theme-toggle-icon';
+    text.textContent = 'Light Mode';
+  } else {
+    icon.className = 'fas fa-moon theme-toggle-icon';
+    text.textContent = 'Dark Mode';
+  }
+}
+
+// Toggle theme
+async function toggleTheme() {
+  const currentTheme = document.body.getAttribute('data-theme') || 'light';
+  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+  applyTheme(newTheme);
+
+  try {
+    await fetch(`${API_URL}/preferences/theme`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ value: newTheme })
+    });
+  } catch (error) {
+    console.error('Error saving theme:', error);
+    showToast('Failed to save theme preference', 'error');
+  }
+}
+
+// ===== IMAGE UPLOAD =====
+
+// Handle image upload
+function handleImageUpload() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) return;
+
+    // Validate file size (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      showToast('Image must be less than 10MB', 'error');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      showLoading(true);
+      const response = await fetch(`${API_URL}/upload`, {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.url) {
+        // Insert image into editor
+        const range = quill.getSelection(true);
+        quill.insertEmbed(range.index, 'image', `http://localhost:3000${data.url}`);
+        quill.setSelection(range.index + 1);
+        showToast('Image uploaded', 'success');
+      }
+
+      showLoading(false);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      showToast('Failed to upload image', 'error');
+      showLoading(false);
+    }
+  };
+
+  input.click();
+}
+
+// ===== EXPORT FUNCTIONS =====
+
+// Toggle export menu
+function toggleExportMenu(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('exportMenu');
+  menu.classList.toggle('show');
+}
+
+// Export as Markdown
+function exportAsMarkdown() {
+  if (!currentPage) return;
+  window.location.href = `${API_URL}/pages/${currentPage.id}/export/markdown`;
+  document.getElementById('exportMenu').classList.remove('show');
+}
+
+// Export as HTML
+function exportAsHTML() {
+  if (!currentPage) return;
+  window.location.href = `${API_URL}/pages/${currentPage.id}/export/html`;
+  document.getElementById('exportMenu').classList.remove('show');
+}
+
+// ===== TAG MANAGEMENT =====
+
+// Load all tags
+async function loadTags() {
+  try {
+    const response = await fetch(`${API_URL}/tags`);
+    const data = await response.json();
+    allTags = data.tags;
+  } catch (error) {
+    console.error('Error loading tags:', error);
+  }
+}
+
+// Show tag modal
+function showTagModal() {
+  const modal = document.getElementById('tagModal');
+  renderTagList();
+  modal.classList.add('show');
+}
+
+// Hide tag modal
+function hideTagModal() {
+  document.getElementById('tagModal').classList.remove('show');
+}
+
+// Render tag list in modal
+function renderTagList() {
+  const container = document.getElementById('tagList');
+
+  if (allTags.length === 0) {
+    container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">No tags yet. Create one below!</p>';
+    return;
+  }
+
+  container.innerHTML = allTags.map(tag => {
+    const isAssigned = currentPage && currentPage.tags && currentPage.tags.some(t => t.id === tag.id);
+
+    return `
+      <div class="tag-item">
+        <span class="tag" style="background-color: ${tag.color}20; color: ${tag.color}; border: 1px solid ${tag.color}40;">
+          ${escapeHtml(tag.name)}
+        </span>
+        <div class="tag-actions">
+          <button class="tag-action-btn ${isAssigned ? 'assigned' : ''}"
+                  onclick="togglePageTag('${tag.id}')"
+                  title="${isAssigned ? 'Remove from page' : 'Add to page'}">
+            <i class="fas ${isAssigned ? 'fa-check' : 'fa-plus'}"></i>
+          </button>
+          <button class="tag-action-btn delete"
+                  onclick="deleteTag('${tag.id}')"
+                  title="Delete tag">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Create new tag
+async function createTag() {
+  const nameInput = document.getElementById('newTagName');
+  const colorInput = document.getElementById('newTagColor');
+  const name = nameInput.value.trim();
+  const color = colorInput.value;
+
+  if (!name) {
+    showToast('Tag name is required', 'error');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/tags`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, color })
+    });
+
+    const data = await response.json();
+    allTags.push(data.tag);
+    renderTagList();
+    nameInput.value = '';
+    colorInput.value = '#808080';
+    showToast('Tag created', 'success');
+  } catch (error) {
+    console.error('Error creating tag:', error);
+    showToast('Failed to create tag', 'error');
+  }
+}
+
+// Delete tag
+async function deleteTag(tagId) {
+  if (!confirm('Delete this tag? It will be removed from all pages.')) {
+    return;
+  }
+
+  try {
+    await fetch(`${API_URL}/tags/${tagId}`, {
+      method: 'DELETE'
+    });
+
+    allTags = allTags.filter(t => t.id !== tagId);
+    if (currentPage && currentPage.tags) {
+      currentPage.tags = currentPage.tags.filter(t => t.id !== tagId);
+    }
+
+    renderTagList();
+    renderPageTags();
+    showToast('Tag deleted', 'success');
+  } catch (error) {
+    console.error('Error deleting tag:', error);
+    showToast('Failed to delete tag', 'error');
+  }
+}
+
+// Toggle tag on current page
+async function togglePageTag(tagId) {
+  if (!currentPage) return;
+
+  const currentTags = currentPage.tags || [];
+  const isAssigned = currentTags.some(t => t.id === tagId);
+
+  let newTags;
+  if (isAssigned) {
+    newTags = currentTags.filter(t => t.id !== tagId).map(t => t.id);
+  } else {
+    newTags = [...currentTags.map(t => t.id), tagId];
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/pages/${currentPage.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: currentPage.title,
+        content: currentPage.content,
+        tags: newTags
+      })
+    });
+
+    const data = await response.json();
+    currentPage = data.page;
+    renderTagList();
+    renderPageTags();
+    showToast(isAssigned ? 'Tag removed' : 'Tag added', 'success');
+  } catch (error) {
+    console.error('Error updating tags:', error);
+    showToast('Failed to update tags', 'error');
+  }
+}
+
+// Render page tags
+function renderPageTags() {
+  const container = document.getElementById('tagsContainer');
+
+  if (!currentPage || !currentPage.tags || currentPage.tags.length === 0) {
+    container.innerHTML = `
+      <button class="tag-add-btn" id="btnAddTag">
+        <i class="fas fa-plus"></i> Add Tag
+      </button>
+    `;
+    document.getElementById('btnAddTag').addEventListener('click', showTagModal);
+    return;
+  }
+
+  const tagsHTML = currentPage.tags.map(tag => `
+    <span class="tag" style="background-color: ${tag.color}20; color: ${tag.color}; border: 1px solid ${tag.color}40;">
+      ${escapeHtml(tag.name)}
+      <button class="tag-remove" onclick="togglePageTag('${tag.id}')" title="Remove tag">
+        <i class="fas fa-times"></i>
+      </button>
+    </span>
+  `).join('');
+
+  container.innerHTML = `
+    ${tagsHTML}
+    <button class="tag-add-btn" id="btnAddTag">
+      <i class="fas fa-plus"></i>
+    </button>
+  `;
+
+  document.getElementById('btnAddTag').addEventListener('click', showTagModal);
+}
+
+// ===== TEMPLATE MANAGEMENT =====
+
+// Toggle template status
+async function toggleTemplate() {
+  if (!currentPage) return;
+
+  const newStatus = !currentPage.is_template;
+
+  try {
+    const response = await fetch(`${API_URL}/pages/${currentPage.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: currentPage.title,
+        content: currentPage.content,
+        is_template: newStatus
+      })
+    });
+
+    const data = await response.json();
+    currentPage = data.page;
+
+    const templateBtn = document.getElementById('templateBtnText');
+    templateBtn.textContent = newStatus ? 'Remove from Templates' : 'Save as Template';
+
+    await loadPages();
+    showToast(newStatus ? 'Saved as template' : 'Removed from templates', 'success');
+  } catch (error) {
+    console.error('Error updating template status:', error);
+    showToast('Failed to update template status', 'error');
+  }
+}
+
+// Render templates list
+function renderTemplatesList() {
+  const templates = pages.filter(p => p.is_template);
+  const container = document.getElementById('templatesList');
+  const section = document.getElementById('templatesSection');
+  const badge = document.getElementById('templateCount');
+
+  badge.textContent = templates.length;
+
+  if (templates.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'block';
+
+  container.innerHTML = templates.map(template => `
+    <div class="template-item" data-page-id="${template.id}" onclick="loadPage('${template.id}')">
+      <i class="fas fa-bookmark template-icon"></i>
+      <span>${escapeHtml(template.title)}</span>
+    </div>
+  `).join('');
+}
+
+// ===== VERSION HISTORY =====
+
+// Show version history modal
+async function showVersionsModal() {
+  if (!currentPage) return;
+
+  const modal = document.getElementById('versionsModal');
+  const listContainer = document.getElementById('versionList');
+
+  try {
+    const response = await fetch(`${API_URL}/pages/${currentPage.id}/versions`);
+    const data = await response.json();
+    const versions = data.versions;
+
+    if (versions.length === 0) {
+      listContainer.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">No previous versions</p>';
+    } else {
+      listContainer.innerHTML = versions.map(version => {
+        const date = new Date(version.created_at);
+        return `
+          <div class="version-item">
+            <div class="version-info">
+              <div class="version-title">${escapeHtml(version.title)}</div>
+              <div class="version-date">${date.toLocaleString()}</div>
+            </div>
+            <button class="btn-secondary" onclick="restoreVersion('${version.id}')">
+              <i class="fas fa-undo"></i> Restore
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    modal.classList.add('show');
+  } catch (error) {
+    console.error('Error loading versions:', error);
+    showToast('Failed to load version history', 'error');
+  }
+}
+
+// Hide version history modal
+function hideVersionsModal() {
+  document.getElementById('versionsModal').classList.remove('show');
+}
+
+// Restore version
+async function restoreVersion(versionId) {
+  if (!currentPage) return;
+
+  if (!confirm('Restore this version? Your current changes will be saved as a new version.')) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/pages/${currentPage.id}/restore/${versionId}`, {
+      method: 'POST'
+    });
+
+    const data = await response.json();
+    currentPage = data.page;
+
+    // Update UI
+    document.getElementById('pageTitle').value = currentPage.title;
+    quill.root.innerHTML = currentPage.content || '';
+
+    hideVersionsModal();
+    showToast('Version restored', 'success');
+  } catch (error) {
+    console.error('Error restoring version:', error);
+    showToast('Failed to restore version', 'error');
+  }
+}
+
+// ===== FILTER MANAGEMENT =====
+
+// Toggle filter menu
+function toggleFilterMenu(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('filterMenu');
+  menu.classList.toggle('show');
+}
+
+// Set filter
+function setFilter(filter) {
+  currentFilter = filter;
+  currentTagFilter = null;
+
+  // Update UI
+  const filterText = document.getElementById('filterText');
+  document.querySelectorAll('.filter-menu-item').forEach(item => {
+    item.classList.remove('active');
+  });
+
+  if (filter === 'all') {
+    filterText.textContent = 'All Pages';
+    document.querySelector('[data-filter="all"]').classList.add('active');
+  } else if (filter === 'templates') {
+    filterText.textContent = 'Templates Only';
+    document.querySelector('[data-filter="templates"]').classList.add('active');
+  }
+
+  document.getElementById('filterMenu').classList.remove('show');
+  loadPages();
+}
+
+// Show tag filter submenu
+function showTagFilterMenu() {
+  if (allTags.length === 0) {
+    showToast('No tags available. Create tags first!', 'info');
+    return;
+  }
+
+  const menu = document.getElementById('filterMenu');
+  const tagItem = document.getElementById('filterByTagItem');
+
+  // Create submenu
+  const submenu = document.createElement('div');
+  submenu.className = 'filter-submenu';
+  submenu.innerHTML = allTags.map(tag => `
+    <div class="filter-menu-item" onclick="setTagFilter('${tag.id}', '${escapeHtml(tag.name)}')">
+      <span class="tag" style="background-color: ${tag.color}20; color: ${tag.color}; border: 1px solid ${tag.color}40;">
+        ${escapeHtml(tag.name)}
+      </span>
+    </div>
+  `).join('');
+
+  // Remove existing submenu if any
+  const existing = tagItem.querySelector('.filter-submenu');
+  if (existing) {
+    existing.remove();
+  } else {
+    tagItem.appendChild(submenu);
+  }
+}
+
+// Set tag filter
+function setTagFilter(tagId, tagName) {
+  currentFilter = 'tag';
+  currentTagFilter = tagName;
+
+  // Update UI
+  const filterText = document.getElementById('filterText');
+  filterText.textContent = `Tag: ${tagName}`;
+
+  document.getElementById('filterMenu').classList.remove('show');
+  loadPages();
 }
 
 // Update last edited every minute
