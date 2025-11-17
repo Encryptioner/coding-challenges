@@ -1,0 +1,35 @@
+{
+  "name": "ccslides",
+  "version": "1.0.0",
+  "description": "Markdown presentation tool - Create and present slides from Markdown",
+  "main": "index.js",
+  "bin": {
+    "ccslides": "./bin/ccslides.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node bin/ccslides.js"
+  },
+  "keywords": [
+    "markdown",
+    "presentation",
+    "slides",
+    "reveal"
+  ],
+  "author": "CodingChallenges.fyi",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "marked": "^9.1.0",
+    "chokidar": "^3.5.3",
+    "socket.io": "^4.5.4",
+    "puppeteer": "^21.0.0",
+    "ejs": "^3.1.9",
+    "commander": "^11.1.0",
+    "chalk": "^4.1.2"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

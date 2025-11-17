@@ -140,7 +140,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 80. [Optical Character Recognition](./80-optical-character-recognition) - Text extraction from images ✓
 81. [Brainfuck Interpreter](./81-brainfuck-interpreter) - Esoteric language interpreter
 82. [Markdown to PDF](./82-markdown-to-pdf) - Convert markdown to PDF ✓
-83. [Markdown Presentation Tool](./83-markdown-presentation-tool) - Presentation from markdown
+83. [Markdown Presentation Tool](./83-markdown-presentation-tool) - Presentation from markdown ✓
 84. [Mandelbrot Set Explorer](./84-mandelbrot-set-explorer) - Fractal visualization
 85. [Time Zone Converter](./85-time-zone-converter) - Convert between time zones
 86. [Strace](./86-strace) - System call tracer
@@ -155,7 +155,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 
 ## Progress
 
-- ✓ Completed: 14
+- ✓ Completed: 15
 - In Progress: 0
 - Total: 94
 
