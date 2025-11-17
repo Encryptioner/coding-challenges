@@ -124,7 +124,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 66. [Zip File Cracker](./66-zip-file-cracker) - Password recovery tool
 67. [YAML Parser](./67-yaml-parser) - Parse and validate YAML
 68. [Blogging Software](./68-blogging-software) - Blog platform
-69. [Notion](./69-notion) - Note-taking workspace
+69. [Notion](./69-notion) - Note-taking workspace ✓
 70. [Memcached CLI](./70-memcached-cli) - Memcached command-line tool
 71. [Wheel of Names](./71-wheel-of-names) - Random name picker
 72. [Sudoku](./72-sudoku) - Number puzzle game
@@ -155,7 +155,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 
 ## Progress
 
-- ✓ Completed: 15
+- ✓ Completed: 16
 - In Progress: 0
 - Total: 94
 
