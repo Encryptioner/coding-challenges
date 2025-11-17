@@ -1,0 +1,54 @@
+{
+  "challenges": [
+    {
+      "title": "Build Your Own wc Tool",
+      "url": "https://codingchallenges.fyi/challenges/challenge-wc",
+      "added_at": "2024-01-01T00:00:00"
+    },
+    {
+      "title": "Build Your Own JSON Parser",
+      "url": "https://codingchallenges.fyi/challenges/challenge-json-parser",
+      "added_at": "2024-01-01T00:00:00"
+    },
+    {
+      "title": "Build Your Own Compression Tool",
+      "url": "https://codingchallenges.fyi/challenges/challenge-huffman",
+      "added_at": "2024-01-01T00:00:00"
+    },
+    {
+      "title": "Build Your Own Cut Tool",
+      "url": "https://codingchallenges.fyi/challenges/challenge-cut",
+      "added_at": "2024-01-01T00:00:00"
+    },
+    {
+      "title": "Build Your Own Load Balancer",
+      "url": "https://codingchallenges.fyi/challenges/challenge-load-balancer",
+      "added_at": "2024-01-01T00:00:00"
+    },
+    {
+      "title": "Build Your Own Sort Tool",
+      "url": "https://codingchallenges.fyi/challenges/challenge-sort",
+      "added_at": "2024-01-01T00:00:00"
+    },
+    {
+      "title": "Build Your Own Calculator",
+      "url": "https://codingchallenges.fyi/challenges/challenge-calculator",
+      "added_at": "2024-01-01T00:00:00"
+    },
+    {
+      "title": "Build Your Own Redis Server",
+      "url": "https://codingchallenges.fyi/challenges/challenge-redis",
+      "added_at": "2024-01-01T00:00:00"
+    },
+    {
+      "title": "Build Your Own grep",
+      "url": "https://codingchallenges.fyi/challenges/challenge-grep",
+      "added_at": "2024-01-01T00:00:00"
+    },
+    {
+      "title": "Build Your Own uniq Tool",
+      "url": "https://codingchallenges.fyi/challenges/challenge-uniq",
+      "added_at": "2024-01-01T00:00:00"
+    }
+  ]
+}
