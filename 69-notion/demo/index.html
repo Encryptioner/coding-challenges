@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notion Clone - Static Demo</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-theme="light">
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <h1 class="logo">
+          <i class="fas fa-book"></i>
+          Notion Clone
+        </h1>
+        <button id="toggleSidebar" class="toggle-btn" title="Toggle sidebar">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+
+      <div class="sidebar-content">
+        <!-- Search -->
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" id="searchInput" placeholder="Search pages...">
+        </div>
+
+        <!-- Filter Dropdown -->
+        <div class="filter-dropdown">
+          <button class="filter-btn" id="filterBtn">
+            <span id="filterText">All Pages</span>
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="filter-menu" id="filterMenu">
+            <div class="filter-menu-item active" data-filter="all">All Pages</div>
+            <div class="filter-menu-item" data-filter="templates">Templates Only</div>
+            <div class="filter-menu-item" id="filterByTagItem">
+              Filter by Tag
+              <i class="fas fa-chevron-right"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Templates Section -->
+        <div id="templatesSection" class="templates-section" style="display: none;">
+          <div class="section-header">
+            <span><i class="fas fa-bookmark"></i> Templates</span>
+            <span class="badge" id="templateCount">0</span>
+          </div>
+          <div id="templatesList" class="templates-list"></div>
+        </div>
+
+        <!-- New Page Button -->
+        <button id="btnNewPage" class="btn-new-page">
+          <i class="fas fa-plus"></i>
+          New Page
+        </button>
+
+        <!-- Pages List -->
+        <div id="pagesList" class="pages-list"></div>
+      </div>
+
+      <!-- Sidebar Footer with Theme Toggle -->
+      <div class="sidebar-footer">
+        <div class="theme-toggle" id="themeToggle">
+          <i class="fas fa-moon theme-toggle-icon" id="themeIcon"></i>
+          <span class="theme-toggle-text" id="themeText">Dark Mode</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Welcome Screen -->
+      <div id="welcomeScreen" class="welcome-screen">
+        <div class="welcome-content">
+          <i class="fas fa-book-open welcome-icon"></i>
+          <h2>Welcome to Notion Clone</h2>
+          <p>Get started by creating your first page</p>
+          <button id="btnWelcomeNewPage" class="btn-primary">
+            <i class="fas fa-plus"></i>
+            Create New Page
+          </button>
+          <div class="demo-notice">
+            <i class="fas fa-info-circle"></i>
+            <span>Static Demo - Data stored in browser localStorage</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Editor Container -->
+      <div id="editorContainer" class="editor-container" style="display: none;">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-actions">
+            <button id="btnTemplate" class="action-btn">
+              <i class="fas fa-bookmark"></i>
+              <span id="templateBtnText">Save as Template</span>
+            </button>
+            <button id="btnVersions" class="action-btn">
+              <i class="fas fa-history"></i>
+              Versions
+            </button>
+            <div class="export-dropdown">
+              <button class="action-btn" id="btnExport">
+                <i class="fas fa-download"></i>
+                Export
+                <i class="fas fa-chevron-down"></i>
+              </button>
+              <div class="export-menu" id="exportMenu">
+                <button class="export-menu-item" id="exportMarkdown">
+                  <i class="fas fa-file-code"></i>
+                  Export as Markdown
+                </button>
+                <button class="export-menu-item" id="exportHTML">
+                  <i class="fas fa-file-alt"></i>
+                  Export as HTML
+                </button>
+              </div>
+            </div>
+            <button id="btnDuplicate" class="action-btn">
+              <i class="fas fa-copy"></i>
+              Duplicate
+            </button>
+            <button id="btnMove" class="action-btn">
+              <i class="fas fa-arrows-alt"></i>
+              Move
+            </button>
+            <button id="btnDelete" class="action-btn delete">
+              <i class="fas fa-trash"></i>
+              Delete
+            </button>
+          </div>
+          <div class="page-meta">
+            <span id="lastEdited">Last edited just now</span>
+          </div>
+        </div>
+
+        <!-- Cover Image -->
+        <img id="pageCover" class="page-cover" style="display: none;">
+
+        <!-- Page Icon -->
+        <div id="pageIconLarge" class="page-icon-large" style="display: none;"></div>
+
+        <!-- Tags Container -->
+        <div class="tags-container" id="tagsContainer">
+          <button class="tag-add-btn" id="btnAddTag">
+            <i class="fas fa-plus"></i> Add Tag
+          </button>
+        </div>
+
+        <!-- Page Title -->
+        <input type="text" id="pageTitle" class="page-title" placeholder="Untitled">
+
+        <!-- Rich Text Editor -->
+        <div id="editor" class="editor"></div>
+      </div>
+
+      <!-- Loading Indicator -->
+      <div id="loading" class="loading" style="display: none;">
+        <div class="spinner"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Move Modal -->
+  <div id="moveModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Move Page</h3>
+        <button id="closeMoveModal" class="close-btn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Move to:</p>
+        <div id="movePagesList" class="move-list">
+          <div class="move-option selected" data-parent="null">
+            <i class="fas fa-home"></i>
+            <span>Workspace (root)</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelMove" class="btn-secondary">Cancel</button>
+        <button id="confirmMove" class="btn-primary">Move</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tag Modal -->
+  <div id="tagModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Manage Tags</h3>
+        <button id="closeTagModal" class="close-btn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="tagList" class="tag-list"></div>
+        <div class="tag-create">
+          <h4>Create New Tag</h4>
+          <input type="text" id="newTagName" placeholder="Tag name" class="input">
+          <input type="color" id="newTagColor" value="#808080" class="color-picker">
+          <button id="btnCreateTag" class="btn-primary">
+            <i class="fas fa-plus"></i>
+            Create Tag
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="closeTagModalBtn" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Versions Modal -->
+  <div id="versionsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Version History</h3>
+        <button id="closeVersionsModal" class="close-btn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="versionList" class="version-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="closeVersionsModalBtn" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <script src="app-demo.js"></script>
+</body>
+</html>

@@ -26,6 +26,7 @@ python3 .github/scripts/generate-index.py
 # Web-based challenges to deploy
 declare -A WEB_CHALLENGES=(
   ["47-chrome-extension"]="Chrome Extension"
+  ["69-notion/demo"]="Notion Clone"
   ["76-video-chat-app"]="Video Chat App"
   ["77-static-site-generator"]="Static Site Generator"
   ["80-optical-character-recognition"]="OCR Tool"

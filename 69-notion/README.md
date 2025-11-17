@@ -26,6 +26,18 @@ A simplified version of Notion - an all-in-one workspace for notes, documents, a
 
 **Status**: Production ready with 2,200+ lines of enhancement code across both backend and frontend.
 
+## 🌐 Live Demo
+
+A **static demo version** is available for GitHub Pages deployment at `/demo/`:
+- Uses localStorage instead of backend API
+- All features except image upload
+- Perfect for static hosting
+- [View Demo Documentation](./demo/README.md)
+
+**Two Versions Available**:
+1. **Full-Stack Version** (main folder) - Complete implementation with Node.js backend and SQLite database
+2. **Static Demo** (`/demo/`) - Client-side only version for GitHub Pages deployment
+
 ## Features
 
 ### Core Functionality
