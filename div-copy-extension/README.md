@@ -1,16 +1,40 @@
-# DivCopy - Copy Any Element Chrome Extension
+# TextCopy - Copy Content from Any Website
 
 <div align="center">
 
-![DivCopy](https://img.shields.io/badge/Chrome-Extension-green?style=for-the-badge&logo=google-chrome)
+![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-green?style=for-the-badge&logo=google-chrome)
+![Standalone Script](https://img.shields.io/badge/Standalone-JavaScript-yellow?style=for-the-badge&logo=javascript)
 ![Manifest V3](https://img.shields.io/badge/Manifest-V3-blue?style=for-the-badge)
 ![Desktop & Mobile](https://img.shields.io/badge/Platform-Desktop%20%26%20Mobile-orange?style=for-the-badge)
 
-**Copy content from any div or element on any website with one click**
+**Two ways to add copy functionality to websites:**
+
+1. **Chrome Extension** - For users to copy content from any website they visit
+2. **Standalone Script** - For website owners to give visitors automatic copy buttons
 
 Similar to WordPress plugins like "Copy Anything to Clipboard" and "DivMagic"
 
 </div>
+
+## 📦 What's Included
+
+This project includes **two separate implementations**:
+
+### 1. Chrome Extension (For End Users)
+Install the Chrome extension to copy content from **any website** you visit. Right-click on any element and choose from multiple copy formats.
+
+**Use case**: "I want to copy content from websites I browse"
+
+### 2. Standalone JavaScript Library (For Website Owners)
+Add one script tag to your website and your **visitors automatically see copy buttons** - no installation needed!
+
+**Use case**: "I want my website visitors to easily copy content from my site"
+
+---
+
+# 🔌 Chrome Extension (For End Users)
+
+This section covers the Chrome Extension that users install to copy content from any website.
 
 ## ✨ Features
 
@@ -132,6 +156,64 @@ Click the DivCopy extension icon to access:
 ### Mobile Browser Support
 - ✅ Chrome for Android
 - ⚠️ Safari iOS (context menus limited)
+
+---
+
+# 📜 Standalone JavaScript Library (For Website Owners)
+
+This section covers the standalone script that website owners add to their sites to give **visitors** automatic copy buttons.
+
+## ✨ Key Features
+
+- **Zero Installation for Visitors** - Copy buttons appear automatically, no browser extension needed
+- **Automatic Button Injection** - Buttons appear on hover over paragraphs, code blocks, headings, quotes
+- **One Script Tag** - Website owner adds just one `<script>` tag
+- **Mobile & Desktop** - Fully responsive, works on all devices
+- **Customizable** - Match your brand colors and style
+- **Analytics Ready** - Track what content visitors copy
+
+## 🚀 Quick Start (For Website Owners)
+
+### Step 1: Add the Script
+
+Add this to your website before the closing `</body>` tag:
+
+```html
+<script src="standalone/textcopy-auto.js"></script>
+<script>
+  TextCopy.init();
+</script>
+```
+
+### Step 2: Done!
+
+That's it! Your visitors now see automatic copy buttons when they hover over content.
+
+## 👥 Visitor Experience
+
+When someone visits your website:
+
+1. They hover over a paragraph, heading, code block, etc.
+2. A "Copy" button appears automatically
+3. They click it - content copied to clipboard!
+4. They see "✓ Copied!" confirmation
+
+**No browser extension. No installation. No configuration. It just works.**
+
+## 📖 Full Documentation
+
+See `standalone/README.md` for:
+- Configuration options
+- Customization examples
+- Analytics integration
+- API reference
+- Troubleshooting guide
+
+## 🎬 Try the Demo
+
+Open `standalone/demo.html` in your browser to see exactly what your visitors will experience!
+
+---
 
 ## 📝 License
 
