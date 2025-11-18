@@ -1,0 +1,297 @@
+/**
+ * Form AutoSave & Recovery - Frontend Styles
+ *
+ * @version 1.0.0
+ */
+
+/* ============================================
+   Restore Notification
+   ============================================ */
+
+.form-autosave-notification {
+    background: #f0f6fc;
+    border: 2px solid #2271b1;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    animation: formAutosaveSlideDown 0.3s ease-out;
+}
+
+.form-autosave-notification-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-autosave-notification-text {
+    margin: 0;
+    font-size: 16px;
+    color: #1d2327;
+    font-weight: 500;
+}
+
+.form-autosave-notification-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.form-autosave-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.form-autosave-btn:focus {
+    box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.3);
+}
+
+.form-autosave-btn-restore {
+    background: #2271b1;
+    color: #fff;
+}
+
+.form-autosave-btn-restore:hover {
+    background: #135e96;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.form-autosave-btn-restore:active {
+    transform: translateY(0);
+}
+
+.form-autosave-btn-dismiss {
+    background: #f0f0f1;
+    color: #2c3338;
+}
+
+.form-autosave-btn-dismiss:hover {
+    background: #dcdcde;
+}
+
+.form-autosave-notification-fade {
+    animation: formAutosaveFadeOut 0.3s ease-out forwards;
+}
+
+/* ============================================
+   Success Toast
+   ============================================ */
+
+.form-autosave-toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #00a32a;
+    color: #fff;
+    padding: 15px 25px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    max-width: 300px;
+}
+
+.form-autosave-toast-show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+
+@keyframes formAutosaveSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes formAutosaveFadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+
+/* Mobile devices */
+@media (max-width: 768px) {
+    .form-autosave-notification {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .form-autosave-notification-text {
+        font-size: 14px;
+    }
+
+    .form-autosave-notification-buttons {
+        flex-direction: column;
+    }
+
+    .form-autosave-btn {
+        width: 100%;
+        padding: 12px 20px;
+    }
+
+    .form-autosave-toast {
+        bottom: 20px;
+        right: 20px;
+        left: 20px;
+        max-width: none;
+        text-align: center;
+    }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+    .form-autosave-notification {
+        padding: 12px;
+        border-radius: 6px;
+    }
+
+    .form-autosave-notification-text {
+        font-size: 13px;
+    }
+
+    .form-autosave-btn {
+        font-size: 13px;
+        padding: 10px 16px;
+    }
+}
+
+/* ============================================
+   Dark Mode Support
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+    .form-autosave-notification {
+        background: #1e1e1e;
+        border-color: #3c8dbc;
+    }
+
+    .form-autosave-notification-text {
+        color: #e0e0e0;
+    }
+
+    .form-autosave-btn-dismiss {
+        background: #2c2c2c;
+        color: #e0e0e0;
+    }
+
+    .form-autosave-btn-dismiss:hover {
+        background: #3c3c3c;
+    }
+}
+
+/* ============================================
+   High Contrast Mode
+   ============================================ */
+
+@media (prefers-contrast: high) {
+    .form-autosave-notification {
+        border-width: 3px;
+    }
+
+    .form-autosave-btn {
+        border: 2px solid currentColor;
+    }
+
+    .form-autosave-btn-restore {
+        border-color: #fff;
+    }
+
+    .form-autosave-btn-dismiss {
+        border-color: #2c3338;
+    }
+}
+
+/* ============================================
+   Reduced Motion Support
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .form-autosave-notification,
+    .form-autosave-toast,
+    .form-autosave-btn {
+        animation: none;
+        transition: none;
+    }
+
+    .form-autosave-btn:hover {
+        transform: none;
+    }
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+
+@media print {
+    .form-autosave-notification,
+    .form-autosave-toast {
+        display: none !important;
+    }
+}
+
+/* ============================================
+   RTL Support
+   ============================================ */
+
+[dir="rtl"] .form-autosave-toast {
+    right: auto;
+    left: 30px;
+}
+
+@media (max-width: 768px) {
+    [dir="rtl"] .form-autosave-toast {
+        left: 20px;
+        right: 20px;
+    }
+}
+
+/* ============================================
+   Accessibility
+   ============================================ */
+
+/* Focus visible for keyboard navigation */
+.form-autosave-btn:focus-visible {
+    outline: 3px solid #2271b1;
+    outline-offset: 2px;
+}
+
+/* Screen reader only text */
+.form-autosave-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
