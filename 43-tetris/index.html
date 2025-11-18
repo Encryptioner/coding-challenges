@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris - Classic Block Puzzle Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            max-width: 800px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #ffe66d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.8;
+        }
+
+        /* Welcome Screen */
+        #welcome-screen {
+            text-align: center;
+        }
+
+        .welcome-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 1.2em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Help Screen */
+        #help-screen {
+            display: none;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .control-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .control-key {
+            font-weight: bold;
+            color: #4ecdc4;
+            font-size: 1.1em;
+        }
+
+        /* Game Screen */
+        #game-screen {
+            display: none;
+        }
+
+        .game-layout {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            align-items: start;
+        }
+
+        .game-board {
+            background: #000;
+            border: 5px solid #333;
+            border-radius: 5px;
+            box-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 200px;
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .info-box h3 {
+            margin-bottom: 10px;
+            color: #4ecdc4;
+        }
+
+        .score-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ffe66d;
+        }
+
+        .level-value,
+        .lines-value {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .next-preview {
+            background: #000;
+            border: 3px solid #333;
+            border-radius: 5px;
+            margin: 10px auto;
+        }
+
+        .game-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .game-buttons button {
+            padding: 10px 20px;
+            font-size: 1em;
+        }
+
+        /* Game Over Overlay */
+        .game-over-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .game-over-content {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 50px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .game-over-content h2 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #ff6b6b;
+        }
+
+        .game-over-content p {
+            font-size: 1.5em;
+            margin: 10px 0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .game-layout {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            opacity: 0.6;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen">
+            <h1>TETRIS</h1>
+            <p class="subtitle">Classic Block Puzzle Game</p>
+            <div class="welcome-buttons">
+                <button onclick="showHelp()">How to Play</button>
+                <button onclick="startGame()">Start Game</button>
+            </div>
+            <div class="footer">
+                <p>Built as part of CodingChallenges.fyi</p>
+            </div>
+        </div>
+
+        <!-- Help Screen -->
+        <div id="help-screen">
+            <h1>HOW TO PLAY</h1>
+            <p class="subtitle">Game Controls & Rules</p>
+
+            <div class="controls-grid">
+                <div class="control-item">
+                    <div class="control-key">← →</div>
+                    <div>Move Left/Right</div>
+                </div>
+                <div class="control-item">
+                    <div class="control-key">↑</div>
+                    <div>Rotate Piece</div>
+                </div>
+                <div class="control-item">
+                    <div class="control-key">↓</div>
+                    <div>Soft Drop</div>
+                </div>
+                <div class="control-item">
+                    <div class="control-key">SPACE</div>
+                    <div>Hard Drop</div>
+                </div>
+                <div class="control-item">
+                    <div class="control-key">P</div>
+                    <div>Pause Game</div>
+                </div>
+                <div class="control-item">
+                    <div class="control-key">ESC</div>
+                    <div>Quit Game</div>
+                </div>
+            </div>
+
+            <div class="info-box" style="margin-top: 20px;">
+                <h3>Game Rules</h3>
+                <p>• Complete horizontal lines to clear them and earn points</p>
+                <p>• Clearing multiple lines at once awards bonus points</p>
+                <p>• Game speeds up as you progress through levels</p>
+                <p>• Game ends when pieces reach the top of the board</p>
+            </div>
+
+            <div class="info-box" style="margin-top: 20px;">
+                <h3>Scoring</h3>
+                <p>1 Line: 100 points</p>
+                <p>2 Lines: 300 points</p>
+                <p>3 Lines: 500 points</p>
+                <p>4 Lines (Tetris): 800 points</p>
+            </div>
+
+            <div class="welcome-buttons">
+                <button onclick="showWelcome()">Back</button>
+                <button onclick="startGame()">Start Game</button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen">
+            <h1>TETRIS</h1>
+            <div class="game-layout">
+                <div class="game-board">
+                    <canvas id="tetris-canvas" width="300" height="600"></canvas>
+                </div>
+                <div class="side-panel">
+                    <div class="info-box">
+                        <h3>Score</h3>
+                        <div class="score-value" id="score">0</div>
+                    </div>
+                    <div class="info-box">
+                        <h3>Level</h3>
+                        <div class="level-value" id="level">1</div>
+                    </div>
+                    <div class="info-box">
+                        <h3>Lines</h3>
+                        <div class="lines-value" id="lines">0</div>
+                    </div>
+                    <div class="info-box">
+                        <h3>Next Piece</h3>
+                        <canvas id="next-canvas" class="next-preview" width="120" height="120"></canvas>
+                    </div>
+                    <div class="game-buttons">
+                        <button onclick="togglePause()">Pause (P)</button>
+                        <button onclick="quitGame()">Quit (ESC)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Overlay -->
+    <div class="game-over-overlay" id="game-over">
+        <div class="game-over-content">
+            <h2>GAME OVER</h2>
+            <p>Final Score: <span id="final-score">0</span></p>
+            <p>Lines Cleared: <span id="final-lines">0</span></p>
+            <p>Level Reached: <span id="final-level">1</span></p>
+            <div class="welcome-buttons">
+                <button onclick="restartGame()">Play Again</button>
+                <button onclick="returnToMenu()">Main Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="tetris.js"></script>
+</body>
+</html>

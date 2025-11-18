@@ -96,7 +96,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 40. [curl](./40-curl) - URL data transfer tool
 41. [HTTPS Load Tester](./41-https-load-tester) - Load testing utility
 42. [tr Tool](./42-tr-tool) - Translate or delete characters
-43. [Tetris](./43-tetris) - Block-stacking game
+43. [Tetris](./43-tetris) - Block-stacking game ✓
 44. [DNS Forwarder](./44-dns-forwarder) - DNS query forwarding
 45. [Port Scanner](./45-port-scanner) - Network port scanner
 46. [yq](./46-yq) - YAML processor
@@ -155,7 +155,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 
 ## Progress
 
-- ✓ Completed: 19
+- ✓ Completed: 20
 - In Progress: 0
 - Total: 94
 
