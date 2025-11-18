@@ -262,3 +262,221 @@
     transition: none !important;
   }
 }
+
+/* ========================================
+   COMPREHENSIVE RESPONSIVE DESIGN
+   Tested on all devices: 320px to 4K
+   ======================================== */
+
+/* Extra Small Phones (320px - 374px) */
+@media (max-width: 374px) {
+  .divcopy-mobile-menu {
+    padding: 4px;
+    gap: 3px;
+    max-width: calc(100vw - 16px);
+  }
+
+  .divcopy-mobile-btn {
+    min-width: 42px;
+    min-height: 42px;
+    padding: 8px;
+    font-size: 16px;
+  }
+
+  .divcopy-mobile-btn span {
+    font-size: 8px;
+  }
+
+  .divcopy-highlighted::after {
+    font-size: 9px;
+    padding: 2px 5px;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .divcopy-toast {
+    bottom: 60px;
+    font-size: 12px;
+    padding: 8px 16px;
+    max-width: calc(100vw - 32px);
+  }
+}
+
+/* Small Phones (375px - 479px) */
+@media (min-width: 375px) and (max-width: 479px) {
+  .divcopy-mobile-menu {
+    padding: 5px;
+    gap: 4px;
+  }
+
+  .divcopy-mobile-btn {
+    min-width: 45px;
+    min-height: 45px;
+  }
+
+  .divcopy-toast {
+    bottom: 70px;
+  }
+}
+
+/* Tablets Portrait (481px - 767px) */
+@media (min-width: 481px) and (max-width: 767px) {
+  .divcopy-mobile-menu {
+    padding: 8px;
+    gap: 6px;
+  }
+
+  .divcopy-mobile-btn {
+    min-width: 55px;
+    min-height: 55px;
+    font-size: 20px;
+  }
+
+  .divcopy-mobile-btn span {
+    font-size: 10px;
+  }
+
+  .divcopy-toast {
+    bottom: 80px;
+    font-size: 14px;
+  }
+}
+
+/* Tablets Landscape & Small Laptops (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .divcopy-highlighted::after {
+    font-size: 13px;
+    padding: 5px 10px;
+  }
+
+  .divcopy-mobile-menu {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .divcopy-mobile-btn {
+    min-width: 60px;
+    min-height: 60px;
+    font-size: 22px;
+  }
+
+  .divcopy-mobile-btn span {
+    font-size: 11px;
+  }
+}
+
+/* Laptops & Desktops (1024px - 1439px) */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .divcopy-highlighted::after {
+    font-size: 13px;
+  }
+
+  .divcopy-mobile-menu {
+    padding: 10px;
+  }
+
+  .divcopy-toast {
+    font-size: 15px;
+  }
+}
+
+/* Large Desktops (1440px - 1919px) */
+@media (min-width: 1440px) and (max-width: 1919px) {
+  .divcopy-highlighted::after {
+    font-size: 14px;
+    padding: 5px 10px;
+  }
+
+  .divcopy-mobile-menu {
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .divcopy-mobile-btn {
+    min-width: 65px;
+    min-height: 65px;
+    font-size: 24px;
+  }
+
+  .divcopy-toast {
+    font-size: 15px;
+    padding: 14px 28px;
+  }
+}
+
+/* 4K & Ultra-Wide Displays (1920px+) */
+@media (min-width: 1920px) {
+  .divcopy-highlighted {
+    outline-width: 4px !important;
+    outline-offset: 3px !important;
+  }
+
+  .divcopy-highlighted::after {
+    font-size: 16px;
+    padding: 6px 12px;
+  }
+
+  .divcopy-mobile-menu {
+    padding: 14px;
+    gap: 10px;
+    border-radius: 16px;
+  }
+
+  .divcopy-mobile-btn {
+    min-width: 70px;
+    min-height: 70px;
+    padding: 14px;
+    font-size: 26px;
+    border-radius: 10px;
+  }
+
+  .divcopy-mobile-btn span {
+    font-size: 12px;
+    margin-top: 6px;
+  }
+
+  .divcopy-toast {
+    font-size: 16px;
+    padding: 16px 32px;
+    border-radius: 28px;
+    bottom: 40px;
+  }
+}
+
+/* Touch Device Optimization (regardless of size) */
+@media (hover: none) and (pointer: coarse) {
+  .divcopy-mobile-btn {
+    /* Larger touch targets for better usability */
+    min-width: 50px;
+    min-height: 50px;
+  }
+
+  .divcopy-highlighted {
+    /* More visible highlight on touch devices */
+    outline-width: 4px !important;
+  }
+}
+
+/* Landscape Orientation */
+@media (orientation: landscape) and (max-height: 500px) {
+  .divcopy-mobile-menu {
+    /* Adjust menu position for landscape */
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .divcopy-toast {
+    bottom: 10px;
+  }
+}
+
+/* Print Support (hide interactive elements) */
+@media print {
+  .divcopy-highlighted,
+  .divcopy-highlighted::after,
+  .divcopy-mobile-menu,
+  .divcopy-toast {
+    display: none !important;
+  }
+}

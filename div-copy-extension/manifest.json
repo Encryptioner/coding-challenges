@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "DivCopy - Copy Any Element",
+  "name": "TextCopy - Easy Content Copying",
   "version": "1.0.0",
-  "description": "Copy content from any div or element on any website with one click. Similar to WordPress Copy Anything plugins.",
+  "description": "Copy any text or content from any website with one click. Works on desktop and mobile. Similar to WordPress Copy Anything plugins.",
   "permissions": [
     "activeTab",
     "storage",
