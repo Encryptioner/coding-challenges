@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DivCopy Settings</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="popup-header">
+      <div class="logo">
+        <span class="logo-icon">📋</span>
+        <h1>DivCopy</h1>
+      </div>
+      <div class="version">v1.0.0</div>
+    </header>
+
+    <!-- Settings Section -->
+    <div class="settings-section">
+      <h2>Settings</h2>
+
+      <!-- Mobile Mode Toggle -->
+      <div class="setting-item">
+        <div class="setting-info">
+          <label for="mobile-mode">Mobile Mode</label>
+          <p class="setting-description">Enable long-press to copy on touch devices</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="mobile-mode">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- Auto Highlight -->
+      <div class="setting-item">
+        <div class="setting-info">
+          <label for="auto-highlight">Auto Highlight</label>
+          <p class="setting-description">Automatically highlight elements on hover</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="auto-highlight" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- Show Tooltips -->
+      <div class="setting-item">
+        <div class="setting-info">
+          <label for="show-tooltips">Show Tooltips</label>
+          <p class="setting-description">Display copy hint tooltips</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="show-tooltips" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- Default Copy Format -->
+      <div class="setting-item">
+        <div class="setting-info">
+          <label for="default-format">Default Format</label>
+          <p class="setting-description">Choose default copy format</p>
+        </div>
+        <select id="default-format">
+          <option value="text">Plain Text</option>
+          <option value="html">HTML</option>
+          <option value="styled">Styled HTML</option>
+          <option value="selector">CSS Selector</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <h2>Quick Actions</h2>
+
+      <div class="action-buttons">
+        <button class="action-btn" id="test-copy">
+          <span class="btn-icon">🧪</span>
+          <span>Test Copy</span>
+        </button>
+
+        <button class="action-btn" id="clear-cache">
+          <span class="btn-icon">🗑️</span>
+          <span>Clear Cache</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Usage Instructions -->
+    <div class="instructions">
+      <h2>How to Use</h2>
+
+      <div class="instruction-item">
+        <span class="step-number">1</span>
+        <div class="step-content">
+          <strong>Desktop:</strong> Right-click on any element → Select copy option
+        </div>
+      </div>
+
+      <div class="instruction-item">
+        <span class="step-number">2</span>
+        <div class="step-content">
+          <strong>Mobile:</strong> Enable Mobile Mode → Long-press element → Choose format
+        </div>
+      </div>
+
+      <div class="instruction-item">
+        <span class="step-number">3</span>
+        <div class="step-content">
+          <strong>Formats:</strong> Text, HTML, Styled HTML, or CSS Selector
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-section">
+      <h2>Statistics</h2>
+
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value" id="copy-count">0</div>
+          <div class="stat-label">Copies Today</div>
+        </div>
+
+        <div class="stat-item">
+          <div class="stat-value" id="total-copies">0</div>
+          <div class="stat-label">Total Copies</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="popup-footer">
+      <div class="footer-links">
+        <a href="#" id="help-link">Help</a>
+        <span class="separator">•</span>
+        <a href="#" id="feedback-link">Feedback</a>
+        <span class="separator">•</span>
+        <a href="#" id="about-link">About</a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

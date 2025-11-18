@@ -1,0 +1,264 @@
+/**
+ * DivCopy Extension Styles
+ * Responsive styles for both desktop and mobile
+ */
+
+/* Element highlighting */
+.divcopy-highlighted {
+  outline: 3px solid #4CAF50 !important;
+  outline-offset: 2px !important;
+  position: relative !important;
+  cursor: copy !important;
+  transition: outline 0.2s ease !important;
+}
+
+.divcopy-highlighted::after {
+  content: '📋 Click to copy';
+  position: absolute;
+  top: -25px;
+  left: 0;
+  background: #4CAF50;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  white-space: nowrap;
+  z-index: 999999;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Mobile mode indicator */
+.divcopy-mobile-mode .divcopy-highlighted::after {
+  content: '👆 Long press to copy';
+}
+
+/* Mobile copy menu */
+.divcopy-mobile-menu {
+  position: fixed;
+  z-index: 9999999;
+  background: white;
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  display: flex;
+  gap: 6px;
+  transform: scale(0);
+  animation: divcopy-menu-pop 0.2s ease forwards;
+}
+
+@keyframes divcopy-menu-pop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.divcopy-mobile-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  min-width: 50px;
+  min-height: 50px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.divcopy-mobile-btn:active {
+  transform: scale(0.95);
+  background: #e0e0e0;
+}
+
+.divcopy-mobile-btn:last-child {
+  background: #ff5252;
+}
+
+.divcopy-mobile-btn:last-child:active {
+  background: #d32f2f;
+}
+
+.divcopy-mobile-btn span {
+  font-size: 9px;
+  margin-top: 2px;
+  color: #333;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  font-weight: 500;
+}
+
+.divcopy-mobile-btn:last-child span {
+  color: white;
+}
+
+/* Toast notifications */
+.divcopy-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  z-index: 99999999;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+}
+
+.divcopy-toast-show {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Desktop hover effects */
+@media (hover: hover) and (pointer: fine) {
+  .divcopy-mobile-btn:hover {
+    background: #e0e0e0;
+    transform: scale(1.05);
+  }
+
+  .divcopy-mobile-btn:last-child:hover {
+    background: #d32f2f;
+  }
+
+  .divcopy-highlighted:hover {
+    outline-color: #45a049 !important;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .divcopy-mobile-menu {
+    padding: 6px;
+    gap: 4px;
+  }
+
+  .divcopy-mobile-btn {
+    min-width: 45px;
+    min-height: 45px;
+    font-size: 18px;
+  }
+
+  .divcopy-mobile-btn span {
+    font-size: 8px;
+  }
+
+  .divcopy-highlighted::after {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+
+  .divcopy-toast {
+    bottom: 80px;
+    font-size: 13px;
+    padding: 10px 20px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .divcopy-mobile-menu {
+    background: #2d2d2d;
+  }
+
+  .divcopy-mobile-btn {
+    background: #3d3d3d;
+  }
+
+  .divcopy-mobile-btn:active {
+    background: #4d4d4d;
+  }
+
+  .divcopy-mobile-btn span {
+    color: #f5f5f5;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .divcopy-mobile-btn:hover {
+      background: #4d4d4d;
+    }
+  }
+}
+
+/* Accessibility */
+.divcopy-mobile-btn:focus {
+  outline: 2px solid #4CAF50;
+  outline-offset: 2px;
+}
+
+/* Prevent text selection during long press */
+.divcopy-mobile-mode {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Ensure menu stays on screen */
+.divcopy-mobile-menu {
+  max-width: calc(100vw - 40px);
+}
+
+@media (max-width: 480px) {
+  .divcopy-mobile-menu {
+    flex-wrap: wrap;
+    max-width: calc(100vw - 20px);
+  }
+}
+
+/* Animation for element highlighting on mobile */
+@media (hover: none) and (pointer: coarse) {
+  .divcopy-highlighted {
+    animation: divcopy-pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes divcopy-pulse {
+    0%, 100% {
+      outline-color: #4CAF50;
+    }
+    50% {
+      outline-color: #45a049;
+    }
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .divcopy-highlighted {
+    outline-width: 4px !important;
+  }
+
+  .divcopy-mobile-menu {
+    border: 2px solid #000;
+  }
+
+  .divcopy-toast {
+    border: 2px solid #fff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .divcopy-highlighted,
+  .divcopy-mobile-btn,
+  .divcopy-toast,
+  .divcopy-mobile-menu {
+    animation: none !important;
+    transition: none !important;
+  }
+}
