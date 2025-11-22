@@ -1,0 +1,48 @@
+# Editor and IDE files
+.vscode/
+.cursor/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build artifacts
+ccwc
+*.o
+*.out
+*.dSYM/
+*.d
+*.a
+*.so
+*.dylib
+
+# Test files (generated during testing)
+test_*.txt
+
+# Distribution packages
+dist/
+*.tar.gz
+*.tar.gz.sha256
+*.zip
+
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.bak
+*.log
+.cache/
+
+# Debug files
+*.dSYM
+core
+vgcore.*

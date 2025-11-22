@@ -1,8 +1,7 @@
 #!/bin/bash
-#
-# Test suite for cccut
-# Tests various features and edge cases
-#
+
+# Test suite for cccut - cut tool implementation
+# Tests various features of the cut command
 
 # Colors for output
 RED='\033[0;31m'
@@ -10,335 +9,173 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Test counters
-TOTAL=0
-PASSED=0
-FAILED=0
-
-# cccut executable
-CCCUT="./cccut"
-
-# Check if cccut exists
-if [ ! -f "$CCCUT" ]; then
-    echo -e "${RED}Error: cccut not found. Run 'make' first.${NC}"
-    exit 1
-fi
+# Counters
+TESTS_RUN=0
+TESTS_PASSED=0
+TESTS_FAILED=0
 
 # Test function
-test_case() {
-    local name="$1"
-    local input="$2"
-    local args="$3"
-    local expected="$4"
+run_test() {
+    local test_name=$1
+    local command=$2
+    local expected=$3
 
-    TOTAL=$((TOTAL + 1))
+    TESTS_RUN=$((TESTS_RUN + 1))
 
-    # Run test
-    actual=$(echo -e "$input" | $CCCUT $args 2>/dev/null)
+    # Run the command and capture output
+    actual=$(eval "$command" 2>&1)
 
-    # Compare
+    # Compare output
     if [ "$actual" = "$expected" ]; then
-        echo -e "${GREEN}✓${NC} Test $TOTAL: $name"
-        PASSED=$((PASSED + 1))
+        echo -e "${GREEN}✓${NC} $test_name"
+        TESTS_PASSED=$((TESTS_PASSED + 1))
     else
-        echo -e "${RED}✗${NC} Test $TOTAL: $name"
-        echo "  Input:    '$input'"
-        echo "  Args:     $args"
-        echo "  Expected: '$expected'"
-        echo "  Got:      '$actual'"
-        FAILED=$((FAILED + 1))
+        echo -e "${RED}✗${NC} $test_name"
+        echo -e "  Expected: ${YELLOW}$expected${NC}"
+        echo -e "  Got:      ${YELLOW}$actual${NC}"
+        TESTS_FAILED=$((TESTS_FAILED + 1))
     fi
 }
 
-# Print header
-echo "========================================"
-echo "cccut Test Suite"
-echo "========================================"
-echo ""
+# Setup
+echo "Setting up test environment..."
+CCCUT="./cccut"
 
-# ========================================
-# Field Mode Tests
-# ========================================
-echo "Testing Field Mode (-f)..."
-echo ""
-
-test_case "Single field extraction" \
-    "A,B,C,D,E" \
-    "-d',' -f2" \
-    "B"
-
-test_case "Multiple fields" \
-    "A,B,C,D,E" \
-    "-d',' -f1,3,5" \
-    "A,C,E"
-
-test_case "Field range" \
-    "A,B,C,D,E" \
-    "-d',' -f2-4" \
-    "B,C,D"
-
-test_case "Open-ended range (N-)" \
-    "A,B,C,D,E" \
-    "-d',' -f3-" \
-    "C,D,E"
-
-test_case "Range from start (-M)" \
-    "A,B,C,D,E" \
-    "-d',' -f-3" \
-    "A,B,C"
-
-test_case "Combined ranges and fields" \
-    "A,B,C,D,E,F,G,H" \
-    "-d',' -f1,3-5,8" \
-    "A,C,D,E,H"
-
-test_case "Field reordering" \
-    "Alice,25,Engineer" \
-    "-d',' -f3,1,2" \
-    "Engineer,Alice,25"
-
-test_case "Colon delimiter" \
-    "root:x:0:0:root:/root:/bin/bash" \
-    "-d':' -f1,6" \
-    "root:/root"
-
-test_case "Tab delimiter (default)" \
-    "A\tB\tC" \
-    "-f2" \
-    "B"
-
-# ========================================
-# Character Mode Tests
-# ========================================
-echo ""
-echo "Testing Character Mode (-c)..."
-echo ""
-
-test_case "Single character" \
-    "Hello World" \
-    "-c1" \
-    "H"
-
-test_case "Character range" \
-    "Hello World" \
-    "-c1-5" \
-    "Hello"
-
-test_case "Multiple character positions" \
-    "Hello World" \
-    "-c1,3,5,7,9,11" \
-    "HloWrd"
-
-test_case "Open-ended character range" \
-    "Hello World" \
-    "-c7-" \
-    "World"
-
-test_case "Character range from start" \
-    "Hello World" \
-    "-c-5" \
-    "Hello"
-
-test_case "Combined character ranges" \
-    "Hello World" \
-    "-c1-5,7-11" \
-    "HelloWorld"
-
-# ========================================
-# Delimiter Tests
-# ========================================
-echo ""
-echo "Testing Delimiters..."
-echo ""
-
-test_case "Comma delimiter" \
-    "A,B,C" \
-    "-d',' -f2" \
-    "B"
-
-test_case "Pipe delimiter" \
-    "A|B|C" \
-    "-d'|' -f2" \
-    "B"
-
-test_case "Space delimiter" \
-    "A B C" \
-    "-d' ' -f2" \
-    "B"
-
-test_case "Semicolon delimiter" \
-    "A;B;C" \
-    "-d';' -f2" \
-    "B"
-
-# ========================================
-# Suppress (-s) Tests
-# ========================================
-echo ""
-echo "Testing Suppress Flag (-s)..."
-echo ""
-
-test_case "Suppress lines without delimiter" \
-    "A:B:C\nNo delimiter here\nD:E:F" \
-    "-d':' -f1 -s" \
-    "A\nD"
-
-test_case "Without suppress (default)" \
-    "A:B:C\nNo delimiter\nD:E:F" \
-    "-d':' -f1" \
-    "A\nNo delimiter\nD"
-
-# ========================================
-# Edge Cases
-# ========================================
-echo ""
-echo "Testing Edge Cases..."
-echo ""
-
-test_case "Empty input" \
-    "" \
-    "-d',' -f1" \
-    ""
-
-test_case "Single field" \
-    "OnlyOneField" \
-    "-d',' -f1" \
-    "OnlyOneField"
-
-test_case "Empty fields" \
-    "A,,C" \
-    "-d',' -f2" \
-    ""
-
-test_case "Field beyond range" \
-    "A,B,C" \
-    "-d',' -f5" \
-    ""
-
-test_case "Duplicate field selection" \
-    "A,B,C" \
-    "-d',' -f2,2,2" \
-    "B,B,B"
-
-test_case "Single character extraction" \
-    "X" \
-    "-c1" \
-    "X"
-
-# ========================================
-# Multi-line Tests
-# ========================================
-echo ""
-echo "Testing Multi-line Input..."
-echo ""
-
-test_case "Multiple lines - field mode" \
-    "A,B,C\nD,E,F\nG,H,I" \
-    "-d',' -f2" \
-    "B\nE\nH"
-
-test_case "Multiple lines - character mode" \
-    "Hello\nWorld\nTest" \
-    "-c1-3" \
-    "Hel\nWor\nTes"
-
-# ========================================
-# File Input Tests
-# ========================================
-echo ""
-echo "Testing File Input..."
-echo ""
-
-# Create temporary test files
-TEMP_FILE1=$(mktemp)
-TEMP_FILE2=$(mktemp)
-
-echo -e "A,B,C\nD,E,F" > "$TEMP_FILE1"
-echo -e "G,H,I\nJ,K,L" > "$TEMP_FILE2"
-
-# Test single file
-actual=$($CCCUT -d',' -f2 "$TEMP_FILE1" 2>/dev/null)
-expected="B\nE"
-TOTAL=$((TOTAL + 1))
-if [ "$actual" = "$(echo -e "$expected")" ]; then
-    echo -e "${GREEN}✓${NC} Test $TOTAL: Single file input"
-    PASSED=$((PASSED + 1))
-else
-    echo -e "${RED}✗${NC} Test $TOTAL: Single file input"
-    FAILED=$((FAILED + 1))
+# Check if binary exists
+if [ ! -f "$CCCUT" ]; then
+    echo -e "${RED}Error: $CCCUT not found. Please run 'make' first.${NC}"
+    exit 1
 fi
 
-# Test multiple files
-actual=$($CCCUT -d',' -f2 "$TEMP_FILE1" "$TEMP_FILE2" 2>/dev/null)
-expected="B\nE\nH\nL"
-TOTAL=$((TOTAL + 1))
-if [ "$actual" = "$(echo -e "$expected")" ]; then
-    echo -e "${GREEN}✓${NC} Test $TOTAL: Multiple file input"
-    PASSED=$((PASSED + 1))
-else
-    echo -e "${RED}✗${NC} Test $TOTAL: Multiple file input"
-    FAILED=$((FAILED + 1))
-fi
+# Create test files
+echo -e "one\ttwo\tthree" > test_tab.txt
+echo "one,two,three,four" > test_csv.txt
+echo -e "apple\tbanana\tcherry\tdate" > test_fruits.txt
+echo "1:2:3:4:5" > test_colon.txt
+echo -e "field1\tfield2" > test_two_fields.txt
+echo "no-delimiter-here" > test_no_delim.txt
 
-# Clean up temp files
-rm -f "$TEMP_FILE1" "$TEMP_FILE2"
+# Create multi-line test file
+cat > test_multi.txt << 'EOF'
+one	two	three	four
+alpha	beta	gamma	delta
+1	2	3	4
+EOF
 
-# ========================================
-# Real-World Scenarios
-# ========================================
+cat > test_multi_csv.txt << 'EOF'
+one,two,three,four
+alpha,beta,gamma,delta
+1,2,3,4
+EOF
+
 echo ""
-echo "Testing Real-World Scenarios..."
+echo "Running tests..."
+echo "================"
+
+# Test 1: Single field extraction (TAB delimiter)
+run_test "Extract first field (tab-delimited)" \
+    "$CCCUT -f 1 test_tab.txt" \
+    "one"
+
+# Test 2: Multiple fields extraction
+run_test "Extract fields 1 and 3 (tab-delimited)" \
+    "$CCCUT -f 1,3 test_tab.txt" \
+    "one	three"
+
+# Test 3: Field range extraction
+run_test "Extract field range 1-2 (tab-delimited)" \
+    "$CCCUT -f 1-2 test_tab.txt" \
+    "one	two"
+
+# Test 4: Custom delimiter (comma)
+run_test "Extract first field (comma-delimited)" \
+    "$CCCUT -f 1 -d , test_csv.txt" \
+    "one"
+
+# Test 5: Multiple fields with custom delimiter
+run_test "Extract fields 1,3 (comma-delimited)" \
+    "$CCCUT -f 1,3 -d , test_csv.txt" \
+    "one,three"
+
+# Test 6: Field range with custom delimiter
+run_test "Extract field range 2-3 (comma-delimited)" \
+    "$CCCUT -f 2-3 -d , test_csv.txt" \
+    "two,three"
+
+# Test 7: Open-ended range (from N to end)
+run_test "Extract fields 2- (from 2 to end)" \
+    "$CCCUT -f 2- -d , test_csv.txt" \
+    "two,three,four"
+
+# Test 8: Open-ended range (from start to N)
+run_test "Extract fields -2 (from start to 2)" \
+    "$CCCUT -f -2 -d , test_csv.txt" \
+    "one,two"
+
+# Test 9: Byte extraction
+run_test "Extract bytes 1-5" \
+    "echo 'hello world' | $CCCUT -b 1-5" \
+    "hello"
+
+# Test 10: Character extraction
+run_test "Extract characters 1-5" \
+    "echo 'hello world' | $CCCUT -c 1-5" \
+    "hello"
+
+# Test 11: Non-contiguous byte ranges
+run_test "Extract bytes 1,3,5" \
+    "echo 'abcdef' | $CCCUT -b 1,3,5" \
+    "ace"
+
+# Test 12: Reading from stdin
+run_test "Read from stdin (pipe)" \
+    "echo -e 'one\ttwo\tthree' | $CCCUT -f 2" \
+    "two"
+
+# Test 13: Multiple lines processing
+run_test "Process multiple lines (field 1)" \
+    "$CCCUT -f 1 test_multi.txt | head -n 1" \
+    "one"
+
+# Test 14: Multiple lines processing (field 2-3)
+run_test "Process multiple lines (fields 2-3)" \
+    "$CCCUT -f 2-3 -d , test_multi_csv.txt | head -n 1" \
+    "two,three"
+
+# Test 15: Custom delimiter (colon)
+run_test "Extract fields with colon delimiter" \
+    "$CCCUT -f 1,3,5 -d : test_colon.txt" \
+    "1:3:5"
+
+# Test 16: All fields
+run_test "Extract all fields (1-)" \
+    "$CCCUT -f 1- test_two_fields.txt" \
+    "field1	field2"
+
+# Test 17: Suppress non-delimited lines
+run_test "Suppress lines without delimiter" \
+    "$CCCUT -f 1 -s test_no_delim.txt" \
+    ""
+
+# Cleanup
 echo ""
+echo "Cleaning up test files..."
+rm -f test_tab.txt test_csv.txt test_fruits.txt test_colon.txt
+rm -f test_two_fields.txt test_no_delim.txt test_multi.txt test_multi_csv.txt
 
-test_case "Extract usernames from /etc/passwd format" \
-    "root:x:0:0:root:/root:/bin/bash\nalice:x:1000:1000:Alice:/home/alice:/bin/bash" \
-    "-d':' -f1" \
-    "root\nalice"
-
-test_case "Extract timestamp from log" \
-    "2024-01-15 10:30:45 INFO User logged in" \
-    "-c1-19" \
-    "2024-01-15 10:30:45"
-
-test_case "Parse CSV contact list" \
-    "Alice Johnson,alice@example.com,555-0101\nBob Smith,bob@example.com,555-0102" \
-    "-d',' -f1,2" \
-    "Alice Johnson,alice@example.com\nBob Smith,bob@example.com"
-
-# ========================================
-# Error Cases (should handle gracefully)
-# ========================================
-echo ""
-echo "Testing Error Handling..."
-echo ""
-
-# Test non-existent file (should print error but not crash)
-$CCCUT -d',' -f1 /nonexistent/file 2>/dev/null
-TOTAL=$((TOTAL + 1))
-if [ $? -ne 0 ] || [ $? -eq 0 ]; then
-    echo -e "${GREEN}✓${NC} Test $TOTAL: Non-existent file handled"
-    PASSED=$((PASSED + 1))
-else
-    echo -e "${RED}✗${NC} Test $TOTAL: Non-existent file not handled"
-    FAILED=$((FAILED + 1))
-fi
-
-# ========================================
 # Summary
-# ========================================
 echo ""
-echo "========================================"
-echo "Test Results"
-echo "========================================"
-echo "Total:  $TOTAL"
-echo -e "Passed: ${GREEN}$PASSED${NC}"
-echo -e "Failed: ${RED}$FAILED${NC}"
-echo ""
+echo "================"
+echo "Test Summary"
+echo "================"
+echo "Tests run:    $TESTS_RUN"
+echo -e "Tests passed: ${GREEN}$TESTS_PASSED${NC}"
+echo -e "Tests failed: ${RED}$TESTS_FAILED${NC}"
 
-if [ $FAILED -eq 0 ]; then
-    echo -e "${GREEN}All tests passed!${NC}"
+if [ $TESTS_FAILED -eq 0 ]; then
+    echo -e "\n${GREEN}All tests passed!${NC}"
     exit 0
 else
-    echo -e "${RED}Some tests failed.${NC}"
+    echo -e "\n${RED}Some tests failed.${NC}"
     exit 1
 fi

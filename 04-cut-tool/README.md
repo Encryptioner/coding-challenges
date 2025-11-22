@@ -1,227 +1,306 @@
-# cccut - A Simple Unix cut Tool Implementation
+# cccut - A Cut Tool Implementation
 
-A lightweight, educational implementation of the Unix `cut` command for extracting sections from lines of text. This project is part of the [Coding Challenges](https://codingchallenges.fyi/challenges/challenge-cut) series.
+A C implementation of the Unix `cut` command-line utility, built as part of the [Coding Challenges](https://codingchallenges.fyi/challenges/challenge-cut).
 
-## 🎯 What is cut?
+## Features
 
-The `cut` tool is a Unix utility that extracts specific portions of each line from a file or input stream. Think of it like a pair of scissors that can:
+- **Field extraction** (`-f`): Extract specific fields from delimited text
+- **Byte extraction** (`-b`): Extract specific bytes from each line
+- **Character extraction** (`-c`): Extract specific characters from each line
+- **Custom delimiters** (`-d`): Support for any single-character delimiter
+- **Suppress non-delimited lines** (`-s`): Skip lines without the delimiter
+- **Flexible range syntax**: Support for single positions, ranges, and lists
+- **Standard input/output**: Read from files or stdin, write to stdout
+- **Cross-platform**: Works on Linux, macOS, and BSD systems
 
-- **Cut out specific columns** from a CSV file (like extracting just names from a contact list)
-- **Extract character ranges** from text (like getting the first 10 characters of each line)
-- **Parse delimited data** (working with tab-separated, comma-separated, or any custom-delimited data)
+## Building
 
-## 🚀 Quick Start
+### Prerequisites
 
-### Building
+- GCC or compatible C compiler
+- Make
+- POSIX-compliant system (Linux, macOS, BSD)
 
-```bash
-# Compile the tool
-make
-
-# Or compile manually
-gcc -o cccut cccut.c -Wall -Wextra
-```
-
-### Basic Examples
-
-```bash
-# Extract the 2nd field from a CSV file
-echo "Alice,25,Engineer" | ./cccut -d',' -f2
-# Output: 25
-
-# Get the first 5 characters from each line
-echo "Hello World" | ./cccut -c1-5
-# Output: Hello
-
-# Extract multiple fields
-echo "Alice,25,Engineer,NYC" | ./cccut -d',' -f1,3
-# Output: Alice,Engineer
-
-# Extract from 3rd field to the end
-echo "A,B,C,D,E,F" | ./cccut -d',' -f3-
-# Output: C,D,E,F
-```
-
-## 📖 Usage
-
-```
-cccut [OPTION]... [FILE]...
-```
-
-### Options
-
-| Option | Description | Example |
-|--------|-------------|---------|
-| `-f LIST` | Select fields (columns) | `-f1,3,5` or `-f1-3` |
-| `-c LIST` | Select characters | `-c1-10` or `-c5,10,15` |
-| `-d DELIM` | Set field delimiter (default: TAB) | `-d','` or `-d':'` |
-| `-s` | Suppress lines with no delimiter | `-s -f1-3` |
-| `-h` | Show help message | `-h` |
-
-### Range Syntax
-
-The `LIST` parameter supports flexible range specifications:
-
-| Format | Meaning | Example |
-|--------|---------|---------|
-| `N` | Single field/character at position N | `3` = 3rd position |
-| `N-M` | Range from N to M (inclusive) | `1-5` = positions 1 through 5 |
-| `N-` | From N to end of line | `3-` = position 3 to end |
-| `-M` | From beginning to M | `-5` = positions 1 through 5 |
-| `N,M,P` | Multiple selections | `1,3,5` = positions 1, 3, and 5 |
-
-You can combine ranges: `-f1-3,5,7-9` selects fields 1, 2, 3, 5, 7, 8, and 9.
-
-## 💡 Real-World Examples
-
-### Working with CSV Files
-
-```bash
-# Extract names and emails from a contact list
-# Input: Alice,alice@example.com,123-456-7890,NYC
-./cccut -d',' -f1-2 contacts.csv
-
-# Get just the phone numbers (3rd column)
-./cccut -d',' -f3 contacts.csv
-```
-
-### Processing Log Files
-
-```bash
-# Extract timestamps (first 19 characters) from logs
-# Input: 2024-01-15 10:30:45 [INFO] User logged in
-./cccut -c1-19 app.log
-
-# Get log levels (assuming space-delimited)
-./cccut -d' ' -f3 app.log
-```
-
-### Working with /etc/passwd
-
-```bash
-# Extract usernames (1st field, colon-delimited)
-./cccut -d':' -f1 /etc/passwd
-
-# Get username and home directory (1st and 6th fields)
-./cccut -d':' -f1,6 /etc/passwd
-```
-
-### Pipeline with Other Commands
-
-```bash
-# Count unique shells in /etc/passwd
-./cccut -d':' -f7 /etc/passwd | sort | uniq -c
-
-# Find all users with UID >= 1000
-./cccut -d':' -f1,3 /etc/passwd | awk -F: '$2 >= 1000'
-
-# Extract commit hashes from git log
-git log --oneline | ./cccut -c1-7
-```
-
-## 🏗️ Building and Testing
-
-### Compilation
+### Build Commands
 
 ```bash
 # Standard build
 make
 
-# Build with debug symbols
+# Or explicitly
+make all
+
+# Debug build with symbols
 make debug
 
-# Clean build artifacts
-make clean
+# Static binary (Linux/BSD only)
+make static
+
+# Check dependencies and configuration
+make check-deps
 ```
 
-### Running Tests
+## Installation
 
 ```bash
-# Run all tests
+# Install to /usr/local/bin (requires sudo)
+sudo make install
+
+# Install to custom location
+PREFIX=/opt/local make install
+
+# Uninstall
+sudo make uninstall
+```
+
+## Usage
+
+### Basic Syntax
+
+```bash
+cccut -b LIST [FILE...]
+cccut -c LIST [FILE...]
+cccut -f LIST [-d DELIM] [-s] [FILE...]
+```
+
+### Options
+
+- `-b, --bytes=LIST` - Select only these bytes
+- `-c, --characters=LIST` - Select only these characters
+- `-f, --fields=LIST` - Select only these fields
+- `-d, --delimiter=DELIM` - Use DELIM instead of TAB for field delimiter
+- `-s, --only-delimited` - Do not print lines not containing delimiters
+- `--help` - Display help message
+
+### List Format
+
+Lists can contain:
+- **Single numbers**: `1` (first field/byte/character)
+- **Ranges**: `1-3` (fields/bytes 1 through 3)
+- **Open-ended ranges**: `3-` (from 3 to end) or `-3` (from start to 3)
+- **Lists**: `1,3,5` (fields 1, 3, and 5)
+- **Combinations**: `1-3,5,7-9` (multiple ranges and positions)
+
+## Examples
+
+### Field Extraction
+
+```bash
+# Create a tab-delimited file
+echo -e "one\ttwo\tthree\tfour" > test.txt
+
+# Extract first field
+cccut -f 1 test.txt
+# Output: one
+
+# Extract multiple fields
+cccut -f 1,3 test.txt
+# Output: one	three
+
+# Extract field range
+cccut -f 2-3 test.txt
+# Output: two	three
+
+# Extract from field 2 to end
+cccut -f 2- test.txt
+# Output: two	three	four
+```
+
+### Custom Delimiters
+
+```bash
+# Create a CSV file
+echo "one,two,three,four" > test.csv
+
+# Extract fields using comma delimiter
+cccut -f 1,3 -d , test.csv
+# Output: one,three
+
+# Extract field range
+cccut -f 2-3 -d , test.csv
+# Output: two,three
+
+# Process /etc/passwd (colon-delimited)
+cccut -f 1,3 -d : /etc/passwd
+# Output: username:uid pairs
+```
+
+### Byte and Character Extraction
+
+```bash
+# Extract specific bytes
+echo "hello world" | cccut -b 1-5
+# Output: hello
+
+# Extract non-contiguous bytes
+echo "abcdef" | cccut -b 1,3,5
+# Output: ace
+
+# Extract characters (same as bytes for ASCII)
+echo "hello world" | cccut -c 7-11
+# Output: world
+```
+
+### Reading from Standard Input
+
+```bash
+# From pipe
+echo -e "one\ttwo\tthree" | cccut -f 2
+# Output: two
+
+# From command substitution
+cat data.txt | cccut -f 1,3 -d ,
+
+# Process multiple files
+cccut -f 1 file1.txt file2.txt file3.txt
+```
+
+### Suppress Non-Delimited Lines
+
+```bash
+# Create test files
+echo -e "has\ttabs" > with_delim.txt
+echo "no tabs here" >> with_delim.txt
+
+# Without -s flag (prints all lines)
+cccut -f 1 with_delim.txt
+# Output:
+# has
+# no tabs here
+
+# With -s flag (skips lines without delimiter)
+cccut -f 1 -s with_delim.txt
+# Output:
+# has
+```
+
+## Testing
+
+Run the test suite to verify functionality:
+
+```bash
+# Build and run tests
 make test
 
-# Or manually
+# Or run test script directly
 ./test.sh
 ```
 
-## 🔍 How It Works
+The test suite covers:
+- Field extraction with various delimiters
+- Byte and character extraction
+- Range specifications
+- Standard input processing
+- Multiple file handling
+- Edge cases
 
-### Field Extraction (-f)
+## Implementation Details
 
-When you use `-f`, the tool:
-1. Splits each line by the delimiter (default: TAB, customizable with `-d`)
-2. Numbers fields starting from 1
-3. Outputs only the specified fields, separated by the delimiter
+### Architecture
 
-**Example:**
-```bash
-# Input:  "A:B:C:D:E"
-# Command: cccut -d':' -f2,4
-# Process: Split → ["A", "B", "C", "D", "E"]
-#          Select fields 2,4 → ["B", "D"]
-# Output: "B:D"
+- **Single-pass processing**: Reads input line by line for memory efficiency
+- **Configurable ranges**: Supports complex range specifications
+- **POSIX compliance**: Uses POSIX-standard functions for portability
+- **Error handling**: Proper validation and error messages
+
+### Range Parsing
+
+The tool supports flexible range syntax:
+- `N`: Single position
+- `N-M`: Inclusive range from N to M
+- `N-`: From N to end of line
+- `-M`: From beginning to M
+- Comma-separated combinations of the above
+
+### Performance Characteristics
+
+- **Memory**: O(line length) - processes one line at a time
+- **Time**: O(n * m) where n is line length and m is number of ranges
+- **Scalability**: Can handle files of any size
+
+## Limitations
+
+- Maximum line length: 65,536 characters
+- Maximum number of ranges: 1,024
+- Delimiter must be a single byte character
+- Character mode treats characters as bytes (full UTF-8 support not implemented)
+
+## Comparison with GNU cut
+
+This implementation aims for compatibility with basic GNU cut functionality:
+
+**Supported:**
+- `-b`, `-c`, `-f` options
+- `-d` delimiter option
+- `-s` suppress option
+- Range specifications
+- Standard input/output
+
+**Not implemented (yet):**
+- `--complement` option
+- `--output-delimiter` option
+- Full UTF-8 multi-byte character support
+- Zero-terminated lines (`-z`)
+
+## Project Structure
+
+```
+04-cut-tool/
+├── cccut.c          # Main implementation
+├── Makefile         # Build configuration
+├── test.sh          # Test suite
+├── README.md        # This file
+└── CHALLENGE.md     # Challenge description
 ```
 
-### Character Extraction (-c)
+## Platform Support
 
-When you use `-c`, the tool:
-1. Treats each line as a sequence of characters
-2. Numbers characters starting from 1
-3. Outputs only characters at the specified positions
+Tested and working on:
+- **Linux**: Ubuntu, Debian, CentOS, Fedora, Arch
+- **macOS**: 10.15+
+- **BSD**: FreeBSD, OpenBSD, NetBSD
 
-**Example:**
+## Development
+
+### Code Style
+
+- C99 standard
+- POSIX-compliant APIs
+- Clear error messages
+- Consistent indentation (4 spaces)
+
+### Building for Development
+
 ```bash
-# Input:  "Hello World"
-# Command: cccut -c1-5
-# Process: Positions 1,2,3,4,5 → "H","e","l","l","o"
-# Output: "Hello"
+# Debug build with symbols
+make debug
+
+# Check for issues
+make clean && make all
+
+# Run tests after changes
+make test
 ```
 
-## 📚 Additional Documentation
+## Contributing
 
-- [**GUIDE.md**](docs/GUIDE.md) - Comprehensive user guide with advanced techniques
-- [**EXAMPLES.md**](docs/EXAMPLES.md) - Extensive collection of practical examples
-- [**ARCHITECTURE.md**](docs/ARCHITECTURE.md) - Code structure and implementation details
+This is an educational project following the [Coding Challenges](https://codingchallenges.fyi) series. Feel free to:
+- Report bugs
+- Suggest improvements
+- Submit pull requests
+- Use as a learning resource
 
-## ⚠️ Limitations
+## License
 
-This is an educational implementation. Some differences from GNU cut:
+This project is for educational purposes. See repository license for details.
 
-- Maximum line length: 4096 characters
-- Maximum fields: 1024
-- No support for byte selection (-b)
-- No support for complement selection (--complement)
-- Single character delimiter only (no multi-character delimiters)
-
-## 🤝 Compatibility
-
-Works on:
-- Linux (all distributions)
-- macOS
-- BSD variants (FreeBSD, OpenBSD, NetBSD)
-- Windows (with WSL or MinGW)
-
-## 📝 License
-
-This is an educational project created as part of the Coding Challenges series.
-
-## 🔗 Resources
+## References
 
 - [Coding Challenges - Cut Tool](https://codingchallenges.fyi/challenges/challenge-cut)
-- [GNU cut manual](https://www.gnu.org/software/coreutils/manual/html_node/cut-invocation.html)
-- [POSIX cut specification](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/cut.html)
+- [GNU cut documentation](https://www.gnu.org/software/coreutils/manual/html_node/cut-invocation.html)
+- [cut man page](https://man7.org/linux/man-pages/man1/cut.1.html)
+- [The Art of Unix Programming](https://www.oreilly.com/library/view/the-art-of/0131429019/)
 
-## 🎓 Learning Objectives
+## Acknowledgments
 
-This challenge teaches:
-- Command-line argument parsing with `getopt`
-- String manipulation in C
-- Input/output streams and file handling
-- Unix philosophy: do one thing well
-- Text processing fundamentals
-
----
-
-**Challenge Progress:** ✓ Completed
-
-Part of the [94 Coding Challenges](https://codingchallenges.fyi) series.
+Built as part of John Crickett's [Coding Challenges](https://codingchallenges.fyi).

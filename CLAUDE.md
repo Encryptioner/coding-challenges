@@ -151,6 +151,12 @@ Challenges can be implemented in any appropriate language. Consider:
 - Learning objectives
 - Platform compatibility requirements
 
+### Instructions
+
+Challenges should be implemented as tutorial style. Consider:
+- Be concise. Implement like a top class software engineer and teacher
+- Adding necessary doc. However, it must not be overwhelming and unnecessary long
+
 ## Reference Implementation: 14-shell
 
 The shell implementation provides a good example of challenge structure:

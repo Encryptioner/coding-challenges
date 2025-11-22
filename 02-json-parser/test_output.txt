@@ -1,0 +1,47 @@
+[0;34m================================================[0m
+[0;34m  ccjsonparser Test Suite[0m
+[0;34m================================================[0m
+
+[0;34mTEST: Help and version output[0m
+[0;32m  ✓ Help output[0m
+[0;32m  ✓ Version output[0m
+
+[0;34mTEST: Step 1: Empty objects[0m
+[0;32m  ✓ Valid empty object[0m
+[0;32m  ✓ Invalid JSON[0m
+
+[0;34mTEST: Step 2: String keys and values[0m
+[0;32m  ✓ Simple string key-value[0m
+[0;32m  ✓ Multiple string key-values[0m
+[0;32m  ✓ Invalid JSON format[0m
+[0;32m  ✓ Invalid JSON format 2[0m
+
+[0;34mTEST: Step 3: Multiple value types (string, number, boolean, null)[0m
+[0;32m  ✓ Mixed value types[0m
+[0;32m  ✓ Invalid value types[0m
+
+[0;34mTEST: Step 4: Nested objects and arrays[0m
+[0;32m  ✓ Objects and arrays[0m
+[0;32m  ✓ Nested structures[0m
+[0;32m  ✓ Invalid nested structure[0m
+
+[0;34mTEST: Standard input[0m
+[0;32m  ✓ Valid JSON from stdin[0m
+[0;32m  ✓ Invalid JSON from stdin[0m
+[0;32m  ✓ Valid JSON from redirect[0m
+
+[0;34mTEST: Additional test cases[0m
+[0;32m  ✓ Empty array[0m
+[0;32m  ✓ Array with numbers[0m
+[0;32m  ✓ Nested arrays[0m
+[0;32m  ✓ Complex nested structure[0m
+[0;32m  ✓ Missing closing brace[0m
+[0;32m  ✓ Missing closing bracket[0m
+[0;32m  ✓ Unquoted key[0m
+[0;32m  ✓ Trailing comma in object[0m
+[0;32m  ✓ Missing colon[0m
+[0;32m  ✓ Just a string (not object/array)[0m
+[0;32m  ✓ Just a number (not object/array)[0m
+
+[0;34mTEST: Exit codes[0m
+[0;32m  ✓ Valid JSON returns 0[0m

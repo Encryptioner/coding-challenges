@@ -1,8 +1,14 @@
 /*
  * cccut - A simple implementation of the Unix cut command
+ * Part of Coding Challenges (https://codingchallenges.fyi)
  *
- * This is a Coding Challenge implementation of the cut tool.
- * See: https://codingchallenges.fyi/challenges/challenge-cut
+ * Supports:
+ * - Cutting by fields (-f)
+ * - Cutting by bytes (-b)
+ * - Cutting by characters (-c)
+ * - Custom delimiter (-d)
+ * - Suppress lines without delimiter (-s)
+ * - Reading from files or stdin
  */
 
 #include <stdio.h>
@@ -11,9 +17,17 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <getopt.h>
+#include <errno.h>
 
-#define MAX_LINE_LENGTH 4096
-#define MAX_FIELDS 1024
+#define MAX_LINE_LENGTH 65536
+#define MAX_RANGES 1024
+
+typedef enum {
+    MODE_NONE = 0,
+    MODE_FIELDS,
+    MODE_BYTES,
+    MODE_CHARS
+} CutMode;
 
 typedef struct {
     int start;
@@ -21,229 +35,285 @@ typedef struct {
 } Range;
 
 typedef struct {
-    Range ranges[MAX_FIELDS];
-    int count;
-} RangeList;
-
-typedef enum {
-    MODE_NONE,
-    MODE_FIELDS,
-    MODE_CHARS
-} CutMode;
-
-typedef struct {
     CutMode mode;
     char delimiter;
-    RangeList ranges;
-    bool suppress_no_delim;  // -s flag
+    bool suppress_no_delim;
+    Range ranges[MAX_RANGES];
+    int num_ranges;
+    char *output_delimiter;
 } Config;
 
-void print_usage(const char *program_name) {
-    fprintf(stderr, "Usage: %s [OPTION]... [FILE]...\n", program_name);
-    fprintf(stderr, "Print selected parts of lines from each FILE to standard output.\n\n");
-    fprintf(stderr, "Options:\n");
-    fprintf(stderr, "  -f LIST       select only these fields\n");
-    fprintf(stderr, "  -d DELIM      use DELIM instead of TAB for field delimiter\n");
-    fprintf(stderr, "  -c LIST       select only these characters\n");
-    fprintf(stderr, "  -s            do not print lines not containing delimiters (with -f)\n");
-    fprintf(stderr, "  -h            display this help and exit\n");
-    fprintf(stderr, "\nLIST is made up of one range, or many ranges separated by commas.\n");
-    fprintf(stderr, "Each range is one of:\n");
-    fprintf(stderr, "  N     N'th field or character, counted from 1\n");
-    fprintf(stderr, "  N-    from N'th to end of line\n");
-    fprintf(stderr, "  N-M   from N'th to M'th (included)\n");
-    fprintf(stderr, "  -M    from first to M'th (included)\n");
-    fprintf(stderr, "\nWith no FILE, or when FILE is -, read standard input.\n");
-}
-
-// Parse a range string like "1", "1-5", "1-", "-5"
-bool parse_range(const char *str, Range *range) {
+/* Parse a range specification like "1", "1-3", "1-", "-3" */
+static int parse_range(const char *str, Range *range) {
+    char *endptr;
     char *dash = strchr(str, '-');
 
-    if (dash == str) {
-        // "-M" format
-        range->start = 1;
-        range->end = atoi(dash + 1);
-        if (range->end < 1) return false;
-    } else if (dash == NULL) {
-        // "N" format
-        range->start = atoi(str);
-        range->end = range->start;
-        if (range->start < 1) return false;
-    } else {
-        // "N-" or "N-M" format
-        range->start = atoi(str);
-        if (range->start < 1) return false;
-
-        if (*(dash + 1) == '\0') {
-            // "N-" format (to end)
-            range->end = -1;
-        } else {
-            // "N-M" format
-            range->end = atoi(dash + 1);
-            if (range->end < range->start) return false;
+    if (dash == NULL) {
+        /* Single number */
+        long num = strtol(str, &endptr, 10);
+        if (*endptr != '\0' || num < 1) {
+            return -1;
         }
+        range->start = (int)num;
+        range->end = (int)num;
+    } else if (dash == str) {
+        /* -N format (from beginning to N) */
+        long num = strtol(dash + 1, &endptr, 10);
+        if (*endptr != '\0' || num < 1) {
+            return -1;
+        }
+        range->start = 1;
+        range->end = (int)num;
+    } else if (*(dash + 1) == '\0') {
+        /* N- format (from N to end) */
+        long num = strtol(str, &endptr, 10);
+        if (endptr != dash || num < 1) {
+            return -1;
+        }
+        range->start = (int)num;
+        range->end = -1;  // -1 means to end
+    } else {
+        /* N-M format */
+        long start = strtol(str, &endptr, 10);
+        if (endptr != dash || start < 1) {
+            return -1;
+        }
+        long end = strtol(dash + 1, &endptr, 10);
+        if (*endptr != '\0' || end < start) {
+            return -1;
+        }
+        range->start = (int)start;
+        range->end = (int)end;
     }
 
-    return true;
+    return 0;
 }
 
-// Parse a list of ranges like "1,3,5-7"
-bool parse_range_list(const char *list, RangeList *ranges) {
+/* Parse list of ranges like "1,3,5-7,10-" */
+static int parse_range_list(const char *list, Config *config) {
     char *list_copy = strdup(list);
-    char *token;
-    char *saveptr;
+    if (!list_copy) {
+        return -1;
+    }
 
-    ranges->count = 0;
+    char *token = strtok(list_copy, ",");
+    config->num_ranges = 0;
 
-    token = strtok_r(list_copy, ",", &saveptr);
-    while (token != NULL && ranges->count < MAX_FIELDS) {
-        // Trim whitespace
-        while (isspace(*token)) token++;
-
-        if (!parse_range(token, &ranges->ranges[ranges->count])) {
+    while (token != NULL && config->num_ranges < MAX_RANGES) {
+        Range range;
+        if (parse_range(token, &range) < 0) {
             free(list_copy);
-            return false;
+            return -1;
         }
-        ranges->count++;
-        token = strtok_r(NULL, ",", &saveptr);
+        config->ranges[config->num_ranges++] = range;
+        token = strtok(NULL, ",");
     }
 
     free(list_copy);
-    return ranges->count > 0;
+    return 0;
 }
 
-// Check if a position is in any of the ranges
-bool in_ranges(int pos, const RangeList *ranges) {
-    for (int i = 0; i < ranges->count; i++) {
-        int start = ranges->ranges[i].start;
-        int end = ranges->ranges[i].end;
-
-        if (end == -1) {
-            // N- format (to end)
-            if (pos >= start) return true;
-        } else {
-            if (pos >= start && pos <= end) return true;
+/* Check if a position is within any of the configured ranges */
+static bool in_range(const Config *config, int pos) {
+    for (int i = 0; i < config->num_ranges; i++) {
+        const Range *r = &config->ranges[i];
+        if (pos >= r->start && (r->end == -1 || pos <= r->end)) {
+            return true;
         }
     }
     return false;
 }
 
-// Process line in character mode
-void cut_chars(const char *line, const Config *config) {
-    int len = strlen(line);
-    // Remove trailing newline for processing
-    if (len > 0 && line[len - 1] == '\n') {
-        len--;
-    }
+/* Cut by bytes */
+static void cut_bytes(const char *line, const Config *config) {
+    size_t len = strlen(line);
+    bool first = true;
 
-    for (int i = 0; i < len; i++) {
-        if (in_ranges(i + 1, &config->ranges)) {
+    for (size_t i = 0; i < len; i++) {
+        if (in_range(config, i + 1)) {
+            if (!first && config->output_delimiter) {
+                printf("%s", config->output_delimiter);
+            }
             putchar(line[i]);
+            first = false;
         }
     }
-    putchar('\n');
 }
 
-// Process line in field mode
-void cut_fields(const char *line, const Config *config) {
-    int len = strlen(line);
-    char *line_copy = malloc(len + 1);
-    strcpy(line_copy, line);
+/* Cut by characters (same as bytes for ASCII, different for UTF-8) */
+static void cut_chars(const char *line, const Config *config) {
+    /* For simplicity, treating this the same as bytes */
+    /* A full implementation would handle UTF-8 multi-byte characters */
+    cut_bytes(line, config);
+}
 
-    // Remove trailing newline
+/* Split a line by delimiter and extract specified fields */
+static void cut_fields(const char *line, const Config *config) {
+    /* Check if line contains delimiter */
+    if (config->suppress_no_delim && strchr(line, config->delimiter) == NULL) {
+        return;  /* Skip this line */
+    }
+
+    /* Split the line by delimiter */
+    char *line_copy = strdup(line);
+    if (!line_copy) {
+        return;
+    }
+
+    /* Remove trailing newline if present */
+    size_t len = strlen(line_copy);
     if (len > 0 && line_copy[len - 1] == '\n') {
         line_copy[len - 1] = '\0';
     }
 
-    // Check if line contains delimiter
-    if (strchr(line_copy, config->delimiter) == NULL) {
-        if (!config->suppress_no_delim) {
-            printf("%s\n", line_copy);
-        }
-        free(line_copy);
-        return;
-    }
-
-    // Split into fields
-    char *fields[MAX_FIELDS];
+    /* Count fields and store them */
+    char *fields[MAX_RANGES * 2];
     int field_count = 0;
-    char *token;
-    char *saveptr;
-    char delim_str[2] = {config->delimiter, '\0'};
 
-    token = strtok_r(line_copy, delim_str, &saveptr);
-    while (token != NULL && field_count < MAX_FIELDS) {
-        fields[field_count++] = token;
-        token = strtok_r(NULL, delim_str, &saveptr);
+    char *ptr = line_copy;
+    char *field_start = ptr;
+
+    while (*ptr) {
+        if (*ptr == config->delimiter) {
+            *ptr = '\0';
+            fields[field_count++] = field_start;
+            field_start = ptr + 1;
+        }
+        ptr++;
     }
+    /* Don't forget the last field */
+    fields[field_count++] = field_start;
 
-    // Output selected fields
+    /* Output selected fields */
     bool first = true;
     for (int i = 1; i <= field_count; i++) {
-        if (in_ranges(i, &config->ranges)) {
+        if (in_range(config, i)) {
             if (!first) {
-                putchar(config->delimiter);
+                printf("%c", config->delimiter);
             }
             printf("%s", fields[i - 1]);
             first = false;
         }
     }
 
-    // Handle ranges that extend beyond field count
-    if (!first) {
-        putchar('\n');
-    }
-
     free(line_copy);
 }
 
-// Process a file according to config
-void process_file(FILE *fp, const Config *config) {
+/* Process a single line according to the configuration */
+static void process_line(const char *line, const Config *config) {
+    /* Skip empty lines */
+    if (line[0] == '\n' || line[0] == '\0') {
+        return;
+    }
+
+    switch (config->mode) {
+        case MODE_BYTES:
+            cut_bytes(line, config);
+            printf("\n");
+            break;
+        case MODE_CHARS:
+            cut_chars(line, config);
+            printf("\n");
+            break;
+        case MODE_FIELDS:
+            cut_fields(line, config);
+            printf("\n");
+            break;
+        default:
+            break;
+    }
+}
+
+/* Process a file or stdin */
+static int process_file(FILE *fp, const Config *config) {
     char line[MAX_LINE_LENGTH];
 
     while (fgets(line, sizeof(line), fp) != NULL) {
-        if (config->mode == MODE_CHARS) {
-            cut_chars(line, config);
-        } else if (config->mode == MODE_FIELDS) {
-            cut_fields(line, config);
-        }
+        process_line(line, config);
     }
+
+    return 0;
+}
+
+/* Print usage information */
+static void print_usage(const char *progname) {
+    fprintf(stderr, "Usage: %s -b LIST | -c LIST | -f LIST [OPTION]... [FILE]...\n", progname);
+    fprintf(stderr, "Cut out selected portions of each line from FILE(s) to standard output.\n\n");
+    fprintf(stderr, "  -b, --bytes=LIST        select only these bytes\n");
+    fprintf(stderr, "  -c, --characters=LIST   select only these characters\n");
+    fprintf(stderr, "  -f, --fields=LIST       select only these fields\n");
+    fprintf(stderr, "  -d, --delimiter=DELIM   use DELIM instead of TAB for field delimiter\n");
+    fprintf(stderr, "  -s, --only-delimited    do not print lines not containing delimiters\n");
+    fprintf(stderr, "      --help              display this help and exit\n\n");
+    fprintf(stderr, "LIST is made up of one range, or many ranges separated by commas.\n");
+    fprintf(stderr, "Each range is one of:\n");
+    fprintf(stderr, "  N      N'th byte, character or field, counted from 1\n");
+    fprintf(stderr, "  N-     from N'th byte, character or field, to end of line\n");
+    fprintf(stderr, "  N-M    from N'th to M'th (included) byte, character or field\n");
+    fprintf(stderr, "  -M     from first to M'th (included) byte, character or field\n\n");
+    fprintf(stderr, "With no FILE, or when FILE is -, read standard input.\n");
 }
 
 int main(int argc, char *argv[]) {
     Config config = {
         .mode = MODE_NONE,
         .delimiter = '\t',
-        .ranges = {.count = 0},
-        .suppress_no_delim = false
+        .suppress_no_delim = false,
+        .num_ranges = 0,
+        .output_delimiter = NULL
+    };
+
+    static struct option long_options[] = {
+        {"bytes",          required_argument, 0, 'b'},
+        {"characters",     required_argument, 0, 'c'},
+        {"fields",         required_argument, 0, 'f'},
+        {"delimiter",      required_argument, 0, 'd'},
+        {"only-delimited", no_argument,       0, 's'},
+        {"help",           no_argument,       0, 'h'},
+        {0, 0, 0, 0}
     };
 
     int opt;
-    char *fields_list = NULL;
-    char *chars_list = NULL;
+    int option_index = 0;
 
-    while ((opt = getopt(argc, argv, "f:d:c:sh")) != -1) {
+    while ((opt = getopt_long(argc, argv, "b:c:f:d:s", long_options, &option_index)) != -1) {
         switch (opt) {
-            case 'f':
+            case 'b':
                 if (config.mode != MODE_NONE) {
-                    fprintf(stderr, "Error: only one type of list may be specified\n");
+                    fprintf(stderr, "%s: only one type of list may be specified\n", argv[0]);
                     return 1;
                 }
-                config.mode = MODE_FIELDS;
-                fields_list = optarg;
+                config.mode = MODE_BYTES;
+                if (parse_range_list(optarg, &config) < 0) {
+                    fprintf(stderr, "%s: invalid byte list: %s\n", argv[0], optarg);
+                    return 1;
+                }
                 break;
             case 'c':
                 if (config.mode != MODE_NONE) {
-                    fprintf(stderr, "Error: only one type of list may be specified\n");
+                    fprintf(stderr, "%s: only one type of list may be specified\n", argv[0]);
                     return 1;
                 }
                 config.mode = MODE_CHARS;
-                chars_list = optarg;
+                if (parse_range_list(optarg, &config) < 0) {
+                    fprintf(stderr, "%s: invalid character list: %s\n", argv[0], optarg);
+                    return 1;
+                }
+                break;
+            case 'f':
+                if (config.mode != MODE_NONE) {
+                    fprintf(stderr, "%s: only one type of list may be specified\n", argv[0]);
+                    return 1;
+                }
+                config.mode = MODE_FIELDS;
+                if (parse_range_list(optarg, &config) < 0) {
+                    fprintf(stderr, "%s: invalid field list: %s\n", argv[0], optarg);
+                    return 1;
+                }
                 break;
             case 'd':
                 if (strlen(optarg) != 1) {
-                    fprintf(stderr, "Error: delimiter must be a single character\n");
+                    fprintf(stderr, "%s: delimiter must be a single character\n", argv[0]);
                     return 1;
                 }
                 config.delimiter = optarg[0];
@@ -260,40 +330,49 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // Check if mode was specified
+    /* Check that a mode was specified */
     if (config.mode == MODE_NONE) {
-        fprintf(stderr, "Error: you must specify a list of fields or characters\n");
+        fprintf(stderr, "%s: you must specify a list of bytes, characters, or fields\n", argv[0]);
         print_usage(argv[0]);
         return 1;
     }
 
-    // Parse the range list
-    const char *list = (config.mode == MODE_FIELDS) ? fields_list : chars_list;
-    if (!parse_range_list(list, &config.ranges)) {
-        fprintf(stderr, "Error: invalid range list\n");
+    /* Check that delimiter option is only used with fields */
+    if (config.delimiter != '\t' && config.mode != MODE_FIELDS) {
+        fprintf(stderr, "%s: delimiter may be used only with fields\n", argv[0]);
         return 1;
     }
 
-    // Process files or stdin
+    /* Check that suppress option is only used with fields */
+    if (config.suppress_no_delim && config.mode != MODE_FIELDS) {
+        fprintf(stderr, "%s: suppressing non-delimited lines makes sense only with fields\n", argv[0]);
+        return 1;
+    }
+
+    /* Process files or stdin */
+    int status = 0;
     if (optind >= argc) {
-        // No files specified, use stdin
-        process_file(stdin, &config);
+        /* No files specified, read from stdin */
+        status = process_file(stdin, &config);
     } else {
-        // Process each file
+        /* Process each file */
         for (int i = optind; i < argc; i++) {
             FILE *fp;
-
             if (strcmp(argv[i], "-") == 0) {
                 fp = stdin;
             } else {
                 fp = fopen(argv[i], "r");
-                if (fp == NULL) {
-                    fprintf(stderr, "Error: cannot open '%s'\n", argv[i]);
+                if (!fp) {
+                    fprintf(stderr, "%s: %s: %s\n", argv[0], argv[i], strerror(errno));
+                    status = 1;
                     continue;
                 }
             }
 
-            process_file(fp, &config);
+            int result = process_file(fp, &config);
+            if (result != 0) {
+                status = result;
+            }
 
             if (fp != stdin) {
                 fclose(fp);
@@ -301,5 +380,5 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    return 0;
+    return status;
 }

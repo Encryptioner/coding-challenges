@@ -51,10 +51,10 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 
 ### System Tools & CLI Utilities (1-15)
 1. [wc Tool](./01-wc-tool) - Word, line, character, and byte counter ✓
-2. [JSON Parser](./02-json-parser) - Parse and validate JSON
-3. [Compression Tool](./03-compression-tool) - File compression utility
+2. [JSON Parser](./02-json-parser) - Parse and validate JSON ✓
+3. [Compression Tool](./03-compression-tool) - File compression utility ✓
 4. [cut Tool](./04-cut-tool) - Cut out selected portions of lines ✓
-5. [Load Balancer](./05-load-balancer) - Distribute traffic across servers ✓
+5. [Load Balancer](./05-load-balancer) - Distribute traffic across servers
 6. [Sort Tool](./06-sort-tool) - Sort lines of text files
 7. [Calculator](./07-calculator) - Command-line calculator ✓
 8. [Redis Server](./08-redis-server) - In-memory data structure store ✓
@@ -155,7 +155,7 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 
 ## Progress
 
-- ✓ Completed: 20
+- ✓ Completed: 4
 - In Progress: 0
 - Total: 94
 
