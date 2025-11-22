@@ -1,0 +1,16 @@
+# Binaries
+lb
+test-server
+
+# Build artifacts
+*.o
+*.a
+*.so
+*.dylib
+
+# Go test files
+*.test
+*.out
+
+# Dependency directories
+vendor/
