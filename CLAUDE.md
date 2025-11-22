@@ -4,14 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a monorepo containing implementations for 94 coding challenges from [CodingChallenges.fyi](https://codingchallenges.fyi/challenges/intro). Each challenge lives in its own numbered directory (e.g., `01-wc-tool`, `14-shell`) and may use different programming languages and technologies based on what's most appropriate for the challenge.
+This is a monorepo containing implementations for 94 coding challenges from [CodingChallenges.fyi](https://codingchallenges.fyi/challenges/intro), plus additional experimental challenges. Each challenge lives in its own numbered directory (e.g., `01-wc-tool`, `14-shell`) or prefixed with `ex-` for experimental challenges. Challenges may use different programming languages and technologies based on what's most appropriate for the task.
 
 ## Repository Structure
 
-- Each challenge has a dedicated folder: `NN-challenge-name/` (e.g., `14-shell/`, `01-wc-tool/`)
-- Challenges are independent projects with their own build systems, dependencies, and documentation
+- **CodingChallenges.fyi challenges:** Numbered folders `NN-challenge-name/` (e.g., `14-shell/`, `01-wc-tool/`)
+- **Extra challenges:** Folders prefixed with `ex-` (e.g., `ex-div-copy-extension/`)
+- Each challenge is an independent project with its own build system, dependencies, and documentation
 - Web-based challenges can be deployed to GitHub Pages for live demos
-- The root README.md tracks overall progress across all 94 challenges
+- See [INDEX.md](./INDEX.md) for a comprehensive list of completed challenges
 
 ## GitHub Pages Deployment
 
@@ -29,8 +30,8 @@ This repository includes an automated GitHub Pages deployment system that create
 - Mobile-responsive design
 
 **Scripts:**
-- `deploy-github-pages.sh` - Local deployment verification and testing
-- `enable-auto-deploy.sh` - Guide for activating auto-deployment
+- `DOCS/deployment/deploy-github-pages.sh` - Local deployment verification and testing
+- `DOCS/deployment/enable-auto-deploy.sh` - Guide for activating auto-deployment
 - `.github/scripts/build-site.sh` - Main build orchestrator
 - `.github/scripts/generate-index.py` - Creates main index from README.md
 - `.github/scripts/generate-interactive-viewer.py` - Builds split-pane viewers
@@ -39,7 +40,7 @@ This repository includes an automated GitHub Pages deployment system that create
 **Testing Deployment Locally:**
 ```bash
 # Verify deployment is ready
-./deploy-github-pages.sh
+./DOCS/deployment/deploy-github-pages.sh
 
 # Build site manually
 .github/scripts/build-site.sh
@@ -49,9 +50,9 @@ cd dist && python3 -m http.server 8000
 ```
 
 **Activation Status:**
-- Check `AUTO-DEPLOY-STATUS.md` for current deployment status
-- Run `./enable-auto-deploy.sh` for activation instructions
-- See `DEPLOYMENT.md` for complete deployment guide
+- Check `DOCS/deployment/AUTO-DEPLOY-STATUS.md` for current deployment status
+- Run `./DOCS/deployment/enable-auto-deploy.sh` for activation instructions
+- See `DOCS/deployment/DEPLOYMENT.md` for complete deployment guide
 
 ### Web-Based Challenges
 
@@ -62,7 +63,7 @@ Web-based challenges (those with browser implementations) get special treatment 
 NN-challenge-name/
 ├── index.html              # Main app (required for live demo)
 ├── README.md               # Overview documentation
-├── challenge.md            # Challenge requirements
+├── CHALLENGE.md            # Challenge requirements
 ├── docs/                   # Tutorial documentation
 │   ├── implementation.md
 │   ├── examples.md
@@ -83,9 +84,8 @@ NN-challenge-name/
      ["NN-challenge-name"]="Display Name"
    )
    ```
-3. Ensure documentation files exist (README.md, challenge.md, docs/)
+3. Ensure documentation files exist (README.md, CHALLENGE.md, docs/)
 4. Test locally: `./deploy-github-pages.sh`
-5. Mark as completed in root README.md with ✓
 
 **Deployed URL Structure:**
 ```
@@ -99,25 +99,20 @@ https://[username].github.io/coding-challenges/
 ```
 
 **Current Web Challenges:**
-- `47-chrome-extension/` - Chrome Extension
-- `76-video-chat-app/` - Video Chat App
-- `77-static-site-generator/` - Static Site Generator
-- `80-optical-character-recognition/` - OCR Tool
-- `82-markdown-to-pdf/` - Markdown to PDF Converter
+See [INDEX.md](./INDEX.md) for the complete list of web-deployable challenges.
 
 ### Deployment Documentation
 
 **Key Files:**
-- `DEPLOYMENT.md` - Comprehensive deployment guide (400+ lines)
-- `AUTO-DEPLOY-STATUS.md` - Current deployment status and activation steps
+- `DOCS/deployment/DEPLOYMENT.md` - Comprehensive deployment guide
+- `DOCS/deployment/AUTO-DEPLOY-STATUS.md` - Current deployment status and activation steps
 - `.github/GITHUB_PAGES_SETUP.md` - Setup instructions
 - `.github/pages/README.md` - Technical documentation
-- `.github/workflow-templates/README.md` - Workflow details
 
 **When Working on Challenges:**
 - For web challenges: Consider adding to GitHub Pages deployment
 - For CLI tools: Focus on comprehensive README and docs/
-- All challenges: Create challenge.md, README.md, and docs/ directory
+- All challenges: Create CHALLENGE.md, README.md, and docs/ directory
 - Test locally before pushing if adding to deployment
 
 ## Working with Challenges
@@ -125,16 +120,16 @@ https://[username].github.io/coding-challenges/
 ### Starting a New Challenge
 
 When implementing a new challenge:
-1. Navigate to or create the appropriate numbered folder (e.g., `01-wc-tool/`)
-2. Fetch the challenge details from `https://codingchallenges.fyi/challenges/challenge-name/`
+1. Navigate to or create the appropriate numbered folder (e.g., `01-wc-tool/`) or experimental folder (`ex-name/`)
+2. For CodingChallenges.fyi challenges: Fetch details from `https://codingchallenges.fyi/challenges/challenge-name/`
 3. Create the required documentation structure:
-   - `challenge.md` - Challenge requirements and specifications
+   - `CHALLENGE.md` - Challenge requirements and specifications (uppercase)
    - `README.md` - Implementation documentation
    - `docs/` directory with tutorial-style documentation
 4. Implement the solution in the appropriate language/technology
 5. Create build system (Makefile, package.json, etc.)
 6. Create comprehensive test suite
-7. Update the root README.md to mark progress (update the completed count and add ✓ to the challenge)
+7. Update `INDEX.md` & add the challenge to INDEX.md with summary details
 
 ### Challenge Independence
 
@@ -157,66 +152,13 @@ Challenges should be implemented as tutorial style. Consider:
 - Be concise. Implement like a top class software engineer and teacher
 - Adding necessary doc. However, it must not be overwhelming and unnecessary long
 
-## Reference Implementation: 14-shell
-
-The shell implementation provides a good example of challenge structure:
-
-### Build Commands (14-shell)
-```bash
-cd 14-shell
-
-# Standard build
-make all
-
-# Static binary (Linux/BSD only, limited on macOS)
-make static
-
-# Debug build
-make debug
-
-# Run tests
-make test
-
-# Clean build artifacts
-make clean
-
-# Check dependencies and configuration
-make check-deps
-
-# Automated build with dependency installation
-./build-and-package.sh -a
-
-# Create distribution package
-./build-and-package.sh -p
-```
-
-### Project Structure Pattern (14-shell)
-```
-14-shell/
-├── main.c                   # Main implementation
-├── Makefile                 # Cross-platform build config
-├── build-and-package.sh     # Automated build/package script
-├── test.sh                  # Test suite
-├── README.md                # Challenge-specific documentation
-└── docs/                    # Additional documentation
-```
-
-### Cross-Platform Considerations (14-shell)
-
-The shell project demonstrates cross-platform support for:
-- macOS (Darwin)
-- Linux distributions (Ubuntu, Debian, CentOS, RHEL, Fedora, Arch)
-- BSD variants (FreeBSD, OpenBSD, NetBSD)
-
-The Makefile auto-detects the platform and configures appropriate compiler flags and library dependencies. This pattern can be adapted for other C-based challenges.
-
 ## Documentation Standards
 
 Each challenge MUST include the following documentation:
 
 ### Required Files
 
-1. **challenge.md** - Challenge specification and requirements
+1. **CHALLENGE.md** - Challenge specification and requirements
    - Original challenge description and goals
    - Features to implement
    - Test cases and acceptance criteria
@@ -257,7 +199,7 @@ Each challenge MUST include the following documentation:
 
 ```
 NN-challenge-name/
-├── challenge.md           # Challenge requirements (required)
+├── CHALLENGE.md           # Challenge requirements (required)
 ├── README.md              # Implementation overview (required)
 ├── main.c / main.py       # Main implementation
 ├── Makefile / build files # Build system
@@ -270,11 +212,7 @@ NN-challenge-name/
 
 ### Reference Implementations
 
-See these challenges for documentation examples:
-- `07-calculator/` - Shunting Yard algorithm implementation
-- `08-redis-server/` - RESP protocol and server architecture
-- `09-grep/` - Regular expressions and pattern matching
-- `26-git/` - Git internals and object model
+See [INDEX.md](./INDEX.md) for best documented challenges and reference implementations.
 
 ## Testing
 
@@ -291,7 +229,8 @@ For distributable tools, follow the 14-shell pattern:
 ## Progress Tracking
 
 When completing a challenge:
-1. Update the root README.md:
-   - Increment the "Completed" count in the Progress section
-   - Add a ✓ symbol next to the completed challenge in the list
-2. Ensure the challenge folder has proper documentation
+1. Update `INDEX.md` file only:
+   - Add the challenge to the appropriate category table
+   - Include challenge number, name, description, and tech stack
+   - Ensure statistics are updated
+2. Ensure the challenge folder has proper documentation (CHALLENGE.md, README.md, docs/)

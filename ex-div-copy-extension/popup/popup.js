@@ -112,14 +112,14 @@ function setupEventListeners() {
   document.getElementById('help-link').addEventListener('click', (e) => {
     e.preventDefault();
     chrome.tabs.create({
-      url: 'https://github.com/your-repo/div-copy-extension#usage'
+      url: 'https://github.com/your-repo/ex-div-copy-extension#usage'
     });
   });
 
   document.getElementById('feedback-link').addEventListener('click', (e) => {
     e.preventDefault();
     chrome.tabs.create({
-      url: 'https://github.com/your-repo/div-copy-extension/issues'
+      url: 'https://github.com/your-repo/ex-div-copy-extension/issues'
     });
   });
 

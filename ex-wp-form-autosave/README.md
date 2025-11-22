@@ -77,7 +77,7 @@
 ### Method 2: Manual Installation
 
 1. Download this repository
-2. Upload the `wp-form-autosave` folder to `/wp-content/plugins/`
+2. Upload the `ex-wp-form-autosave` folder to `/wp-content/plugins/`
 3. Activate the plugin through the **Plugins** menu in WordPress
 4. Go to **Settings → Form AutoSave** to configure (optional)
 
@@ -86,7 +86,7 @@
 ```bash
 cd wp-content/plugins/
 git clone https://github.com/your-repo/coding-challenges.git
-cd coding-challenges/wp-form-autosave
+cd coding-challenges/ex-wp-form-autosave
 ```
 
 Then activate in WordPress admin.
@@ -385,9 +385,9 @@ This program is free software; you can redistribute it and/or modify it under th
 
 ## 🙏 Support
 
-- 📖 [Documentation](https://github.com/your-repo/wp-form-autosave)
-- 🐛 [Report Issues](https://github.com/your-repo/wp-form-autosave/issues)
-- 💡 [Feature Requests](https://github.com/your-repo/wp-form-autosave/issues)
+- 📖 [Documentation](https://github.com/your-repo/ex-wp-form-autosave)
+- 🐛 [Report Issues](https://github.com/your-repo/ex-wp-form-autosave/issues)
+- 💡 [Feature Requests](https://github.com/your-repo/ex-wp-form-autosave/issues)
 - ⭐ [Rate on WordPress.org](https://wordpress.org/plugins/) (when published)
 
 ---

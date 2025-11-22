@@ -241,7 +241,6 @@ pip install -r .github/requirements.txt
 
 ### Challenge Not Appearing
 
-- Mark with ✓ in root README.md
 - Add to `WEB_CHALLENGES` in build script (for live demos)
 - Ensure `index.html` exists (for web demos)
 - Verify challenge folder naming matches README.md

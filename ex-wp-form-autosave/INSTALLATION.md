@@ -14,7 +14,7 @@ Choose one of these methods:
 **Option B: Clone Repository**
 ```bash
 git clone https://github.com/your-repo/coding-challenges.git
-cd coding-challenges/wp-form-autosave
+cd coding-challenges/ex-wp-form-autosave
 ```
 
 ### Step 2: Install in WordPress
@@ -31,7 +31,7 @@ cd coding-challenges/wp-form-autosave
 **Via FTP/File Manager:**
 
 1. Unzip the downloaded file
-2. Locate the `wp-form-autosave` folder
+2. Locate the `ex-wp-form-autosave` folder
 3. Upload to `/wp-content/plugins/` directory
 4. Go to WordPress admin → **Plugins**
 5. Find "Form AutoSave & Recovery" and click **Activate**
@@ -63,7 +63,7 @@ Before installing, ensure you have:
 
 1. **Download the Plugin**
    - Download from GitHub or WordPress.org
-   - You should have a file named `form-autosave.zip` or `wp-form-autosave.zip`
+   - You should have a file named `form-autosave.zip` or `ex-wp-form-autosave.zip`
 
 2. **Access WordPress Admin**
    - Log in to your WordPress site
@@ -103,7 +103,7 @@ Before installing, ensure you have:
 
    # Extract
    unzip main.zip
-   cd coding-challenges-main/wp-form-autosave
+   cd coding-challenges-main/ex-wp-form-autosave
    ```
 
 2. **Connect via FTP**
@@ -116,10 +116,10 @@ Before installing, ensure you have:
    ```
 
 4. **Upload Plugin Folder**
-   - Upload the entire `wp-form-autosave` folder
+   - Upload the entire `ex-wp-form-autosave` folder
    - Ensure folder structure is:
      ```
-     /wp-content/plugins/wp-form-autosave/
+     /wp-content/plugins/ex-wp-form-autosave/
      ├── form-autosave.php
      ├── assets/
      │   ├── js/
@@ -130,8 +130,8 @@ Before installing, ensure you have:
 
 5. **Set Permissions** (if needed)
    ```bash
-   chmod 755 wp-form-autosave
-   chmod 644 wp-form-autosave/form-autosave.php
+   chmod 755 ex-wp-form-autosave
+   chmod 644 ex-wp-form-autosave/form-autosave.php
    ```
 
 6. **Activate in WordPress**
@@ -152,13 +152,13 @@ Before installing, ensure you have:
 2. **Clone Repository**
    ```bash
    git clone https://github.com/your-repo/coding-challenges.git temp
-   mv temp/wp-form-autosave ./
+   mv temp/ex-wp-form-autosave ./
    rm -rf temp
    ```
 
 3. **Activate Plugin**
    ```bash
-   wp plugin activate wp-form-autosave
+   wp plugin activate ex-wp-form-autosave
    ```
 
 4. **Verify**
@@ -168,7 +168,7 @@ Before installing, ensure you have:
 
    You should see:
    ```
-   wp-form-autosave  1.0.0  active
+   ex-wp-form-autosave  1.0.0  active
    ```
 
 ### Method 4: Composer (Advanced)
@@ -186,7 +186,7 @@ Add to your `composer.json`:
     }
   ],
   "require": {
-    "your-repo/wp-form-autosave": "^1.0"
+    "your-repo/ex-wp-form-autosave": "^1.0"
   }
 }
 ```
@@ -194,7 +194,7 @@ Add to your `composer.json`:
 Then run:
 ```bash
 composer install
-wp plugin activate wp-form-autosave
+wp plugin activate ex-wp-form-autosave
 ```
 
 ---
@@ -265,7 +265,7 @@ After activation, configure the plugin:
 **Problem:** Plugin doesn't show up in Plugins list
 
 **Solutions:**
-1. Check folder structure - must be `/wp-content/plugins/wp-form-autosave/`
+1. Check folder structure - must be `/wp-content/plugins/ex-wp-form-autosave/`
 2. Ensure `form-autosave.php` is in the root of plugin folder
 3. Check file permissions (755 for folders, 644 for files)
 4. Reload the Plugins page (Ctrl+F5)
@@ -371,7 +371,7 @@ If you want to remove ALL traces:
 cd /var/www/html
 
 # Remove plugin files
-rm -rf wp-content/plugins/wp-form-autosave
+rm -rf wp-content/plugins/ex-wp-form-autosave
 
 # Remove database options
 wp option delete form_autosave_options
@@ -424,13 +424,13 @@ For developers who want to contribute:
 ```bash
 # Clone repository
 git clone https://github.com/your-repo/coding-challenges.git
-cd coding-challenges/wp-form-autosave
+cd coding-challenges/ex-wp-form-autosave
 
 # Symlink to WordPress plugins directory
-ln -s $(pwd) /path/to/wordpress/wp-content/plugins/wp-form-autosave
+ln -s $(pwd) /path/to/wordpress/wp-content/plugins/ex-wp-form-autosave
 
 # Activate via WP-CLI
-wp plugin activate wp-form-autosave
+wp plugin activate ex-wp-form-autosave
 
 # Enable debug mode
 wp option patch update form_autosave_options debug_mode 1
