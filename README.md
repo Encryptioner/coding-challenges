@@ -1,6 +1,18 @@
 # Coding Challenges
 
-A comprehensive collection of 94 coding challenges from [CodingChallenges.fyi](https://codingchallenges.fyi/challenges/intro). Each challenge is designed to help build practical programming skills by recreating common tools, applications, and systems from scratch.
+A comprehensive collection of coding challenges from [CodingChallenges.fyi](https://codingchallenges.fyi/challenges/intro). Each challenge is designed to help build practical programming skills by recreating common tools, applications, and systems from scratch.
+
+In addition to the coding challenges from **CodingChallenges.fyi**, there are some extra challenges are done for experiment and learning purpose
+
+## Statics
+
+### Progress on **CodingChallenges.fyi**
+- ✓ Completed: 23
+- Total: 94
+
+### Progress on **Extra Challenges**
+- ✓ Completed: 2
+- Total: 2
 
 ## About
 
@@ -12,42 +24,12 @@ This repository contains implementations for various coding challenges that cove
 - Games and interactive applications
 - DevOps and infrastructure tools
 
-## 🌐 GitHub Pages Deployment
-
-This repository includes a complete GitHub Pages deployment system with interactive documentation viewers!
-
-**🚀 Quick Deploy:** Run `./deploy-github-pages.sh` to verify deployment readiness and get step-by-step instructions.
-
-**Features:**
-- 📖 Interactive split-pane documentation viewer (docs + live demos side-by-side)
-- 🎮 Live web-based implementations (#47, #76, #77, #80, #82)
-- 📱 Mobile-responsive design
-- 🔍 Filterable challenge grid
-- 📋 One-click code copying
-- 📚 Comprehensive tutorials
-
-**Deploy Steps:**
-1. Run `./deploy-github-pages.sh` to test locally
-2. Enable GitHub Pages in repository Settings
-3. Add workflow file to `.github/workflows/` (see [DEPLOYMENT.md](./DEPLOYMENT.md))
-4. Visit `https://[username].github.io/coding-challenges/`
-
-**Deployment Status:**
-- ⚠️ **Not Active Yet** - Requires workflow file on master branch (see [AUTO-DEPLOY-STATUS.md](./AUTO-DEPLOY-STATUS.md))
-- Run `./enable-auto-deploy.sh` for activation guide
-- Once active: Every push to master automatically deploys!
-
-**Documentation:**
-- [AUTO-DEPLOY-STATUS.md](./AUTO-DEPLOY-STATUS.md) - **Start here!** Current status & activation steps
-- [DEPLOYMENT.md](./DEPLOYMENT.md) - Complete deployment guide (400+ lines)
-- [.github/GITHUB_PAGES_SETUP.md](./.github/GITHUB_PAGES_SETUP.md) - Setup instructions
-- [.github/pages/README.md](./.github/pages/README.md) - Technical documentation
-
 ## Repository Structure
 
 Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) containing the implementation and related files.
+Extra challenges are it's own folder starting with `ex` (e.g., `ex-div-copy-extension`, `ex-wp-form-autosave`) containing the implementation and related files.
 
-## Challenges
+## Challenges from **CodingChallenges.fyi**
 
 ### System Tools & CLI Utilities (1-15)
 1. [wc Tool](./01-wc-tool) - Word, line, character, and byte counter ✓
@@ -153,11 +135,37 @@ Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) cont
 93. [Rate Limiter](./93-rate-limiter) - API rate limiting with multiple algorithms ✓
 94. [Forth Interpreter](./94-forth-interpreter) - Stack-based language interpreter
 
-## Progress
+## 🌐 GitHub Pages Deployment
 
-- ✓ Completed: 4
-- In Progress: 0
-- Total: 94
+This repository includes a complete GitHub Pages deployment system with interactive documentation viewers!
+
+**🚀 Quick Deploy:** Run `./deploy-github-pages.sh` to verify deployment readiness and get step-by-step instructions.
+
+**Features:**
+- 📖 Interactive split-pane documentation viewer (docs + live demos side-by-side)
+- 🎮 Live web-based implementations (#47, #76, #77, #80, #82)
+- 📱 Mobile-responsive design
+- 🔍 Filterable challenge grid
+- 📋 One-click code copying
+- 📚 Comprehensive tutorials
+
+**Deploy Steps:**
+1. Run `./deploy-github-pages.sh` to test locally
+2. Enable GitHub Pages in repository Settings
+3. Add workflow file to `.github/workflows/` (see [DEPLOYMENT.md](./DEPLOYMENT.md))
+4. Visit `https://[username].github.io/coding-challenges/`
+
+**Deployment Status:**
+- ⚠️ **Not Active Yet** - Requires workflow file on master branch (see [AUTO-DEPLOY-STATUS.md](./AUTO-DEPLOY-STATUS.md))
+- Run `./enable-auto-deploy.sh` for activation guide
+- Once active: Every push to master automatically deploys!
+
+**Documentation:**
+- [AUTO-DEPLOY-STATUS.md](./AUTO-DEPLOY-STATUS.md) - **Start here!** Current status & activation steps
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - Complete deployment guide (400+ lines)
+- [.github/GITHUB_PAGES_SETUP.md](./.github/GITHUB_PAGES_SETUP.md) - Setup instructions
+- [.github/pages/README.md](./.github/pages/README.md) - Technical documentation
+
 
 ## Deployment & Scripts
 
@@ -208,3 +216,10 @@ Each challenge folder contains its own implementation and documentation. Navigat
 ## License
 
 This repository is for educational purposes. Individual implementations may have their own licenses.
+
+## Find Me
+- [Website](https://encryptioner.github.io)
+- [Linkedin](https://www.linkedin.com/in/mir-mursalin-ankur)
+- [Github](https://github.com/Encryptioner)
+- [X (Twitter)](https://twitter.com/AnkurMursalin)
+- [Nerddevs](https://nerddevs.com/author/ankur/)
