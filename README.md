@@ -147,72 +147,19 @@ This repository contains implementations for various coding challenges that cove
 
 ## 🌐 GitHub Pages Deployment
 
-This repository includes a complete GitHub Pages deployment system with interactive documentation viewers!
+This repository auto-deploys to GitHub Pages with interactive documentation viewers and live demos.
 
-**🚀 Quick Deploy:** Run `./DOCS/deployment/deploy-github-pages.sh` to verify deployment readiness and get step-by-step instructions.
-
-**Features:**
-- 📖 Interactive split-pane documentation viewer (docs + live demos side-by-side)
-- 🎮 Live web-based implementations (#47, #76, #77, #80, #82)
-- 📱 Mobile-responsive design
-- 🔍 Filterable challenge grid
-- 📋 One-click code copying
-- 📚 Comprehensive tutorials
-
-**Deploy Steps:**
-1. Run `./DOCS/deployment/deploy-github-pages.sh` to test locally
-2. Enable GitHub Pages in repository Settings
-3. Add workflow file to `.github/workflows/` (see [DEPLOYMENT.md](./DOCS/deployment/DEPLOYMENT.md))
-4. Visit `https://[username].github.io/coding-challenges/`
-
-**Deployment Status:**
-- ⚠️ **Not Active Yet** - Requires workflow file on master branch (see [AUTO-DEPLOY-STATUS.md](./DOCS/deployment/AUTO-DEPLOY-STATUS.md))
-- Run `./DOCS/deployment/enable-auto-deploy.sh` for activation guide
-- Once active: Every push to master automatically deploys!
-
-**Documentation:**
-- [AUTO-DEPLOY-STATUS.md](./DOCS/deployment/AUTO-DEPLOY-STATUS.md) - **Start here!** Current status & activation steps
-- [DEPLOYMENT.md](./DOCS/deployment/DEPLOYMENT.md) - Complete deployment guide (400+ lines)
-- [.github/GITHUB_PAGES_SETUP.md](./.github/GITHUB_PAGES_SETUP.md) - Setup instructions
-- [.github/pages/README.md](./.github/pages/README.md) - Technical documentation
-
-
-## Deployment & Scripts
-
-Quick reference for deployment-related commands:
-
-### Local Testing
+**Quick Start:**
 ```bash
-# Test deployment readiness (recommended first step)
-./DOCS/deployment/deploy-github-pages.sh
-
-# Check auto-deployment status
-cat AUTO-DEPLOY-STATUS.md
-
-# View activation guide
-./DOCS/deployment/enable-auto-deploy.sh
-
-# Build site manually
-.github/scripts/build-site.sh
-
-# Preview locally
-cd dist && python3 -m http.server 8000
+./DOCS/deployment/deploy-github-pages.sh  # Test locally
 ```
 
-### Auto-Deployment
-- **Status:** ⚠️ Not active yet (see [AUTO-DEPLOY-STATUS.md](./DOCS/deployment/AUTO-DEPLOY-STATUS.md))
-- **Activate:** Add workflow file to `.github/workflows/` on master branch
-- **After Activation:** Every push to master automatically deploys
-- **URL:** `https://[username].github.io/coding-challenges/`
+**Features:** Interactive split-pane viewers, filterable challenge grid, live web demos, mobile-responsive design
 
-### Key Files
-| File | Purpose |
-|------|---------|
-| `deploy-github-pages.sh` | Verify deployment readiness & test locally |
-| `enable-auto-deploy.sh` | Interactive activation guide |
-| `AUTO-DEPLOY-STATUS.md` | Current deployment status |
-| `DEPLOYMENT.md` | Complete deployment documentation |
-| `CLAUDE.md` | Repository guide for Claude Code |
+**Documentation:**
+- [SETUP.md](./DOCS/deployment/SETUP.md) - First-time setup
+- [WORKFLOW.md](./DOCS/deployment/WORKFLOW.md) - Daily workflow
+- [DEPLOYMENT.md](./DOCS/deployment/DEPLOYMENT.md) - Complete guide
 
 ## Getting Started
 
