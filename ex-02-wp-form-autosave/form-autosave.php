@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Form AutoSave & Recovery
- * Plugin URI: https://github.com/your-repo/ex-wp-form-autosave
+ * Plugin URI: https://github.com/your-repo/ex-02-wp-form-autosave
  * Description: Never lose form data again! Automatically saves form progress in user's browser and offers to restore on page reload. Works with Contact Form 7, WPForms, Gravity Forms, and any HTML form.
  * Version: 1.0.0
  * Author: Your Name

@@ -73,7 +73,7 @@ This section covers the Chrome Extension that users install to copy content from
 1. **Download the extension**
    ```bash
    git clone https://github.com/your-repo/coding-challenges
-   cd coding-challenges/ex-div-copy-extension
+   cd coding-challenges/ex-01-div-copy-extension
    ```
 
 2. **Generate icons** (optional, placeholders included)
@@ -93,7 +93,7 @@ This section covers the Chrome Extension that users install to copy content from
    - Open Chrome and go to `chrome://extensions/`
    - Enable "Developer mode" (toggle in top right)
    - Click "Load unpacked"
-   - Select the `ex-div-copy-extension` folder
+   - Select the `ex-01-div-copy-extension` folder
    - Extension icon should appear in your toolbar!
 
 ## 🚀 Usage

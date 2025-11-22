@@ -94,7 +94,7 @@ Never lose form data again! Automatically saves form progress in browser and off
 = FTP Installation =
 
 1. Download and extract the plugin
-2. Upload `ex-wp-form-autosave` folder to `/wp-content/plugins/`
+2. Upload `ex-02-wp-form-autosave` folder to `/wp-content/plugins/`
 3. Activate the plugin through the Plugins menu
 4. Go to Settings → Form AutoSave to configure (optional)
 
@@ -181,7 +181,7 @@ This plugin stores form data in the user's browser using localStorage. No data i
 == Additional Information ==
 
 * For support, visit: https://github.com/your-repo/coding-challenges/issues
-* For documentation, visit: https://github.com/your-repo/coding-challenges/tree/main/ex-wp-form-autosave
+* For documentation, visit: https://github.com/your-repo/coding-challenges/tree/main/ex-02-wp-form-autosave
 * For feature requests, visit: https://github.com/your-repo/coding-challenges/issues
 
 == Developer Notes ==

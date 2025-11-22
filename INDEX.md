@@ -75,8 +75,8 @@ This index provides a comprehensive list of all completed challenges in the repo
 
 | Challenge | Description | Language/Tech |
 |-----------|-------------|---------------|
-| ✓ | [Div Copy Extension](./ex-div-copy-extension) | Browser extension for copying div content | JavaScript/HTML/CSS |
-| ✓ | [WordPress Form Autosave](./ex-wp-form-autosave) | Auto-save functionality for WordPress forms | JavaScript/PHP |
+| ✓ | [01 - Div Copy Extension](./ex-01-div-copy-extension) | Browser extension for copying div content | JavaScript/HTML/CSS |
+| ✓ | [02 - WordPress Form Autosave](./ex-02-wp-form-autosave) | Auto-save functionality for WordPress forms | JavaScript/PHP |
 
 ---
 

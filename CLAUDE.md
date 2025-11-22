@@ -9,7 +9,7 @@ This is a monorepo containing implementations for 94 coding challenges from [Cod
 ## Repository Structure
 
 - **CodingChallenges.fyi challenges:** Numbered folders `NN-challenge-name/` (e.g., `14-shell/`, `01-wc-tool/`)
-- **Extra challenges:** Folders prefixed with `ex-` (e.g., `ex-div-copy-extension/`)
+- **Extra challenges:** Folders prefixed with `ex-NN-challenge-name/` (e.g., `ex-01-div-copy-extension/`)
 - Each challenge is an independent project with its own build system, dependencies, and documentation
 - Web-based challenges can be deployed to GitHub Pages for live demos
 - See [INDEX.md](./INDEX.md) for a comprehensive list of completed challenges
@@ -49,10 +49,10 @@ This repository includes an automated GitHub Pages deployment system that create
 cd dist && python3 -m http.server 8000
 ```
 
-**Activation Status:**
-- Check `DOCS/deployment/AUTO-DEPLOY-STATUS.md` for current deployment status
-- Run `./DOCS/deployment/enable-auto-deploy.sh` for activation instructions
-- See `DOCS/deployment/DEPLOYMENT.md` for complete deployment guide
+**Deployment Documentation:**
+- `DOCS/deployment/SETUP.md` - First-time setup and activation
+- `DOCS/deployment/WORKFLOW.md` - Quick workflow reference
+- `DOCS/deployment/DEPLOYMENT.md` - Complete deployment guide
 
 ### Web-Based Challenges
 
@@ -104,10 +104,10 @@ See [INDEX.md](./INDEX.md) for the complete list of web-deployable challenges.
 ### Deployment Documentation
 
 **Key Files:**
-- `DOCS/deployment/DEPLOYMENT.md` - Comprehensive deployment guide
-- `DOCS/deployment/AUTO-DEPLOY-STATUS.md` - Current deployment status and activation steps
-- `.github/GITHUB_PAGES_SETUP.md` - Setup instructions
-- `.github/pages/README.md` - Technical documentation
+- `DOCS/deployment/SETUP.md` - First-time setup and activation
+- `DOCS/deployment/WORKFLOW.md` - Daily workflow reference
+- `DOCS/deployment/DEPLOYMENT.md` - Complete deployment guide
+- `.github/README.md` - GitHub configuration overview
 
 **When Working on Challenges:**
 - For web challenges: Consider adding to GitHub Pages deployment
@@ -120,7 +120,7 @@ See [INDEX.md](./INDEX.md) for the complete list of web-deployable challenges.
 ### Starting a New Challenge
 
 When implementing a new challenge:
-1. Navigate to or create the appropriate numbered folder (e.g., `01-wc-tool/`) or experimental folder (`ex-name/`)
+1. Navigate to or create the appropriate numbered folder (e.g., `01-wc-tool/`) or experimental folder (`ex-NN-challenge-name/`)
 2. For CodingChallenges.fyi challenges: Fetch details from `https://codingchallenges.fyi/challenges/challenge-name/`
 3. Create the required documentation structure:
    - `CHALLENGE.md` - Challenge requirements and specifications (uppercase)

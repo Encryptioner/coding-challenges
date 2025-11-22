@@ -31,7 +31,7 @@ This repository contains implementations for various coding challenges that cove
 ## Repository Structure
 
 - Each challenge has its own numbered folder (e.g., `01-wc-tool`, `14-shell`) containing the implementation and related files.
-- Extra challenges are it's own folder starting with `ex` (e.g., `ex-div-copy-extension`, `ex-ex-wp-form-autosave`) containing the implementation and related files.
+- Extra challenges are it's own folder starting with `ex` (e.g., `ex-01-div-copy-extension`, `ex-ex-02-wp-form-autosave`) containing the implementation and related files.
 - In each challenge, there will have `CHALLENGE.md` file, `README.md` file, necessary `docs` directory and all other implementation files. 
 
 ## Challenges from **CodingChallenges.fyi**
@@ -139,6 +139,11 @@ This repository contains implementations for various coding challenges that cove
 92. [LOC Counter](./92-loc-counter) - Own version of the tools cloc, sloc and scc
 93. [Rate Limiter](./93-rate-limiter) - API rate limiting with multiple algorithms
 94. [Forth Interpreter](./94-forth-interpreter) - Stack-based language interpreter
+
+## Extra Challenges
+1. [Div Copy Extension](./ex-01-div-copy-extension) - Browser extension for copying div content
+2. [WordPress Form Autosave](./ex-02-wp-form-autosave) - Auto-save functionality for WordPress forms
+
 
 ## 🌐 GitHub Pages Deployment
 
