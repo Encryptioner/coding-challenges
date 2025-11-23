@@ -6,9 +6,9 @@ Auto-deployment is configured but not activated.
 
 ## What Activation Does
 
-**Before**: Push to main → Nothing happens (manual deployment required)
+**Before**: Push to master → Nothing happens (manual deployment required)
 
-**After**: Push to main → Auto-builds → Auto-deploys → Site updates (zero manual work)
+**After**: Push to master → Auto-builds → Auto-deploys → Site updates (zero manual work)
 
 ## Activation Steps
 
@@ -22,21 +22,21 @@ Auto-deployment is configured but not activated.
 
 **Method A: GitHub Web (Easiest)**
 1. Go to repo on GitHub
-2. Switch to `main` branch
+2. Switch to `master` branch
 3. Navigate to `.github/workflows/` (create if needed)
 4. Click "Add file" → "Create new file"
 5. Name: `deploy-pages.yml`
 6. Copy content from: `.github/workflow-templates/deploy-pages.yml`
-7. Commit to main
+7. Commit to master
 
 **Method B: Command Line**
 ```bash
-# On main branch
+# On master branch
 mkdir -p .github/workflows
 cp .github/workflow-templates/deploy-pages.yml .github/workflows/
 git add .github/workflows/deploy-pages.yml
 git commit -m "feat: activate auto-deployment"
-git push origin main
+git push origin master
 ```
 
 ### 3. Verify
@@ -47,7 +47,7 @@ git push origin main
 
 ## What Gets Deployed
 
-Every push to `main` auto-deploys:
+Every push to `master` auto-deploys:
 - Main index (filterable grid of all challenges)
 - Interactive viewers (5 web challenges with docs + live demos)
 - Documentation (all challenge docs converted to HTML)
@@ -57,13 +57,19 @@ Every push to `main` auto-deploys:
 
 **Before activation** (local test):
 ```bash
+# Install dependencies in virtual environment
+python3 -m venv venv
+source venv/bin/activate  # macOS/Linux
+pip install -r .github/requirements.txt
+
+# Run test
 ./DOCS/deployment/deploy-github-pages.sh
 ```
 
 **After activation** (verify auto-deploy):
 ```bash
 git commit --allow-empty -m "test: verify auto-deployment"
-git push origin main
+git push origin master
 # Check Actions tab
 ```
 
@@ -71,13 +77,18 @@ git push origin main
 
 | Issue | Fix |
 |-------|-----|
-| Workflow not running | Ensure workflow file is on main branch |
+| Workflow not running | Ensure workflow file is on master branch |
 | Build fails | Check Actions logs, verify Python 3.11+ |
 | Site shows 404 | Wait 2-3 minutes, check Pages is enabled |
 
 ## Quick Reference
 
 ```bash
+# Setup virtual environment
+python3 -m venv venv
+source venv/bin/activate
+pip install -r .github/requirements.txt
+
 # Test deployment locally
 ./DOCS/deployment/deploy-github-pages.sh
 

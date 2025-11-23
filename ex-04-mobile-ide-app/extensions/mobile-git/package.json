@@ -1,0 +1,37 @@
+{
+  "name": "mobile-git-extension",
+  "version": "1.0.0",
+  "description": "Mobile-optimized Git interface with PR review, diff viewer, and commit management",
+  "main": "lib/browser/mobile-git-frontend-module.js",
+  "types": "lib/browser/mobile-git-frontend-module.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "clean": "rimraf lib"
+  },
+  "dependencies": {
+    "@theia/core": "^1.45.0",
+    "@theia/git": "^1.45.0",
+    "@theia/scm": "^1.45.0",
+    "@theia/filesystem": "^1.45.0",
+    "@theia/monaco": "^1.45.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "styled-components": "^6.1.0",
+    "inversify": "^6.0.0",
+    "isomorphic-git": "^1.25.0",
+    "@octokit/rest": "^20.0.2"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.3.0",
+    "rimraf": "^5.0.0"
+  },
+  "theiaExtensions": [
+    {
+      "frontend": "lib/browser/mobile-git-frontend-module"
+    }
+  ]
+}

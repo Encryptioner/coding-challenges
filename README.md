@@ -13,8 +13,8 @@ In addition to the coding challenges from **CodingChallenges.fyi**, there are so
 
 ### Progress on **Extra Challenges**
 - Completed: 2
-- Total: 2
-- Progress: 100%
+- Total: 4
+- Progress: 50%
 
 ### Check completed challenge list in [Index.md](./INDEX.md)
 
@@ -143,6 +143,8 @@ This repository contains implementations for various coding challenges that cove
 ## Extra Challenges
 1. [Div Copy Extension](./ex-01-div-copy-extension) - Browser extension for copying div content
 2. [WordPress Form Autosave](./ex-02-wp-form-autosave) - Auto-save functionality for WordPress forms
+3. [Google Drive Downloader](./ex-03-google-drive-downloader/) - Download files from a google drive folder link
+4. [Mobile IDE App](./ex-04-mobile-ide-app/) - IDE for mobile use
 
 
 ## 🌐 GitHub Pages Deployment

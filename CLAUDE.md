@@ -77,13 +77,7 @@ NN-challenge-name/
 **Adding a Web Challenge to Deployment:**
 
 1. Implement the challenge with an `index.html` file
-2. Add to `.github/scripts/build-site.sh`:
-   ```bash
-   declare -A WEB_CHALLENGES=(
-     # ... existing challenges ...
-     ["NN-challenge-name"]="Display Name"
-   )
-   ```
+2. Add to `INDEX.md` file's `Web-Deployable Challenges` section after completion
 3. Ensure documentation files exist (README.md, CHALLENGE.md, docs/)
 4. Test locally: `./deploy-github-pages.sh`
 
