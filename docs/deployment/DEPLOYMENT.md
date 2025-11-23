@@ -15,8 +15,28 @@ This repository auto-deploys to GitHub Pages, creating an interactive showcase o
 
 ## Quick Start
 
+### Install Dependencies
+
+Use a virtual environment for Python dependencies:
+
+```bash
+# Create virtual environment
+python3 -m venv venv
+
+# Activate it
+source venv/bin/activate  # On macOS/Linux
+venv\Scripts\activate     # On Windows
+
+# Install dependencies
+pip install -r .github/requirements.txt
+```
+
 ### Local Testing
 ```bash
+# Activate venv first
+source venv/bin/activate
+
+# Run test script
 ./DOCS/deployment/deploy-github-pages.sh
 ```
 
@@ -155,6 +175,9 @@ pip install -r .github/requirements.txt
 ### Local Testing
 
 ```bash
+# Activate virtual environment
+source venv/bin/activate
+
 # Build site
 .github/scripts/build-site.sh
 

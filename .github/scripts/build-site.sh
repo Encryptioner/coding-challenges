@@ -16,6 +16,9 @@ cp -r .github/pages/assets/* "$DIST_DIR/assets/" 2>/dev/null || true
 # Copy 404 page
 cp .github/pages/404.html "$DIST_DIR/" 2>/dev/null || true
 
+# Copy favicon
+cp .github/pages/favicon.svg "$DIST_DIR/" 2>/dev/null || true
+
 # Create .nojekyll file (disable Jekyll processing)
 touch "$DIST_DIR/.nojekyll"
 

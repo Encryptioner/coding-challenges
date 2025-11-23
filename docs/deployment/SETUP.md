@@ -57,6 +57,12 @@ Every push to `main` auto-deploys:
 
 **Before activation** (local test):
 ```bash
+# Install dependencies in virtual environment
+python3 -m venv venv
+source venv/bin/activate  # macOS/Linux
+pip install -r .github/requirements.txt
+
+# Run test
 ./DOCS/deployment/deploy-github-pages.sh
 ```
 
@@ -78,6 +84,11 @@ git push origin main
 ## Quick Reference
 
 ```bash
+# Setup virtual environment
+python3 -m venv venv
+source venv/bin/activate
+pip install -r .github/requirements.txt
+
 # Test deployment locally
 ./DOCS/deployment/deploy-github-pages.sh
 

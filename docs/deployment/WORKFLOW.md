@@ -15,6 +15,25 @@ This repo auto-deploys to GitHub Pages, creating:
 - Git
 - GitHub repo with Pages enabled
 
+### Install Python Dependencies
+
+Use a virtual environment for isolation:
+
+```bash
+# Create virtual environment
+python3 -m venv venv
+
+# Activate it
+source venv/bin/activate  # On macOS/Linux
+# OR
+venv\Scripts\activate     # On Windows
+
+# Install dependencies
+pip install -r .github/requirements.txt
+```
+
+**Note**: Always activate venv before running build scripts.
+
 ## One-Time Setup
 
 ### 1. Enable GitHub Pages
@@ -43,6 +62,9 @@ git push origin main
 Test before deploying:
 
 ```bash
+# Activate virtual environment first
+source venv/bin/activate
+
 # Quick test
 ./DOCS/deployment/deploy-github-pages.sh
 

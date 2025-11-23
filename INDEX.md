@@ -8,7 +8,7 @@ This index provides a comprehensive list of all completed challenges in the repo
 - **Completed:** 24 out of 94
 - **Progress:** 25.5%
 
-### Extra Challenges
+### Progress on Extra Challenges
 - **Completed:** 2 out of 2
 - **Progress:** 100%
 
