@@ -52,8 +52,8 @@ See [SETUP.md](./SETUP.md) for activation instructions.
 
 **Summary:**
 1. Enable GitHub Pages (Settings → Pages → Source: GitHub Actions)
-2. Add workflow file to main branch
-3. Push to main → site auto-deploys
+2. Add workflow file to master branch
+3. Push to master → site auto-deploys
 
 ## Site Structure
 
@@ -87,18 +87,13 @@ NN-challenge-name/
 └── static/                 # Assets
 ```
 
-2. **Register in build script** (`.github/scripts/build-site.sh`):
-```bash
-declare -A WEB_CHALLENGES=(
-  ["NN-challenge-name"]="Display Name"
-)
-```
+2. Add to `INDEX.md` file's `Web-Deployable Challenges` section after completion
 
 3. **Deploy**:
 ```bash
 git add .
 git commit -m "feat: add NN-challenge-name"
-git push origin main
+git push origin master
 ```
 
 ### Documentation-Only Challenge
@@ -120,7 +115,7 @@ Just create `README.md` and `docs/` folder. The build script auto-converts markd
 - `docs-viewer.js` - Split-pane functionality
 
 ### Workflow (`.github/workflows/deploy-pages.yml`)
-- Triggers on push to main
+- Triggers on push to master
 - Builds site (30-60 seconds)
 - Deploys to GitHub Pages
 - Updates live site automatically
@@ -166,11 +161,12 @@ pip install -r .github/requirements.txt
 
 | Issue | Solution |
 |-------|----------|
-| Workflow not running | Ensure workflow file is on main branch, Pages enabled |
+| Workflow not running | Ensure workflow file is on master branch, Pages enabled |
 | Build fails | Check Actions logs, verify dependencies installed |
-| Challenge not appearing | Add to `WEB_CHALLENGES`, ensure `index.html` exists |
+| Live Demo not appearing | Add to `Web-Deployable Challenges` of `INDEX.md`, ensure `index.html` exists |
 | 404 errors | Check `.nojekyll` exists, verify folder names |
 | Changes not showing | Clear browser cache, check Actions tab |
+| Testing github page and no live demo | Install the dependencies as documented in the deployment workflow and run `.github/scripts/build-site.sh`. Then test locally with `cd dist && python3 -m http.server 8000` |
 
 ### Local Testing
 

@@ -100,8 +100,10 @@ def generate_viewer_html(challenge_dir, challenge_name):
     nav_items = []
     for doc in docs_files:
         icon_svg = get_icon_svg(doc['icon'])
+        # Convert .md to .html for the data-doc attribute
+        html_path = doc['file'].replace('.md', '.html')
         nav_items.append(f'''
-            <a href="#" class="docs-nav-item" data-doc="{doc['file']}">
+            <a href="#" class="docs-nav-item" data-doc="{html_path}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     {icon_svg}
                 </svg>

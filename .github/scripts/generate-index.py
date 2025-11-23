@@ -55,61 +55,97 @@ def get_completed_challenges():
     return completed
 
 def parse_extra_challenges():
-    """Parse INDEX.md to extract extra challenges"""
+    """Parse README.md to extract extra challenges (completed and in-progress)"""
     extra_challenges = []
 
-    if not os.path.exists('INDEX.md'):
+    if not os.path.exists('README.md'):
         return extra_challenges
 
-    with open('INDEX.md', 'r') as f:
+    # Get completed extra challenges from INDEX.md
+    completed_extra = set()
+    extra_tech_info = {}
+    if os.path.exists('INDEX.md'):
+        with open('INDEX.md', 'r') as f:
+            content = f.read()
+            # Find extra challenge folders in INDEX.md with tech info
+            for match in re.finditer(r'\|\s*✓\s*\|\s*\[\d+\s*-\s*(.+?)\]\(\./(ex-\d+-[^)]+)\)\s*\|\s*(.+?)\s*\|\s*(.+?)\s*\|', content):
+                name, folder, description, tech = match.groups()
+                completed_extra.add(folder)
+                extra_tech_info[folder] = tech.strip()
+
+    with open('README.md', 'r') as f:
         lines = f.readlines()
 
     in_extra_section = False
     for line in lines:
-        # Match exactly "## Extra Challenges" (not ###)
+        # Match "## Extra Challenges"
         if line.strip() == '## Extra Challenges':
             in_extra_section = True
             continue
-        # Exit when we hit another ## section (but not ###)
-        if in_extra_section and line.startswith('## ') and 'Extra Challenges' not in line:
+        # Exit when we hit another ## section
+        if in_extra_section and line.startswith('##'):
             break
 
-        # Parse extra challenge lines (format: "| ✓ | [NN - Name](./folder) | Description | Tech |")
-        if in_extra_section and '|' in line and '✓' in line:
-            # Match pattern: | ✓ | [01 - Name](./folder) | Description | Tech |
-            match = re.search(r'\|\s*✓\s*\|\s*\[(\d+)\s*-\s*(.+?)\]\(\.\/(.+?)\)\s*\|\s*(.+?)\s*\|\s*(.+?)\s*\|', line)
+        # Parse extra challenge lines (format: "1. [Name](./folder) - Description")
+        if in_extra_section and re.match(r'^\d+\.', line):
+            match = re.search(r'(\d+)\.\s+\[(.+?)\]\(\.\/(.+?)\/?\)\s+-\s+(.+?)$', line)
             if match:
-                num, name, folder, description, tech = match.groups()
+                num, name, folder, description = match.groups()
+                folder = folder.rstrip('/')  # Remove trailing slash if present
+                is_completed = folder in completed_extra
+
                 extra_challenges.append({
                     'number': f'EX-{num}',
                     'name': name.strip(),
-                    'folder': folder.strip(),
+                    'folder': folder,
                     'description': description.strip(),
-                    'tech': tech.strip(),
-                    'completed': True,
+                    'tech': extra_tech_info.get(folder, 'Various'),
+                    'completed': is_completed,
                     'section': 'Extra Challenges'
                 })
 
     return extra_challenges
 
-def has_web_interface(folder):
+def get_web_deployable_challenges():
+    """Extract web-deployable challenges from INDEX.md"""
+    web_challenges = set()
+
+    if not os.path.exists('INDEX.md'):
+        return web_challenges
+
+    with open('INDEX.md', 'r') as f:
+        content = f.read()
+
+    # Find "Web-Deployable Challenges" section
+    in_web_section = False
+    for line in content.split('\n'):
+        if '### Web-Deployable Challenges' in line or '## Web-Deployable Challenges' in line:
+            in_web_section = True
+            continue
+        if in_web_section and (line.startswith('###') or line.startswith('##')):
+            break
+
+        # Parse web challenge lines (format: "1. [NN - Name](./folder) - Description")
+        if in_web_section and re.match(r'^\d+\.', line):
+            match = re.search(r'\[(?:\d+)\s*-\s*.+?\]\(\.\/(.+?)\)', line)
+            if match:
+                folder = match.group(1)
+                web_challenges.add(folder)
+
+    return web_challenges
+
+def has_web_interface(folder, web_challenges):
     """Check if challenge has a web interface"""
-    web_challenges = [
-        '47-chrome-extension',
-        '76-video-chat-app',
-        '77-static-site-generator',
-        '80-optical-character-recognition',
-        '82-markdown-to-pdf'
-    ]
     return folder in web_challenges
 
-def generate_index_html(challenges, extra_challenges):
+def generate_index_html(challenges, extra_challenges, web_challenges):
     """Generate the main index.html"""
 
     # Count completed challenges
     completed_count = sum(1 for c in challenges if c['completed'])
-    extra_completed_count = len(extra_challenges)
+    extra_completed_count = sum(1 for c in extra_challenges if c['completed'])
     total_count = len(challenges)
+    total_extra = len(extra_challenges)
 
     # Group by section
     sections = {}
@@ -209,7 +245,7 @@ def generate_index_html(challenges, extra_challenges):
         for challenge in section_challenges:
             completed_badge = '✓ Completed' if challenge['completed'] else 'In Progress'
             completed_class = 'completed' if challenge['completed'] else 'in-progress'
-            has_web = has_web_interface(challenge['folder'])
+            has_web = has_web_interface(challenge['folder'], web_challenges)
             web_badge = '<span class="badge badge-web">Web App</span>' if has_web else ''
 
             github_url = f"https://github.com/Encryptioner/coding-challenges/tree/master/{challenge['folder']}"
@@ -261,13 +297,15 @@ def generate_index_html(challenges, extra_challenges):
             <div class="challenges-grid">
 '''
         for challenge in extra_challenges:
+            completed_badge = '✓ Completed' if challenge['completed'] else 'In Progress'
+            completed_class = 'completed' if challenge['completed'] else 'in-progress'
             github_url = f"https://github.com/Encryptioner/coding-challenges/tree/master/{challenge['folder']}"
 
             html += f'''
-                <div class="challenge-card completed" data-tags="completed">
+                <div class="challenge-card {completed_class}" data-tags="{'completed' if challenge['completed'] else 'in-progress'}">
                     <div class="card-header">
                         <span class="challenge-number">{challenge['number']}</span>
-                        <span class="badge badge-completed">✓ Completed</span>
+                        <span class="badge badge-{completed_class}">{completed_badge}</span>
                     </div>
                     <h3 class="card-title">{challenge['name']}</h3>
                     <p class="card-description">{challenge['description']}</p>
@@ -328,12 +366,16 @@ def main():
     completed_count = sum(1 for c in challenges if c['completed'])
     print(f"  - {completed_count} completed")
 
-    print("Parsing extra challenges from INDEX.md...")
+    print("Parsing extra challenges from README.md...")
     extra_challenges = parse_extra_challenges()
-    print(f"  - {len(extra_challenges)} extra challenges")
+    print(f"  - {len(extra_challenges)} extra challenges ({sum(1 for c in extra_challenges if c['completed'])} completed)")
+
+    print("Extracting web-deployable challenges from INDEX.md...")
+    web_challenges = get_web_deployable_challenges()
+    print(f"  - {len(web_challenges)} web-deployable challenges")
 
     print("Generating index.html...")
-    html = generate_index_html(challenges, extra_challenges)
+    html = generate_index_html(challenges, extra_challenges, web_challenges)
 
     # Write to dist directory
     os.makedirs('dist', exist_ok=True)

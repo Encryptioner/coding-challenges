@@ -26,26 +26,29 @@ touch "$DIST_DIR/.nojekyll"
 echo "Generating main index page..."
 python3 .github/scripts/generate-index.py
 
-# Web-based challenges to deploy
-declare -A WEB_CHALLENGES=(
-  ["47-chrome-extension"]="Chrome Extension"
-  ["69-notion/demo"]="Notion Clone"
-  ["76-video-chat-app"]="Video Chat App"
-  ["77-static-site-generator"]="Static Site Generator"
-  ["80-optical-character-recognition"]="OCR Tool"
-  ["82-markdown-to-pdf"]="Markdown to PDF"
-)
+# Extract web-deployable challenges from INDEX.md
+echo "Extracting web-deployable challenges from INDEX.md..."
+WEB_CHALLENGE_FOLDERS=$(python3 .github/scripts/extract-web-challenges.py)
 
-# Deploy web-based challenges with interactive viewer
-echo "Deploying web-based challenges..."
-for challenge_dir in "${!WEB_CHALLENGES[@]}"; do
-  if [ -d "$challenge_dir" ]; then
-    echo "  - Deploying $challenge_dir..."
+if [ -z "$WEB_CHALLENGE_FOLDERS" ]; then
+  echo "  ! No web challenges found in INDEX.md"
+else
+  # Deploy web-based challenges with interactive viewer
+  echo "Deploying web-based challenges..."
+  for challenge_dir in $WEB_CHALLENGE_FOLDERS; do
+    if [ -d "$challenge_dir" ]; then
+      # Extract challenge name from folder (e.g., "47-chrome-extension" -> "Chrome Extension")
+      challenge_name=$(echo "$challenge_dir" | sed 's/^[0-9]*-//' | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));}1')
 
-    # Generate interactive documentation viewer
-    python3 .github/scripts/generate-interactive-viewer.py "$challenge_dir" "${WEB_CHALLENGES[$challenge_dir]}"
-  fi
-done
+      echo "  - Deploying $challenge_dir ($challenge_name)..."
+
+      # Generate interactive documentation viewer
+      python3 .github/scripts/generate-interactive-viewer.py "$challenge_dir" "$challenge_name"
+    else
+      echo "  ! Directory not found: $challenge_dir"
+    fi
+  done
+fi
 
 # Generate documentation pages for all challenges
 echo "Generating documentation pages..."

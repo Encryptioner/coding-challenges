@@ -60,13 +60,7 @@ See [SETUP.md](../DOCS/deployment/SETUP.md) for detailed instructions.
 
 ## Web Challenges
 
-Register new web challenges in `scripts/build-site.sh`:
-
-```bash
-declare -A WEB_CHALLENGES=(
-  ["NN-challenge-name"]="Display Name"
-)
-```
+Add to `INDEX.md` file's `Web-Deployable Challenges` section after completion
 
 ## Local Testing
 

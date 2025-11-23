@@ -44,18 +44,18 @@ pip install -r .github/requirements.txt
 
 ### 2. Activate Auto-Deployment
 
-Add the workflow file to your main branch:
+Add the workflow file to your master branch:
 
 ```bash
-# On main/master branch
+# On master branch
 mkdir -p .github/workflows
 cp .github/workflow-templates/deploy-pages.yml .github/workflows/
 git add .github/workflows/deploy-pages.yml
 git commit -m "feat: activate auto-deployment"
-git push origin main
+git push origin master
 ```
 
-**That's it!** Every push to main will now auto-deploy.
+**That's it!** Every push to master will now auto-deploy.
 
 ## Local Testing
 
@@ -94,21 +94,14 @@ NN-challenge-name/
 
 ### 2. Register Challenge
 
-Edit `.github/scripts/build-site.sh`:
-
-```bash
-declare -A WEB_CHALLENGES=(
-  # ... existing challenges ...
-  ["NN-challenge-name"]="Display Name"
-)
-```
+Add to `INDEX.md` file's `Web-Deployable Challenges` section after completion
 
 ### 3. Deploy
 
 ```bash
 git add .
 git commit -m "feat: add NN-challenge-name"
-git push origin main
+git push origin master
 ```
 
 The site updates automatically in 1-2 minutes.
@@ -147,7 +140,7 @@ Edit root `README.md` with challenge list, then push:
 ```bash
 git add README.md
 git commit -m "docs: update challenge list"
-git push origin main
+git push origin master
 ```
 
 ### Add Documentation Only (No Web Demo)
@@ -166,18 +159,19 @@ Edit `.github/pages/assets/`:
 
 ```bash
 git commit --allow-empty -m "chore: rebuild site"
-git push origin main
+git push origin master
 ```
 
 ## Troubleshooting
 
 | Issue | Solution |
 |-------|----------|
-| Workflow not running | Check workflow file is on main branch, Pages enabled |
+| Workflow not running | Check workflow file is on master branch, Pages enabled |
 | Build fails | Check Actions logs, verify Python 3.11+ available |
-| Challenge not appearing | Ensure added to `WEB_CHALLENGES`, has `index.html` |
+| Live Demo not appearing | Add to `Web-Deployable Challenges` of `INDEX.md`, ensure `index.html` exists |
 | 404 errors | Wait 2-3 minutes after first deploy, clear cache |
 | Changes not showing | Check Actions tab for build status, clear browser cache |
+| Testing github page and no live demo | Install the dependencies as documented in the deployment workflow and run `.github/scripts/build-site.sh`. Then test locally with `cd dist && python3 -m http.server 8000` |
 
 ## Quick Reference
 
