@@ -42,19 +42,19 @@ export class VSCodeExtensionManager {
       const {
         query = '',
         category,
-        sortBy = 'relevance',
+        sortBy = 'downloads',
         limit = 20,
       } = options;
 
-      const params = new URLSearchParams({
-        query,
-        size: limit.toString(),
-        sortOrder: sortBy,
-        ...(category && { category }),
-      });
+      // Build params only with values that exist
+      const params = new URLSearchParams();
+      if (query) params.append('query', query);
+      params.append('size', limit.toString());
+      params.append('sortOrder', sortBy);
+      if (category) params.append('category', category);
 
       const response = await fetch(
-        `${this.OPEN_VSX_API}/search?${params.toString()}`
+        `${this.OPEN_VSX_API}/-/search?${params.toString()}`
       );
 
       if (!response.ok) {

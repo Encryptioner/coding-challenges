@@ -33,7 +33,17 @@ export function CloneDialog({ onClose }: CloneDialogProps) {
     if (result.success) {
       const repoName = repoUrl.split('/').pop() || repoUrl;
       addRecentProject({ url: repoUrl, name: repoName, path: '/repo' });
-      alert('Repository cloned successfully!');
+
+      // Initialize repository to load actual branch and status
+      setProgress('Loading repository state...');
+      const initResult = await gitService.initializeRepository('/repo');
+
+      if (initResult.success) {
+        alert(`Repository cloned successfully! Branch: ${initResult.data?.currentBranch}`);
+      } else {
+        alert('Repository cloned but failed to initialize state');
+      }
+
       onClose();
       window.location.reload();
     } else {

@@ -365,6 +365,60 @@ class GitService {
       return null;
     }
   }
+
+  /**
+   * Initialize repository state after clone
+   * Loads current branch, git status, and recent commits
+   * Updates IDE store with actual repository state
+   */
+  async initializeRepository(dir = '/repo'): Promise<GitResult<{
+    currentBranch: string;
+    gitStatus: GitStatus[];
+    commits: GitCommit[];
+  }>> {
+    try {
+      // Get current branch
+      const branch = await this.getCurrentBranch(dir);
+      if (!branch) {
+        return {
+          success: false,
+          error: 'Could not determine current branch',
+        };
+      }
+
+      // Get git status
+      const allStatus = await this.statusMatrix(dir);
+      const gitStatus = allStatus.filter(item => item.status !== 'unmodified');
+
+      // Get recent commits
+      const commits = await this.log(dir, 20);
+
+      // Update IDE store
+      const { useIDEStore } = await import('@/store/useIDEStore');
+      const store = useIDEStore.getState();
+
+      store.setCurrentBranch(branch);
+      store.setGitStatus(gitStatus);
+      store.setCommits(commits);
+
+      console.log(`✅ Repository initialized: branch=${branch}, status=${gitStatus.length} files, commits=${commits.length}`);
+
+      return {
+        success: true,
+        data: {
+          currentBranch: branch,
+          gitStatus,
+          commits,
+        },
+      };
+    } catch (error) {
+      console.error('Initialize repository error:', error);
+      return {
+        success: false,
+        error: String(error),
+      };
+    }
+  }
 }
 
 export const gitService = new GitService();

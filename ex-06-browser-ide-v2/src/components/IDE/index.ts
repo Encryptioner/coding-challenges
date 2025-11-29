@@ -8,3 +8,4 @@ export { SettingsDialog } from './SettingsDialog';
 export { AIAssistant } from './AIAssistant';
 export { ClaudeCodePanel } from './ClaudeCodePanel';
 export { ExtensionsPanel } from './ExtensionsPanel';
+export { WorkspaceSwitcher } from './WorkspaceSwitcher';

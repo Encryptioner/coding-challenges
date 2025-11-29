@@ -11,6 +11,7 @@ import {
   AIAssistant,
   ClaudeCodePanel,
   ExtensionsPanel,
+  WorkspaceSwitcher,
 } from '@/components/IDE';
 import { useIDEStore } from '@/store/useIDEStore';
 import { logger } from '@/utils/logger';
@@ -95,6 +96,7 @@ function App() {
       <div className="titlebar flex items-center justify-between px-2 sm:px-4 py-2 bg-gray-800 border-b border-gray-700 flex-shrink-0">
         <div className="titlebar-drag flex items-center gap-2 sm:gap-4 overflow-hidden">
           <span className="title font-semibold text-xs sm:text-sm truncate">🚀 Browser IDE Pro v{config.APP_VERSION}</span>
+          <WorkspaceSwitcher />
           <div className="flex gap-1 sm:gap-2">
             <button
               onClick={toggleSidebar}
@@ -189,11 +191,13 @@ function App() {
 
       {/* Main Layout */}
       <div className="main-content flex-1 overflow-hidden">
-        <PanelGroup direction="horizontal">
+        <PanelGroup direction="horizontal" id="main-horizontal">
           {/* Sidebar - auto-hide on mobile */}
           {sidebarOpen && (
             <>
               <Panel
+                id="sidebar"
+                order={1}
                 defaultSize={20}
                 minSize={10}
                 maxSize={40}
@@ -206,10 +210,10 @@ function App() {
           )}
 
           {/* Editor + Bottom Panel */}
-          <Panel>
-            <PanelGroup direction="vertical">
+          <Panel id="main-editor" order={2}>
+            <PanelGroup direction="vertical" id="main-vertical">
               {/* Editor */}
-              <Panel defaultSize={bottomPanelVisible ? 70 : 100} minSize={30}>
+              <Panel id="editor" order={1} defaultSize={bottomPanelVisible ? 70 : 100} minSize={30}>
                 <Editor />
               </Panel>
 
@@ -217,7 +221,7 @@ function App() {
               {bottomPanelVisible && (
                 <>
                   <PanelResizeHandle className="h-1 bg-gray-700 hover:bg-blue-500 transition-colors" />
-                  <Panel defaultSize={30} minSize={15} maxSize={70}>
+                  <Panel id="bottom-panel" order={2} defaultSize={30} minSize={15} maxSize={70}>
                     <div className="bottom-panel flex flex-col h-full">
                       <div className="bottom-panel-tabs flex bg-gray-800 border-b border-gray-700">
                         {terminalOpen && (
