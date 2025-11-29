@@ -20,6 +20,9 @@ importers:
       '@webcontainer/api':
         specifier: ^1.1.9
         version: 1.6.1
+      buffer:
+        specifier: ^6.0.3
+        version: 6.0.3
       idb:
         specifier: ^8.0.0
         version: 8.0.3
@@ -78,6 +81,9 @@ importers:
       vite-plugin-pwa:
         specifier: ^0.17.4
         version: 0.17.5(vite@5.4.21(terser@5.44.1))(workbox-build@7.4.0(@types/babel__core@7.20.5))(workbox-window@7.4.0)
+      workbox-window:
+        specifier: ^7.4.0
+        version: 7.4.0
 
 packages:
 

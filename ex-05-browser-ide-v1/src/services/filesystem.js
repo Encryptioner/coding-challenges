@@ -4,9 +4,30 @@ class FileSystemService {
   constructor() {
     this.fs = new LightningFS('browser-ide-fs');
     this.pfs = this.fs.promises;
+    this.initialized = false;
+    this.initPromise = this.initialize();
+  }
+
+  async initialize() {
+    if (this.initialized) return;
+
+    try {
+      // Ensure /repo directory exists
+      await this.ensureDir('/repo');
+      this.initialized = true;
+    } catch (error) {
+      console.error('Error initializing filesystem:', error);
+    }
+  }
+
+  async ensureInitialized() {
+    if (!this.initialized) {
+      await this.initPromise;
+    }
   }
   
   async readDir(path = '/') {
+    await this.ensureInitialized();
     try {
       const entries = await this.pfs.readdir(path);
       const items = await Promise.all(
@@ -144,8 +165,9 @@ class FileSystemService {
   
   // Recursively build file tree
   async buildFileTree(path = '/', maxDepth = 10, currentDepth = 0) {
+    await this.ensureInitialized();
     if (currentDepth >= maxDepth) return [];
-    
+
     const items = await this.readDir(path);
     const tree = [];
     

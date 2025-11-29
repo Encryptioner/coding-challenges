@@ -2,6 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
 import { registerSW } from 'virtual:pwa-register';
+import { Buffer } from 'buffer';
+
+// Polyfill Buffer for isomorphic-git
+window.Buffer = Buffer;
 
 // Register service worker for PWA
 if ('serviceWorker' in navigator) {
