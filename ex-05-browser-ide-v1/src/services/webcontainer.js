@@ -104,7 +104,7 @@ class WebContainerService {
   
   async install() {
     console.log('📦 Installing dependencies...');
-    const result = await this.spawn('npm', ['install']);
+    const result = await this.spawn('pnpm', ['install']);
     
     if (result.success) {
       // Stream output to console
@@ -122,8 +122,8 @@ class WebContainerService {
   }
   
   async run(script = 'dev') {
-    console.log(`🚀 Running npm run ${script}...`);
-    const result = await this.spawn('npm', ['run', script]);
+    console.log(`🚀 Running pnpm run ${script}...`);
+    const result = await this.spawn('pnpm', ['run', script]);
     
     if (result.success) {
       // Stream output

@@ -195,15 +195,14 @@ browser-ide/
 
 ### Local Development
 ```bash
-# Clone the project
-git clone https://github.com/yourusername/browser-ide.git
-cd browser-ide
+# Go to the project
+cd ex-05-browser-ide-v1
 
 # Install dependencies
-npm install
+pnpm install
 
 # Start dev server
-npm run dev
+pnpm dev
 
 # Open http://localhost:5173
 ```
@@ -211,16 +210,16 @@ npm run dev
 ### Build for Production
 ```bash
 # Build static files
-npm run build
+pnpm build
 
 # Preview production build
-npm run preview
+pnpm preview
 ```
 
 ### Deploy to GitHub Pages
 ```bash
 # Deploy to gh-pages branch
-npm run deploy
+pnpm deploy
 
 # Or use GitHub Actions (automatic on push to main)
 ```
@@ -244,7 +243,7 @@ npm run deploy
 
 3. **Deploy:**
    ```bash
-   npm run deploy
+   pnpm deploy
    ```
 
 4. **Access:**
@@ -253,14 +252,14 @@ npm run deploy
 ### Option 2: Vercel
 
 ```bash
-npm install -g vercel
+pnpm install -g vercel
 vercel --prod
 ```
 
 ### Option 3: Netlify
 
 1. Connect GitHub repo
-2. Build command: `npm run build`
+2. Build command: `pnpm build`
 3. Publish directory: `dist`
 
 ---
@@ -462,7 +461,7 @@ const Preview = lazy(() => import('./components/Preview'));
 - [ ] Switch branch
 - [ ] Commit changes
 - [ ] Push to GitHub
-- [ ] Run npm install
+- [ ] Run pnpm install
 - [ ] Run dev server
 - [ ] View live preview
 - [ ] Ask AI for help
@@ -550,8 +549,8 @@ MIT License - Free to use, modify, and distribute
 Ready to code in your browser? Let's go!
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 Visit http://localhost:5173 and start coding! 🚀

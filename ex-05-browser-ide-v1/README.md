@@ -25,15 +25,14 @@ A fully functional VS Code-like IDE that runs entirely in your browser. No backe
 ### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/browser-ide.git
-cd browser-ide
+# Go to the project
+cd ex-05-browser-ide-v1
 
 # Install dependencies
-npm install
+pnpm install
 
 # Start dev server
-npm run dev
+pnpm dev
 ```
 
 Visit `http://localhost:5173`
@@ -41,13 +40,13 @@ Visit `http://localhost:5173`
 ### Build for Production
 
 ```bash
-npm run build
+pnpm build
 ```
 
 ### Deploy to GitHub Pages
 
 ```bash
-npm run deploy
+pnpm deploy
 ```
 
 Or use the included GitHub Actions workflow for automatic deployment.

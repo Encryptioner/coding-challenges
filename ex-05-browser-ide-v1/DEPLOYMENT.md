@@ -46,11 +46,11 @@ git push
 6. Wait for the action to complete (check the **Actions** tab)
 7. Your site will be live at: `https://YOUR_USERNAME.github.io/browser-ide/`
 
-### Option B: Using npm deploy command
+### Option B: Using pnpm deploy command
 
 1. Install gh-pages:
 ```bash
-npm install -g gh-pages
+pnpm install -g gh-pages
 ```
 
 2. Update `vite.config.js` base path:
@@ -60,7 +60,7 @@ base: '/browser-ide/', // Your repo name
 
 3. Deploy:
 ```bash
-npm run deploy
+pnpm deploy
 ```
 
 4. Enable GitHub Pages:
@@ -138,7 +138,7 @@ If GitHub Pages doesn't work for WebContainers:
 
 #### Vercel
 ```bash
-npm install -g vercel
+pnpm install -g vercel
 vercel --prod
 ```
 
@@ -146,7 +146,7 @@ Vercel automatically sets correct headers for WebContainers.
 
 #### Netlify
 ```bash
-npm install -g netlify-cli
+pnpm install -g netlify-cli
 netlify deploy --prod
 ```
 
@@ -160,7 +160,7 @@ Add `_headers` file to public/:
 #### Cloudflare Pages
 
 1. Connect your GitHub repo to Cloudflare Pages
-2. Build command: `npm run build`
+2. Build command: `pnpm build`
 3. Output directory: `dist`
 4. Add required headers in Cloudflare dashboard
 
@@ -172,8 +172,8 @@ Add `_headers` file to public/:
 
 **Solution:**
 ```bash
-npm install
-npm run build
+pnpm install
+pnpm build
 ```
 
 ### WebContainers Don't Work
@@ -259,7 +259,7 @@ Add Google Analytics or Plausible:
 Consider adding Sentry for error monitoring:
 
 ```bash
-npm install @sentry/react
+pnpm install @sentry/react
 ```
 
 ## Updates

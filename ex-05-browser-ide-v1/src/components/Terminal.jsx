@@ -10,7 +10,7 @@ export function Terminal() {
       </div>
       <div className="terminal-content">
         <div className="terminal-line">$ Ready to execute commands...</div>
-        <div className="terminal-line hint">Use WebContainer API for npm commands</div>
+        <div className="terminal-line hint">Use WebContainer API for pnpm commands</div>
       </div>
     </div>
   );
