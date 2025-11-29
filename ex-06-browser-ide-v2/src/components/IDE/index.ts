@@ -6,3 +6,5 @@ export { Preview } from './Preview';
 export { CloneDialog } from './CloneDialog';
 export { SettingsDialog } from './SettingsDialog';
 export { AIAssistant } from './AIAssistant';
+export { ClaudeCodePanel } from './ClaudeCodePanel';
+export { ExtensionsPanel } from './ExtensionsPanel';

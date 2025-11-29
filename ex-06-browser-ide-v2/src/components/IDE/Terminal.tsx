@@ -1,13 +1,29 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Terminal as XTerm } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { WebLinksAddon } from '@xterm/addon-web-links';
+import { webContainer } from '@/services/webcontainer';
 import '@xterm/xterm/css/xterm.css';
 
 export function Terminal() {
   const terminalRef = useRef<HTMLDivElement>(null);
   const xtermRef = useRef<XTerm | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
+  const [isWebContainerReady, setIsWebContainerReady] = useState(false);
+
+  // Initialize WebContainer
+  useEffect(() => {
+    async function initWebContainer() {
+      const result = await webContainer.boot();
+      if (result.success) {
+        setIsWebContainerReady(true);
+        console.log('✅ WebContainer ready');
+      } else {
+        console.error('❌ WebContainer failed to boot:', result.error);
+      }
+    }
+    initWebContainer();
+  }, []);
 
   useEffect(() => {
     if (!terminalRef.current || xtermRef.current) return;
@@ -61,15 +77,112 @@ export function Terminal() {
     // Write welcome message
     xterm.writeln('Browser IDE Terminal');
     xterm.writeln('');
-    xterm.writeln('Ready to execute commands...');
-    xterm.writeln('Use WebContainer API for npm/pnpm commands');
+    xterm.writeln('WebContainer VM Ready');
+    xterm.writeln('Supports: npm, pnpm, node, git, and bash commands');
     xterm.writeln('');
     xterm.write('$ ');
 
+    let currentLine = '';
+
+    // Execute command
+    async function executeCommand(command: string) {
+      if (!command.trim()) {
+        xterm.write('\r\n$ ');
+        return;
+      }
+
+      xterm.write('\r\n');
+
+      // Parse command
+      const parts = command.trim().split(/\s+/);
+      const cmd = parts[0];
+      const args = parts.slice(1);
+
+      try {
+        // Special handling for 'clear'
+        if (cmd === 'clear') {
+          xterm.clear();
+          xterm.write('$ ');
+          return;
+        }
+
+        // Execute via WebContainer
+        if (!isWebContainerReady) {
+          xterm.writeln('⚠️  WebContainer is still booting...');
+          xterm.write('$ ');
+          return;
+        }
+
+        const result = await webContainer.spawn(cmd, args);
+
+        if (result.success && result.process) {
+          const process = result.process;
+
+          // Stream output
+          process.output.pipeTo(
+            new WritableStream({
+              write(data) {
+                xterm.write(data);
+              },
+            })
+          );
+
+          // Wait for exit
+          const exitCode = await process.exit;
+
+          if (exitCode !== 0) {
+            xterm.writeln(`\r\n❌ Process exited with code ${exitCode}`);
+          }
+        } else {
+          xterm.writeln(`❌ Error: ${result.error || 'Command failed'}`);
+        }
+      } catch (error: any) {
+        xterm.writeln(`❌ Error: ${error.message}`);
+      }
+
+      xterm.write('\r\n$ ');
+    }
+
     // Handle input
     xterm.onData((data) => {
-      // Echo input for now (basic implementation)
-      xterm.write(data);
+      const code = data.charCodeAt(0);
+
+      // Enter key
+      if (code === 13) {
+        executeCommand(currentLine);
+        currentLine = '';
+        return;
+      }
+
+      // Backspace
+      if (code === 127) {
+        if (currentLine.length > 0) {
+          currentLine = currentLine.slice(0, -1);
+          xterm.write('\b \b');
+        }
+        return;
+      }
+
+      // Ctrl+C
+      if (code === 3) {
+        xterm.write('^C\r\n$ ');
+        currentLine = '';
+        return;
+      }
+
+      // Ctrl+L (clear)
+      if (code === 12) {
+        xterm.clear();
+        xterm.write('$ ');
+        currentLine = '';
+        return;
+      }
+
+      // Regular character
+      if (code >= 32) {
+        currentLine += data;
+        xterm.write(data);
+      }
     });
 
     xtermRef.current = xterm;

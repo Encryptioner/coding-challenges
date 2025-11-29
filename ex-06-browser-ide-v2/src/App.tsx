@@ -9,6 +9,8 @@ import {
   CloneDialog,
   SettingsDialog,
   AIAssistant,
+  ClaudeCodePanel,
+  ExtensionsPanel,
 } from '@/components/IDE';
 import { useIDEStore } from '@/store/useIDEStore';
 import { logger } from '@/utils/logger';
@@ -32,7 +34,9 @@ function App() {
   const [showSettingsDialog, setShowSettingsDialog] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
-  const [activeBottomPanel, setActiveBottomPanel] = useState<'terminal' | 'preview'>('terminal');
+  const [activeBottomPanel, setActiveBottomPanel] = useState<'terminal' | 'preview' | 'claude-code' | 'extensions'>('terminal');
+  const [showClaudeCode, setShowClaudeCode] = useState(false);
+  const [showExtensions, setShowExtensions] = useState(false);
 
   useEffect(() => {
     logger.info(`Browser IDE Pro v${config.APP_VERSION} - Starting...`);
@@ -83,15 +87,15 @@ function App() {
     }
   };
 
-  const bottomPanelVisible = terminalOpen || previewOpen;
+  const bottomPanelVisible = terminalOpen || previewOpen || showClaudeCode || showExtensions;
 
   return (
-    <div className="app flex flex-col h-screen bg-gray-900 text-gray-100">
+    <div className="app flex flex-col h-screen bg-gray-900 text-gray-100 overflow-hidden">
       {/* Title Bar */}
-      <div className="titlebar flex items-center justify-between px-4 py-2 bg-gray-800 border-b border-gray-700">
-        <div className="titlebar-drag flex items-center gap-4">
-          <span className="title font-semibold">🚀 Browser IDE Pro v{config.APP_VERSION}</span>
-          <div className="flex gap-2">
+      <div className="titlebar flex items-center justify-between px-2 sm:px-4 py-2 bg-gray-800 border-b border-gray-700 flex-shrink-0">
+        <div className="titlebar-drag flex items-center gap-2 sm:gap-4 overflow-hidden">
+          <span className="title font-semibold text-xs sm:text-sm truncate">🚀 Browser IDE Pro v{config.APP_VERSION}</span>
+          <div className="flex gap-1 sm:gap-2">
             <button
               onClick={toggleSidebar}
               className="text-xs px-2 py-1 hover:bg-gray-700 rounded"
@@ -113,27 +117,49 @@ function App() {
             >
               👁️
             </button>
+            <button
+              onClick={() => {
+                setShowClaudeCode(!showClaudeCode);
+                if (!showClaudeCode) setActiveBottomPanel('claude-code');
+              }}
+              className={`text-xs px-2 py-1 hover:bg-gray-700 rounded ${showClaudeCode ? 'bg-gray-700' : ''}`}
+              title="Toggle Claude Code Agent"
+            >
+              🧠
+            </button>
+            <button
+              onClick={() => {
+                setShowExtensions(!showExtensions);
+                if (!showExtensions) setActiveBottomPanel('extensions');
+              }}
+              className={`text-xs px-2 py-1 hover:bg-gray-700 rounded ${showExtensions ? 'bg-gray-700' : ''}`}
+              title="Toggle Extensions"
+            >
+              🧩
+            </button>
           </div>
         </div>
-        <div className="titlebar-actions flex gap-2">
+        <div className="titlebar-actions flex gap-1 sm:gap-2 flex-shrink-0">
           <button
             onClick={() => setShowCloneDialog(true)}
             title="Clone Repository"
-            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm font-medium"
+            className="px-2 sm:px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs sm:text-sm font-medium whitespace-nowrap"
           >
-            📥 Clone
+            <span className="hidden sm:inline">📥 Clone</span>
+            <span className="sm:hidden">📥</span>
           </button>
           <button
             onClick={() => setShowAIAssistant(true)}
-            title="AI Assistant"
-            className="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-sm font-medium"
+            title="AI Assistant (Simple Chat)"
+            className="px-2 sm:px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-xs sm:text-sm font-medium whitespace-nowrap"
           >
-            🤖 AI
+            <span className="hidden sm:inline">🤖 AI</span>
+            <span className="sm:hidden">🤖</span>
           </button>
           <button
             onClick={() => setShowSettingsDialog(true)}
             title="Settings"
-            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+            className="px-2 sm:px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs sm:text-sm"
           >
             ⚙️
           </button>
@@ -164,13 +190,18 @@ function App() {
       {/* Main Layout */}
       <div className="main-content flex-1 overflow-hidden">
         <PanelGroup direction="horizontal">
-          {/* Sidebar */}
+          {/* Sidebar - auto-hide on mobile */}
           {sidebarOpen && (
             <>
-              <Panel defaultSize={20} minSize={10} maxSize={40}>
+              <Panel
+                defaultSize={20}
+                minSize={10}
+                maxSize={40}
+                className="hidden md:block"
+              >
                 <FileExplorer />
               </Panel>
-              <PanelResizeHandle className="w-1 bg-gray-700 hover:bg-blue-500 transition-colors" />
+              <PanelResizeHandle className="hidden md:block w-1 bg-gray-700 hover:bg-blue-500 transition-colors" />
             </>
           )}
 
@@ -198,7 +229,7 @@ function App() {
                             }`}
                             onClick={() => setActiveBottomPanel('terminal')}
                           >
-                            Terminal
+                            💻 Terminal
                           </div>
                         )}
                         {previewOpen && (
@@ -210,13 +241,39 @@ function App() {
                             }`}
                             onClick={() => setActiveBottomPanel('preview')}
                           >
-                            Preview
+                            👁️ Preview
+                          </div>
+                        )}
+                        {showClaudeCode && (
+                          <div
+                            className={`tab px-4 py-2 cursor-pointer text-sm ${
+                              activeBottomPanel === 'claude-code'
+                                ? 'active bg-gray-900 text-blue-400 border-b-2 border-blue-500'
+                                : 'hover:bg-gray-700 text-gray-300'
+                            }`}
+                            onClick={() => setActiveBottomPanel('claude-code')}
+                          >
+                            🧠 Claude Code
+                          </div>
+                        )}
+                        {showExtensions && (
+                          <div
+                            className={`tab px-4 py-2 cursor-pointer text-sm ${
+                              activeBottomPanel === 'extensions'
+                                ? 'active bg-gray-900 text-blue-400 border-b-2 border-blue-500'
+                                : 'hover:bg-gray-700 text-gray-300'
+                            }`}
+                            onClick={() => setActiveBottomPanel('extensions')}
+                          >
+                            🧩 Extensions
                           </div>
                         )}
                       </div>
                       <div className="bottom-panel-content flex-1 overflow-hidden">
                         {activeBottomPanel === 'terminal' && terminalOpen && <Terminal />}
                         {activeBottomPanel === 'preview' && previewOpen && <Preview />}
+                        {activeBottomPanel === 'claude-code' && showClaudeCode && <ClaudeCodePanel />}
+                        {activeBottomPanel === 'extensions' && showExtensions && <ExtensionsPanel />}
                       </div>
                     </div>
                   </Panel>
@@ -236,6 +293,27 @@ function App() {
       {showSettingsDialog && <SettingsDialog onClose={() => setShowSettingsDialog(false)} />}
 
       {showAIAssistant && <AIAssistant onClose={() => setShowAIAssistant(false)} />}
+
+      {/* Mobile File Explorer Overlay */}
+      {sidebarOpen && (
+        <div className="md:hidden fixed inset-0 z-50 bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="absolute left-0 top-0 bottom-0 w-4/5 max-w-sm bg-gray-900 shadow-2xl">
+            <div className="flex items-center justify-between px-4 py-3 bg-gray-800 border-b border-gray-700">
+              <h2 className="text-sm font-semibold">Files</h2>
+              <button
+                onClick={toggleSidebar}
+                className="px-2 py-1 hover:bg-gray-700 rounded"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="h-full overflow-y-auto">
+              <FileExplorer />
+            </div>
+          </div>
+          <div className="absolute right-0 top-0 bottom-0 left-4/5" onClick={toggleSidebar} />
+        </div>
+      )}
     </div>
   );
 }
