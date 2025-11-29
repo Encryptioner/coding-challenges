@@ -13,6 +13,7 @@ import {
   ExtensionsPanel,
   WorkspaceSwitcher,
 } from '@/components/IDE';
+import { SourceControlPanel } from '@/components/Git';
 import { useIDEStore } from '@/store/useIDEStore';
 import { logger } from '@/utils/logger';
 import { config } from '@/config/environment';
@@ -35,9 +36,10 @@ function App() {
   const [showSettingsDialog, setShowSettingsDialog] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
-  const [activeBottomPanel, setActiveBottomPanel] = useState<'terminal' | 'preview' | 'claude-code' | 'extensions'>('terminal');
+  const [activeBottomPanel, setActiveBottomPanel] = useState<'terminal' | 'preview' | 'claude-code' | 'extensions' | 'git'>('terminal');
   const [showClaudeCode, setShowClaudeCode] = useState(false);
   const [showExtensions, setShowExtensions] = useState(false);
+  const [showGit, setShowGit] = useState(false);
 
   useEffect(() => {
     logger.info(`Browser IDE Pro v${config.APP_VERSION} - Starting...`);
@@ -88,7 +90,7 @@ function App() {
     }
   };
 
-  const bottomPanelVisible = terminalOpen || previewOpen || showClaudeCode || showExtensions;
+  const bottomPanelVisible = terminalOpen || previewOpen || showClaudeCode || showExtensions || showGit;
 
   return (
     <div className="app flex flex-col h-screen bg-gray-900 text-gray-100 overflow-hidden">
@@ -138,6 +140,16 @@ function App() {
               title="Toggle Extensions"
             >
               🧩
+            </button>
+            <button
+              onClick={() => {
+                setShowGit(!showGit);
+                if (!showGit) setActiveBottomPanel('git');
+              }}
+              className={`text-xs px-2 py-1 hover:bg-gray-700 rounded ${showGit ? 'bg-gray-700' : ''}`}
+              title="Toggle Source Control"
+            >
+              🔀
             </button>
           </div>
         </div>
@@ -272,12 +284,25 @@ function App() {
                             🧩 Extensions
                           </div>
                         )}
+                        {showGit && (
+                          <div
+                            className={`tab px-4 py-2 cursor-pointer text-sm ${
+                              activeBottomPanel === 'git'
+                                ? 'active bg-gray-900 text-blue-400 border-b-2 border-blue-500'
+                                : 'hover:bg-gray-700 text-gray-300'
+                            }`}
+                            onClick={() => setActiveBottomPanel('git')}
+                          >
+                            🔀 Git
+                          </div>
+                        )}
                       </div>
                       <div className="bottom-panel-content flex-1 overflow-hidden">
                         {activeBottomPanel === 'terminal' && terminalOpen && <Terminal />}
                         {activeBottomPanel === 'preview' && previewOpen && <Preview />}
                         {activeBottomPanel === 'claude-code' && showClaudeCode && <ClaudeCodePanel />}
                         {activeBottomPanel === 'extensions' && showExtensions && <ExtensionsPanel />}
+                        {activeBottomPanel === 'git' && showGit && <SourceControlPanel />}
                       </div>
                     </div>
                   </Panel>

@@ -36,8 +36,10 @@ export function StatusBar() {
 
   async function loadBranches() {
     setIsLoading(true);
-    const branchList = await gitService.listBranches('/repo');
-    setBranches(branchList);
+    const result = await gitService.listBranches('/repo');
+    if (result.success && result.data) {
+      setBranches(result.data);
+    }
     setIsLoading(false);
   }
 

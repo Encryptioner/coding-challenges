@@ -20,9 +20,21 @@ class WebContainerService {
   private instance: WebContainer | null = null;
   private serverUrl: string | null = null;
   private processes = new Map<string, WCProcessType>();
+  private bootPromise: Promise<WebContainerResult<WebContainer>> | null = null;
 
   async boot(): Promise<WebContainerResult<WebContainer>> {
-    if (!this.instance) {
+    // If already booted, return existing instance
+    if (this.instance) {
+      return { success: true, data: this.instance };
+    }
+
+    // If currently booting, wait for that to complete
+    if (this.bootPromise) {
+      return this.bootPromise;
+    }
+
+    // Start new boot process
+    this.bootPromise = (async () => {
       try {
         this.instance = await WebContainer.boot();
         console.log('✅ WebContainer booted successfully');
@@ -40,10 +52,14 @@ class WebContainerService {
         return { success: true, data: this.instance };
       } catch (error) {
         console.error('❌ Failed to boot WebContainer:', error);
+        this.bootPromise = null; // Reset on error
         return { success: false, error: String(error) };
+      } finally {
+        this.bootPromise = null; // Clear promise after completion
       }
-    }
-    return { success: true, data: this.instance };
+    })();
+
+    return this.bootPromise;
   }
 
   async mountFiles(fileTree: FileSystemTree): Promise<WebContainerResult<void>> {

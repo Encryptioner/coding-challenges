@@ -79,21 +79,49 @@ class GitService {
     }
   }
 
-  async listBranches(dir = '/repo'): Promise<GitBranch[]> {
+  async listBranches(dir = '/repo'): Promise<GitResult<GitBranch[]>> {
     try {
-      const branches = await git.listBranches({
+      // Get all local branches
+      const localBranches = await git.listBranches({
         fs: fileSystem.getFS(),
         dir,
       });
+
+      // Get remote branches
+      let remoteBranches: string[] = [];
+      try {
+        const remotes = await git.listBranches({
+          fs: fileSystem.getFS(),
+          dir,
+          remote: 'origin',
+        });
+        remoteBranches = remotes.map(name => `origin/${name}`);
+      } catch {
+        // No remote branches
+      }
+
       const currentBranch = await this.getCurrentBranch(dir);
 
-      return branches.map((name) => ({
+      // Combine and deduplicate branches
+      const allBranches = [...new Set([...localBranches, ...remoteBranches])];
+
+      const branchList = allBranches.map((name) => ({
         name,
         current: name === currentBranch,
       }));
+
+      console.log(`📋 Found ${branchList.length} branches:`, branchList.map(b => b.name));
+
+      return {
+        success: true,
+        data: branchList,
+      };
     } catch (error) {
       console.error('List branches error:', error);
-      return [];
+      return {
+        success: false,
+        error: String(error),
+      };
     }
   }
 
@@ -367,6 +395,40 @@ class GitService {
   }
 
   /**
+   * Remove (unstage) a file
+   */
+  async remove(dir: string, filepath: string): Promise<GitResult<void>> {
+    try {
+      await git.remove({
+        fs: fileSystem.getFS(),
+        dir,
+        filepath,
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Remove error:', error);
+      return { success: false, error: String(error) };
+    }
+  }
+
+  /**
+   * Delete a branch
+   */
+  async deleteBranch(dir: string, branchName: string): Promise<GitResult<void>> {
+    try {
+      await git.deleteBranch({
+        fs: fileSystem.getFS(),
+        dir,
+        ref: branchName,
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Delete branch error:', error);
+      return { success: false, error: String(error) };
+    }
+  }
+
+  /**
    * Initialize repository state after clone
    * Loads current branch, git status, and recent commits
    * Updates IDE store with actual repository state
@@ -418,6 +480,98 @@ class GitService {
         error: String(error),
       };
     }
+  }
+
+  /**
+   * Get diff for a file
+   */
+  async diff(dir: string, filepath: string): Promise<GitResult<string>> {
+    try {
+      const fs = fileSystem.getFS();
+
+      // Get HEAD version
+      const headContent = await git.readBlob({
+        fs,
+        dir,
+        oid: 'HEAD',
+        filepath,
+      }).catch(() => null);
+
+      // Get working directory version - read from LightningFS
+      let workdirContent = '';
+      const fileResult = await fileSystem.readFile(`${dir}/${filepath}`);
+      if (fileResult.success && fileResult.data) {
+        workdirContent = fileResult.data;
+      }
+
+      const oldText = headContent ? new TextDecoder().decode(headContent.blob) : '';
+      const newText = workdirContent;
+
+      // Generate unified diff format
+      const diff = this.generateUnifiedDiff(filepath, oldText, newText);
+
+      return {
+        success: true,
+        data: diff,
+      };
+    } catch (error) {
+      console.error('Diff error:', error);
+      return {
+        success: false,
+        error: String(error),
+      };
+    }
+  }
+
+  /**
+   * Generate unified diff format
+   */
+  private generateUnifiedDiff(filepath: string, oldText: string, newText: string): string {
+    const oldLines = oldText.split('\n');
+    const newLines = newText.split('\n');
+
+    const diff: string[] = [];
+    diff.push(`--- a/${filepath}`);
+    diff.push(`+++ b/${filepath}`);
+
+    // Simple line-by-line diff (not optimal but functional)
+    let oldIndex = 0;
+    let newIndex = 0;
+
+    while (oldIndex < oldLines.length || newIndex < newLines.length) {
+      const oldLine = oldLines[oldIndex];
+      const newLine = newLines[newIndex];
+
+      if (oldIndex >= oldLines.length) {
+        // Only new lines remain
+        diff.push(`@@ -${oldIndex + 1},0 +${newIndex + 1},${newLines.length - newIndex} @@`);
+        while (newIndex < newLines.length) {
+          diff.push(`+${newLines[newIndex++]}`);
+        }
+        break;
+      } else if (newIndex >= newLines.length) {
+        // Only old lines remain
+        diff.push(`@@ -${oldIndex + 1},${oldLines.length - oldIndex} +${newIndex + 1},0 @@`);
+        while (oldIndex < oldLines.length) {
+          diff.push(`-${oldLines[oldIndex++]}`);
+        }
+        break;
+      } else if (oldLine === newLine) {
+        // Context line
+        diff.push(` ${oldLine}`);
+        oldIndex++;
+        newIndex++;
+      } else {
+        // Changed line
+        diff.push(`@@ -${oldIndex + 1},1 +${newIndex + 1},1 @@`);
+        diff.push(`-${oldLine}`);
+        diff.push(`+${newLine}`);
+        oldIndex++;
+        newIndex++;
+      }
+    }
+
+    return diff.join('\n');
   }
 }
 
