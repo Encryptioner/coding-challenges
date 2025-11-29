@@ -62,9 +62,9 @@ export class BrowserIDEDatabase extends Dexie {
   async searchProjects(query: string): Promise<Project[]> {
     const lowerQuery = query.toLowerCase();
     return this.projects
-      .filter(p => 
+      .filter(p =>
         p.name.toLowerCase().includes(lowerQuery) ||
-        p.description?.toLowerCase().includes(lowerQuery)
+        (p.description?.toLowerCase().includes(lowerQuery) ?? false)
       )
       .toArray();
   }

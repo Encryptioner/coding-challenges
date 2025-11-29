@@ -33,3 +33,7 @@ dist-ssr
 # PWA
 public/sw.js
 public/workbox-*.js
+
+# Dist
+dev-dist
+dist
