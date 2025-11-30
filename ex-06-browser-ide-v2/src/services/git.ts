@@ -258,16 +258,19 @@ class GitService {
     remote = 'origin',
     remoteRef?: string,
     dir = '/repo'
-  ): Promise<GitResult<void>> {
+  ): Promise<GitResult<string>> {
     try {
       const currentBranch = await this.getCurrentBranch(dir);
+      const pushRef = remoteRef || currentBranch || 'main';
+
+      console.log(`📤 Pushing branch: ${pushRef} to ${remote}`);
 
       await git.push({
         fs: fileSystem.getFS(),
         http,
         dir,
         remote,
-        ref: remoteRef || currentBranch || 'main',
+        ref: pushRef,
         corsProxy: this.corsProxy,
         onAuth: () => ({
           username: token,
@@ -277,7 +280,9 @@ class GitService {
           console.log('Push progress:', progress);
         },
       });
-      return { success: true };
+
+      console.log(`✅ Successfully pushed ${pushRef} to ${remote}`);
+      return { success: true, data: pushRef };
     } catch (error) {
       console.error('Push error:', error);
       return { success: false, error: String(error) };
@@ -289,16 +294,19 @@ class GitService {
     remote = 'origin',
     remoteRef?: string,
     dir = '/repo'
-  ): Promise<GitResult<void>> {
+  ): Promise<GitResult<string>> {
     try {
       const currentBranch = await this.getCurrentBranch(dir);
+      const pullRef = remoteRef || currentBranch || 'main';
+
+      console.log(`📥 Pulling branch: ${pullRef} from ${remote}`);
 
       await git.pull({
         fs: fileSystem.getFS(),
         http,
         dir,
         remote,
-        ref: remoteRef || currentBranch || 'main',
+        ref: pullRef,
         corsProxy: this.corsProxy,
         onAuth: () => ({
           username: token,
@@ -309,7 +317,9 @@ class GitService {
           email: 'user@browser-ide.dev',
         },
       });
-      return { success: true };
+
+      console.log(`✅ Successfully pulled ${pullRef} from ${remote}`);
+      return { success: true, data: pullRef };
     } catch (error) {
       console.error('Pull error:', error);
       return { success: false, error: String(error) };
@@ -407,6 +417,45 @@ class GitService {
       return { success: true };
     } catch (error) {
       console.error('Remove error:', error);
+      return { success: false, error: String(error) };
+    }
+  }
+
+  /**
+   * Reset file(s) to HEAD (unstage)
+   */
+  async resetFiles(dir: string, filepaths?: string[]): Promise<GitResult<void>> {
+    try {
+      const fs = fileSystem.getFS();
+
+      if (!filepaths || filepaths.length === 0) {
+        // Reset all staged files
+        const statusMatrix = await git.statusMatrix({ fs, dir });
+
+        for (const [filepath, , worktreeStatus, stageStatus] of statusMatrix) {
+          // If file is staged (stage status !== worktree status)
+          if (stageStatus !== worktreeStatus) {
+            await git.resetIndex({
+              fs,
+              dir,
+              filepath,
+            });
+          }
+        }
+      } else {
+        // Reset specific files
+        for (const filepath of filepaths) {
+          await git.resetIndex({
+            fs,
+            dir,
+            filepath,
+          });
+        }
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Reset error:', error);
       return { success: false, error: String(error) };
     }
   }

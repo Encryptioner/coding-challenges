@@ -3,13 +3,14 @@ import { Terminal as XTerm } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { WebLinksAddon } from '@xterm/addon-web-links';
 import { webContainer } from '@/services/webcontainer';
+import { gitService } from '@/services/git';
+import { useIDEStore } from '@/store/useIDEStore';
 import '@xterm/xterm/css/xterm.css';
 
 export function Terminal() {
   const terminalRef = useRef<HTMLDivElement>(null);
   const xtermRef = useRef<XTerm | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
-  const [isWebContainerReady, setIsWebContainerReady] = useState(false);
   const [bootStatus, setBootStatus] = useState<'booting' | 'ready' | 'error'>('booting');
   const commandHistoryRef = useRef<string[]>([]);
   const historyIndexRef = useRef<number>(-1);
@@ -22,21 +23,21 @@ export function Terminal() {
     async function initWebContainer() {
       // Check if already booted (prevents React 18 StrictMode double-boot)
       if (webContainer.isBooted()) {
+        console.log('✅ WebContainer already booted, setting ready state');
         if (!cancelled) {
-          setIsWebContainerReady(true);
           setBootStatus('ready');
         }
         return;
       }
 
+      console.log('🔄 Booting WebContainer...');
       setBootStatus('booting');
       const result = await webContainer.boot();
 
       if (!cancelled) {
         if (result.success) {
-          setIsWebContainerReady(true);
+          console.log('✅ WebContainer boot complete, setting ready state');
           setBootStatus('ready');
-          console.log('✅ WebContainer ready');
         } else {
           setBootStatus('error');
           console.error('❌ WebContainer failed to boot:', result.error);
@@ -56,7 +57,13 @@ export function Terminal() {
   }, []);
 
   useEffect(() => {
-    if (!terminalRef.current || xtermRef.current) return;
+    if (!terminalRef.current) return;
+
+    // Skip if terminal already created (shouldn't happen now that we clear refs in cleanup)
+    if (xtermRef.current) {
+      console.warn('Terminal already exists, skipping creation');
+      return;
+    }
 
     // Create terminal instance
     const xterm = new XTerm({
@@ -95,10 +102,14 @@ export function Terminal() {
     // Open terminal
     xterm.open(terminalRef.current);
 
+    // Focus terminal to enable input
+    xterm.focus();
+
     // Fit after a short delay to ensure DOM is ready
     setTimeout(() => {
       try {
         fitAddon.fit();
+        xterm.focus(); // Focus again after fit
       } catch (err) {
         console.warn('Terminal fit failed, will retry on resize:', err);
       }
@@ -109,10 +120,317 @@ export function Terminal() {
     xterm.writeln('');
     xterm.writeln('WebContainer VM Ready');
     xterm.writeln('Supports: npm, pnpm, node, git, and bash commands');
+    xterm.writeln('Type "help" for available commands');
     xterm.writeln('');
     xterm.write('$ ');
 
+    console.log('✅ Terminal initialized with input handler');
+
     let currentLine = '';
+
+    // Get latest settings from store
+    const getSettings = () => {
+      return useIDEStore.getState().settings;
+    };
+
+    // Handle git commands through isomorphic-git
+    async function handleGitCommand(args: string[], xterm: XTerm) {
+      if (args.length === 0) {
+        xterm.writeln('usage: git <command> [<args>]');
+        xterm.writeln('');
+        xterm.writeln('Common git commands:');
+        xterm.writeln('   status       Show working tree status');
+        xterm.writeln('   branch       List, create branches');
+        xterm.writeln('   checkout     Switch branches');
+        xterm.writeln('   add          Add file contents to staging');
+        xterm.writeln('   commit       Record changes to repository');
+        xterm.writeln('   log          Show commit logs');
+        xterm.writeln('   push         Push to remote');
+        xterm.writeln('   pull         Pull from remote');
+        xterm.writeln('   reset        Unstage changes');
+        xterm.writeln('   diff         Show file changes');
+        xterm.writeln('   remote       Manage remotes');
+        xterm.writeln('   config       Get/set configuration');
+        return;
+      }
+
+      const subcommand = args[0];
+      const subargs = args.slice(1);
+
+      try {
+        switch (subcommand) {
+          case 'status': {
+            const status = await gitService.statusMatrix('/repo');
+            if (status.length === 0) {
+              xterm.writeln('nothing to commit, working tree clean');
+            } else {
+              xterm.writeln('Changes:');
+              for (const file of status) {
+                const statusChar =
+                  file.status === 'added' ? 'A' :
+                  file.status === 'modified' ? 'M' :
+                  file.status === 'deleted' ? 'D' :
+                  file.status === 'unmodified' ? ' ' : '?';
+                xterm.writeln(`  ${statusChar}  ${file.path}`);
+              }
+            }
+            break;
+          }
+
+          case 'branch': {
+            if (subargs.length === 0) {
+              // List branches
+              const result = await gitService.listBranches('/repo');
+              if (result.success && result.data) {
+                for (const branch of result.data) {
+                  const marker = branch.current ? '* ' : '  ';
+                  xterm.writeln(`${marker}${branch.name}`);
+                }
+              } else {
+                xterm.writeln(`error: ${result.error}`);
+              }
+            } else {
+              // Create branch
+              const branchName = subargs[0];
+              const result = await gitService.createBranch(branchName, '/repo');
+              if (result.success) {
+                xterm.writeln(`Created branch '${branchName}'`);
+              } else {
+                xterm.writeln(`error: ${result.error}`);
+              }
+            }
+            break;
+          }
+
+          case 'checkout': {
+            if (subargs.length === 0) {
+              xterm.writeln('error: missing branch name');
+            } else {
+              const branchName = subargs[0];
+              const result = await gitService.checkout(branchName, '/repo');
+              if (result.success) {
+                xterm.writeln(`Switched to branch '${branchName}'`);
+              } else {
+                xterm.writeln(`error: ${result.error}`);
+              }
+            }
+            break;
+          }
+
+          case 'add': {
+            if (subargs.length === 0) {
+              xterm.writeln('error: missing file path');
+            } else if (subargs[0] === '.') {
+              const result = await gitService.addAll('/repo');
+              if (result.success) {
+                xterm.writeln('Added all changes');
+              } else {
+                xterm.writeln(`error: ${result.error}`);
+              }
+            } else {
+              const filepath = subargs[0];
+              const result = await gitService.add(filepath, '/repo');
+              if (result.success) {
+                xterm.writeln(`Added '${filepath}'`);
+              } else {
+                xterm.writeln(`error: ${result.error}`);
+              }
+            }
+            break;
+          }
+
+          case 'commit': {
+            // Parse commit message from -m flag
+            const mIndex = subargs.indexOf('-m');
+            if (mIndex === -1 || mIndex === subargs.length - 1) {
+              xterm.writeln('error: missing commit message (use -m "message")');
+            } else {
+              const message = subargs[mIndex + 1];
+              const currentSettings = getSettings();
+              const author = {
+                name: currentSettings.githubUsername || 'Browser IDE User',
+                email: currentSettings.githubEmail || 'user@browser-ide.dev',
+              };
+              const result = await gitService.commit(message, author, '/repo');
+              if (result.success && result.data) {
+                xterm.writeln(`[${result.data.substring(0, 7)}] ${message}`);
+              } else {
+                xterm.writeln(`error: ${result.error}`);
+              }
+            }
+            break;
+          }
+
+          case 'log': {
+            const commits = await gitService.log('/repo', 10);
+            if (commits.length === 0) {
+              xterm.writeln('No commits yet');
+            } else {
+              for (const commit of commits) {
+                xterm.writeln(`commit ${commit.oid}`);
+                xterm.writeln(`Author: ${commit.author.name} <${commit.author.email}>`);
+                const date = new Date(commit.author.timestamp * 1000);
+                xterm.writeln(`Date:   ${date.toISOString()}`);
+                xterm.writeln('');
+                xterm.writeln(`    ${commit.message}`);
+                xterm.writeln('');
+              }
+            }
+            break;
+          }
+
+          case 'push': {
+            const currentSettings = getSettings();
+            const token = currentSettings.githubToken;
+
+            console.log('🔍 Push - Token check:', {
+              hasToken: !!token,
+              tokenLength: token?.length,
+              tokenPrefix: token?.substring(0, 7)
+            });
+
+            if (!token) {
+              xterm.writeln('error: No GitHub token configured');
+              xterm.writeln('Please set token in Settings > Git Settings');
+            } else {
+              xterm.writeln('Pushing to remote...');
+              const result = await gitService.push(token, 'origin', undefined, '/repo');
+              if (result.success && result.data) {
+                xterm.writeln(`✅ Successfully pushed branch '${result.data}' to origin`);
+              } else {
+                xterm.writeln(`error: ${result.error}`);
+              }
+            }
+            break;
+          }
+
+          case 'pull': {
+            const currentSettings = getSettings();
+            const token = currentSettings.githubToken;
+
+            console.log('🔍 Pull - Token check:', {
+              hasToken: !!token,
+              tokenLength: token?.length,
+              tokenPrefix: token?.substring(0, 7)
+            });
+
+            if (!token) {
+              xterm.writeln('error: No GitHub token configured');
+              xterm.writeln('Please set token in Settings > Git Settings');
+            } else {
+              xterm.writeln('Pulling from remote...');
+              const result = await gitService.pull(token, 'origin', undefined, '/repo');
+              if (result.success && result.data) {
+                xterm.writeln(`✅ Successfully pulled branch '${result.data}' from origin`);
+              } else {
+                xterm.writeln(`error: ${result.error}`);
+              }
+            }
+            break;
+          }
+
+          case 'reset': {
+            // git reset [<file>] - Unstage file(s)
+            if (subargs.length === 0) {
+              // Reset all staged files
+              const result = await gitService.resetFiles('/repo');
+              if (result.success) {
+                xterm.writeln('Unstaged all changes');
+              } else {
+                xterm.writeln(`error: ${result.error}`);
+              }
+            } else {
+              // Reset specific file
+              const filepath = subargs[0] === 'HEAD' ? subargs[1] : subargs[0];
+              if (!filepath) {
+                xterm.writeln('error: missing file path');
+              } else {
+                const result = await gitService.resetFiles('/repo', [filepath]);
+                if (result.success) {
+                  xterm.writeln(`Unstaged '${filepath}'`);
+                } else {
+                  xterm.writeln(`error: ${result.error}`);
+                }
+              }
+            }
+            break;
+          }
+
+          case 'diff': {
+            // git diff [<file>] - Show changes
+            if (subargs.length === 0) {
+              xterm.writeln('usage: git diff <file>');
+            } else {
+              const filepath = subargs[0];
+              const result = await gitService.diff('/repo', filepath);
+              if (result.success && result.data) {
+                xterm.writeln(result.data);
+              } else {
+                xterm.writeln(`error: ${result.error || 'No changes'}`);
+              }
+            }
+            break;
+          }
+
+          case 'remote': {
+            // git remote [-v]
+            const remotes = await gitService.listRemotes('/repo');
+            if (remotes.length === 0) {
+              xterm.writeln('No remotes configured');
+            } else {
+              const verbose = subargs.includes('-v');
+              for (const { remote, url } of remotes) {
+                if (verbose) {
+                  xterm.writeln(`${remote}\t${url} (fetch)`);
+                  xterm.writeln(`${remote}\t${url} (push)`);
+                } else {
+                  xterm.writeln(remote);
+                }
+              }
+            }
+            break;
+          }
+
+          case 'config': {
+            // git config <key> [<value>]
+            if (subargs.length === 0) {
+              xterm.writeln('usage: git config <key> [<value>]');
+            } else {
+              const key = subargs[0];
+              if (subargs.length === 1) {
+                // Get config
+                const value = await gitService.getConfig(key, '/repo');
+                if (value) {
+                  xterm.writeln(value);
+                } else {
+                  xterm.writeln(`No value set for '${key}'`);
+                }
+              } else {
+                // Set config
+                const value = subargs.slice(1).join(' ');
+                const result = await gitService.setConfig(key, value, '/repo');
+                if (result.success) {
+                  xterm.writeln(`Set ${key} = ${value}`);
+                } else {
+                  xterm.writeln(`error: ${result.error}`);
+                }
+              }
+            }
+            break;
+          }
+
+          default:
+            xterm.writeln(`git: '${subcommand}' is not a git command. See 'git --help'.`);
+            xterm.writeln('');
+            xterm.writeln('Supported commands:');
+            xterm.writeln('  status, branch, checkout, add, commit, log');
+            xterm.writeln('  push, pull, reset, diff, remote, config');
+            break;
+        }
+      } catch (error: any) {
+        xterm.writeln(`error: ${error.message}`);
+      }
+    }
 
     // Execute command
     async function executeCommand(command: string) {
@@ -148,7 +466,23 @@ export function Terminal() {
           xterm.writeln('  node     - Run Node.js');
           xterm.writeln('  npm      - Node package manager');
           xterm.writeln('  pnpm     - Fast npm alternative');
-          xterm.writeln('  git      - Git version control');
+          xterm.writeln('  git      - Git version control (via isomorphic-git)');
+          xterm.writeln('');
+          xterm.writeln('Git commands:');
+          xterm.writeln('  git status              - Show working tree status');
+          xterm.writeln('  git branch              - List branches');
+          xterm.writeln('  git branch <name>       - Create new branch');
+          xterm.writeln('  git checkout <name>     - Switch branches');
+          xterm.writeln('  git add <file>          - Stage file');
+          xterm.writeln('  git add .               - Stage all files');
+          xterm.writeln('  git commit -m "msg"     - Commit changes');
+          xterm.writeln('  git log                 - Show commit history');
+          xterm.writeln('  git push                - Push to remote');
+          xterm.writeln('  git pull                - Pull from remote');
+          xterm.writeln('  git reset [<file>]      - Unstage file(s)');
+          xterm.writeln('  git diff <file>         - Show file changes');
+          xterm.writeln('  git remote [-v]         - List remotes');
+          xterm.writeln('  git config <key> [val]  - Get/set config');
           xterm.writeln('');
           xterm.writeln('Use ↑/↓ arrows to navigate command history');
           xterm.writeln('Use Ctrl+C to cancel running command');
@@ -156,12 +490,22 @@ export function Terminal() {
           return;
         }
 
-        // Execute via WebContainer
-        if (!isWebContainerReady) {
+        // Special handling for 'git' commands
+        if (cmd === 'git') {
+          await handleGitCommand(args, xterm);
+          xterm.write('\r\n$ ');
+          return;
+        }
+
+        // Execute via WebContainer - check actual boot status, not local state
+        if (!webContainer.isBooted()) {
+          console.log('⚠️ Command blocked: WebContainer not booted yet');
           xterm.writeln('⚠️  WebContainer is still booting...');
           xterm.write('$ ');
           return;
         }
+
+        console.log('✅ Executing command:', cmd, args);
 
         const result = await webContainer.spawn(cmd, args);
 
@@ -231,6 +575,7 @@ export function Terminal() {
     // Handle input
     xterm.onData((data) => {
       const code = data.charCodeAt(0);
+      console.log('Terminal input received:', { data, code });
 
       // Enter key
       if (code === 13) {
@@ -334,6 +679,8 @@ export function Terminal() {
     return () => {
       resizeObserver.disconnect();
       xterm.dispose();
+      xtermRef.current = null;
+      fitAddonRef.current = null;
     };
   }, []);
 
@@ -364,8 +711,14 @@ export function Terminal() {
       </div>
       <div
         ref={terminalRef}
-        className="terminal-content flex-1 p-2"
-        style={{ height: '100%' }}
+        className="terminal-content flex-1 overflow-hidden"
+        style={{ height: '100%', padding: '12px' }}
+        onClick={() => {
+          // Focus terminal when clicked
+          if (xtermRef.current) {
+            xtermRef.current.focus();
+          }
+        }}
       />
     </div>
   );

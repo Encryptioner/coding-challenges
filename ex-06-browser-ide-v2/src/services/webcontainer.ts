@@ -210,7 +210,8 @@ class WebContainerService {
   }
 
   isBooted(): boolean {
-    return this.instance !== null;
+    // Only return true if instance exists AND not currently booting
+    return this.instance !== null && this.bootPromise === null;
   }
 
   async teardown(): Promise<void> {

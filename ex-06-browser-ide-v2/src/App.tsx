@@ -15,6 +15,8 @@ import {
 } from '@/components/IDE';
 import { SourceControlPanel } from '@/components/Git';
 import { useIDEStore } from '@/store/useIDEStore';
+import { gitService } from '@/services/git';
+import { fileSystem } from '@/services/filesystem';
 import { logger } from '@/utils/logger';
 import { config } from '@/config/environment';
 
@@ -54,6 +56,32 @@ function App() {
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setInstalled(true);
     }
+
+    // Initialize git repository if it exists
+    async function initGitIfExists() {
+      try {
+        // Check if /repo directory exists
+        const fs = fileSystem.getFS();
+        const stats = await fs.promises.stat('/repo').catch(() => null);
+
+        if (stats && stats.isDirectory()) {
+          console.log('📂 Found existing repository, initializing git state...');
+          const result = await gitService.initializeRepository('/repo');
+
+          if (result.success && result.data) {
+            console.log(`✅ Git initialized: branch=${result.data.currentBranch}, files=${result.data.gitStatus.length}, commits=${result.data.commits.length}`);
+          } else {
+            console.warn('⚠️ Git initialization failed:', result.error);
+          }
+        } else {
+          console.log('ℹ️ No repository found at /repo');
+        }
+      } catch (error) {
+        console.error('❌ Error checking for repository:', error);
+      }
+    }
+
+    initGitIfExists();
 
     // Listen for install prompt
     const handleBeforeInstallPrompt = (e: Event) => {
