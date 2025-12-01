@@ -23,6 +23,31 @@ export interface GitCloneProgress {
 class GitService {
   private corsProxy = 'https://cors.isomorphic-git.org';
 
+  // Alternative getCurrentBranch method to avoid parameter collision
+  private async getCurrentBranchNameFs(directory?: string): Promise<string | null> {
+    try {
+      return await git.currentBranch({
+        fs: fileSystem.getFS(),
+        dir,
+      });
+    } catch (error) {
+      console.error('Get current branch error:', error);
+      return null;
+    }
+  }
+
+  // Update initializeRepository to use the new method
+  async initializeRepository(dir = dir ?? fileSystem.getCurrentWorkingDirectory()): Promise<GitResult<{
+    currentBranch: string;
+    gitStatus: GitStatus[];
+    commits: GitCommit[];
+  }>> {
+    try {
+      // Get current branch
+      const branch = await this.getCurrentBranchNameFs(dir);
+
+      // Get git status
+
   async clone(
     url: string,
     token: string,
