@@ -5,6 +5,7 @@ import { WebLinksAddon } from '@xterm/addon-web-links';
 import { webContainer } from '@/services/webcontainer';
 import { gitService } from '@/services/git';
 import { useIDEStore } from '@/store/useIDEStore';
+import { fileSystem } from '@/services/filesystem';
 import '@xterm/xterm/css/xterm.css';
 
 export function Terminal() {
@@ -133,6 +134,170 @@ export function Terminal() {
       return useIDEStore.getState().settings;
     };
 
+    // Handle file system commands
+    async function handleLsCommand(_args: string[], xterm: XTerm) {
+      const result = await fileSystem.listCurrentDirectory();
+
+      if (result.success && result.data) {
+        for (const item of result.data) {
+          const icon = item.type === 'directory' ? '📁' : '📄';
+          const name = item.type === 'directory' ? `${item.name}/` : item.name;
+          xterm.writeln(`${icon} ${name}`);
+        }
+      } else {
+        xterm.writeln(`ls: ${result.error || 'failed to list directory'}`);
+      }
+    }
+
+    async function handlePwdCommand(_args: string[], xterm: XTerm) {
+      const currentDir = fileSystem.getCurrentWorkingDirectory();
+      xterm.writeln(currentDir);
+    }
+
+    async function handleCdCommand(args: string[], xterm: XTerm) {
+      if (args.length === 0) {
+        // cd to home directory (/)
+        const result = await fileSystem.changeDirectory('/');
+        if (result.success) {
+          xterm.writeln(`Changed to directory: ${result.data}`);
+        } else {
+          xterm.writeln(`cd: ${result.error}`);
+        }
+      } else {
+        const path = args[0];
+        const result = await fileSystem.changeDirectory(path);
+        if (result.success) {
+          xterm.writeln(`Changed to directory: ${result.data}`);
+        } else {
+          xterm.writeln(`cd: ${result.error}`);
+        }
+      }
+    }
+
+    async function handleMkdirCommand(args: string[], xterm: XTerm) {
+      if (args.length === 0) {
+        xterm.writeln('mkdir: missing operand');
+        return;
+      }
+
+      const dirName = args[0];
+      const result = await fileSystem.createDirectory(dirName);
+      if (result.success) {
+        xterm.writeln(`Created directory: ${dirName}`);
+      } else {
+        xterm.writeln(`mkdir: ${result.error}`);
+      }
+    }
+
+    async function handleRmCommand(args: string[], xterm: XTerm) {
+      if (args.length === 0) {
+        xterm.writeln('rm: missing operand');
+        return;
+      }
+
+      const path = args[0];
+      const result = await fileSystem.deletePath(path);
+      if (result.success) {
+        xterm.writeln(`Removed: ${path}`);
+      } else {
+        xterm.writeln(`rm: ${result.error}`);
+      }
+    }
+
+    async function handleMvCommand(args: string[], xterm: XTerm) {
+      if (args.length < 2) {
+        xterm.writeln('mv: missing file operand');
+        xterm.writeln('usage: mv <source> <destination>');
+        return;
+      }
+
+      const source = args[0];
+      const dest = args[1];
+
+      // Read source file
+      const readResult = await fileSystem.readFile(source);
+      if (!readResult.success) {
+        xterm.writeln(`mv: ${readResult.error}`);
+        return;
+      }
+
+      // Write to destination
+      const writeResult = await fileSystem.writeFile(dest, readResult.data!);
+      if (!writeResult.success) {
+        xterm.writeln(`mv: ${writeResult.error}`);
+        return;
+      }
+
+      // Remove source
+      const deleteResult = await fileSystem.deletePath(source);
+      if (!deleteResult.success) {
+        xterm.writeln(`mv: warning - could not remove source: ${deleteResult.error}`);
+      }
+
+      xterm.writeln(`Moved: ${source} -> ${dest}`);
+    }
+
+    async function handleCpCommand(args: string[], xterm: XTerm) {
+      if (args.length < 2) {
+        xterm.writeln('cp: missing file operand');
+        xterm.writeln('usage: cp <source> <destination>');
+        return;
+      }
+
+      const source = args[0];
+      const dest = args[1];
+
+      // Read source file
+      const readResult = await fileSystem.readFile(source);
+      if (!readResult.success) {
+        xterm.writeln(`cp: ${readResult.error}`);
+        return;
+      }
+
+      // Write to destination
+      const writeResult = await fileSystem.writeFile(dest, readResult.data!);
+      if (!writeResult.success) {
+        xterm.writeln(`cp: ${writeResult.error}`);
+        return;
+      }
+
+      xterm.writeln(`Copied: ${source} -> ${dest}`);
+    }
+
+    async function handleCatCommand(args: string[], xterm: XTerm) {
+      if (args.length === 0) {
+        xterm.writeln('cat: missing file operand');
+        return;
+      }
+
+      const path = args[0];
+      const result = await fileSystem.readFile(path);
+      if (result.success && result.data) {
+        // Split content into lines and write each line
+        const lines = result.data.split('\n');
+        for (const line of lines) {
+          xterm.writeln(line);
+        }
+      } else {
+        xterm.writeln(`cat: ${result.error}`);
+      }
+    }
+
+    async function handleTouchCommand(args: string[], xterm: XTerm) {
+      if (args.length === 0) {
+        xterm.writeln('touch: missing file operand');
+        return;
+      }
+
+      const fileName = args[0];
+      const result = await fileSystem.writeFile(fileName, '');
+      if (result.success) {
+        xterm.writeln(`Created file: ${fileName}`);
+      } else {
+        xterm.writeln(`touch: ${result.error}`);
+      }
+    }
+
     // Handle git commands through isomorphic-git
     async function handleGitCommand(args: string[], xterm: XTerm) {
       if (args.length === 0) {
@@ -160,7 +325,7 @@ export function Terminal() {
       try {
         switch (subcommand) {
           case 'status': {
-            const status = await gitService.statusMatrix('/repo');
+            const status = await gitService.statusMatrix(fileSystem.getCurrentWorkingDirectory());
             if (status.length === 0) {
               xterm.writeln('nothing to commit, working tree clean');
             } else {
@@ -180,7 +345,7 @@ export function Terminal() {
           case 'branch': {
             if (subargs.length === 0) {
               // List branches
-              const result = await gitService.listBranches('/repo');
+              const result = await gitService.listBranches(fileSystem.getCurrentWorkingDirectory());
               if (result.success && result.data) {
                 for (const branch of result.data) {
                   const marker = branch.current ? '* ' : '  ';
@@ -192,7 +357,7 @@ export function Terminal() {
             } else {
               // Create branch
               const branchName = subargs[0];
-              const result = await gitService.createBranch(branchName, '/repo');
+              const result = await gitService.createBranch(branchName, fileSystem.getCurrentWorkingDirectory());
               if (result.success) {
                 xterm.writeln(`Created branch '${branchName}'`);
               } else {
@@ -207,7 +372,7 @@ export function Terminal() {
               xterm.writeln('error: missing branch name');
             } else {
               const branchName = subargs[0];
-              const result = await gitService.checkout(branchName, '/repo');
+              const result = await gitService.checkout(branchName, fileSystem.getCurrentWorkingDirectory());
               if (result.success) {
                 xterm.writeln(`Switched to branch '${branchName}'`);
               } else {
@@ -221,7 +386,7 @@ export function Terminal() {
             if (subargs.length === 0) {
               xterm.writeln('error: missing file path');
             } else if (subargs[0] === '.') {
-              const result = await gitService.addAll('/repo');
+              const result = await gitService.addAll(fileSystem.getCurrentWorkingDirectory());
               if (result.success) {
                 xterm.writeln('Added all changes');
               } else {
@@ -229,7 +394,7 @@ export function Terminal() {
               }
             } else {
               const filepath = subargs[0];
-              const result = await gitService.add(filepath, '/repo');
+              const result = await gitService.add(filepath, fileSystem.getCurrentWorkingDirectory());
               if (result.success) {
                 xterm.writeln(`Added '${filepath}'`);
               } else {
@@ -251,7 +416,7 @@ export function Terminal() {
                 name: currentSettings.githubUsername || 'Browser IDE User',
                 email: currentSettings.githubEmail || 'user@browser-ide.dev',
               };
-              const result = await gitService.commit(message, author, '/repo');
+              const result = await gitService.commit(message, author, fileSystem.getCurrentWorkingDirectory());
               if (result.success && result.data) {
                 xterm.writeln(`[${result.data.substring(0, 7)}] ${message}`);
               } else {
@@ -262,7 +427,7 @@ export function Terminal() {
           }
 
           case 'log': {
-            const commits = await gitService.log('/repo', 10);
+            const commits = await gitService.log(fileSystem.getCurrentWorkingDirectory(), 10);
             if (commits.length === 0) {
               xterm.writeln('No commits yet');
             } else {
@@ -294,7 +459,7 @@ export function Terminal() {
               xterm.writeln('Please set token in Settings > Git Settings');
             } else {
               xterm.writeln('Pushing to remote...');
-              const result = await gitService.push(token, 'origin', undefined, '/repo');
+              const result = await gitService.push(token, 'origin', undefined, fileSystem.getCurrentWorkingDirectory());
               if (result.success && result.data) {
                 xterm.writeln(`✅ Successfully pushed branch '${result.data}' to origin`);
               } else {
@@ -319,7 +484,7 @@ export function Terminal() {
               xterm.writeln('Please set token in Settings > Git Settings');
             } else {
               xterm.writeln('Pulling from remote...');
-              const result = await gitService.pull(token, 'origin', undefined, '/repo');
+              const result = await gitService.pull(token, 'origin', undefined, fileSystem.getCurrentWorkingDirectory());
               if (result.success && result.data) {
                 xterm.writeln(`✅ Successfully pulled branch '${result.data}' from origin`);
               } else {
@@ -333,7 +498,7 @@ export function Terminal() {
             // git reset [<file>] - Unstage file(s)
             if (subargs.length === 0) {
               // Reset all staged files
-              const result = await gitService.resetFiles('/repo');
+              const result = await gitService.resetFiles(fileSystem.getCurrentWorkingDirectory());
               if (result.success) {
                 xterm.writeln('Unstaged all changes');
               } else {
@@ -345,7 +510,7 @@ export function Terminal() {
               if (!filepath) {
                 xterm.writeln('error: missing file path');
               } else {
-                const result = await gitService.resetFiles('/repo', [filepath]);
+                const result = await gitService.resetFiles(fileSystem.getCurrentWorkingDirectory(), [filepath]);
                 if (result.success) {
                   xterm.writeln(`Unstaged '${filepath}'`);
                 } else {
@@ -362,7 +527,7 @@ export function Terminal() {
               xterm.writeln('usage: git diff <file>');
             } else {
               const filepath = subargs[0];
-              const result = await gitService.diff('/repo', filepath);
+              const result = await gitService.diff(fileSystem.getCurrentWorkingDirectory(), filepath);
               if (result.success && result.data) {
                 xterm.writeln(result.data);
               } else {
@@ -374,7 +539,7 @@ export function Terminal() {
 
           case 'remote': {
             // git remote [-v]
-            const remotes = await gitService.listRemotes('/repo');
+            const remotes = await gitService.listRemotes(fileSystem.getCurrentWorkingDirectory());
             if (remotes.length === 0) {
               xterm.writeln('No remotes configured');
             } else {
@@ -399,7 +564,7 @@ export function Terminal() {
               const key = subargs[0];
               if (subargs.length === 1) {
                 // Get config
-                const value = await gitService.getConfig(key, '/repo');
+                const value = await gitService.getConfig(key, fileSystem.getCurrentWorkingDirectory());
                 if (value) {
                   xterm.writeln(value);
                 } else {
@@ -408,7 +573,7 @@ export function Terminal() {
               } else {
                 // Set config
                 const value = subargs.slice(1).join(' ');
-                const result = await gitService.setConfig(key, value, '/repo');
+                const result = await gitService.setConfig(key, value, fileSystem.getCurrentWorkingDirectory());
                 if (result.success) {
                   xterm.writeln(`Set ${key} = ${value}`);
                 } else {
@@ -461,14 +626,19 @@ export function Terminal() {
         // Special handling for 'help'
         if (cmd === 'help') {
           xterm.writeln('Available commands:');
-          xterm.writeln('  clear    - Clear terminal');
-          xterm.writeln('  help     - Show this help');
-          xterm.writeln('  node     - Run Node.js');
-          xterm.writeln('  npm      - Node package manager');
-          xterm.writeln('  pnpm     - Fast npm alternative');
-          xterm.writeln('  git      - Git version control (via isomorphic-git)');
           xterm.writeln('');
-          xterm.writeln('Git commands:');
+          xterm.writeln('File System:');
+          xterm.writeln('  ls [path]              - List directory contents');
+          xterm.writeln('  pwd                     - Show current directory');
+          xterm.writeln('  cd [path]              - Change directory');
+          xterm.writeln('  mkdir <dir>             - Create directory');
+          xterm.writeln('  rm <path>               - Remove file or directory');
+          xterm.writeln('  mv <src> <dest>         - Move/rename file');
+          xterm.writeln('  cp <src> <dest>         - Copy file');
+          xterm.writeln('  cat <file>              - Display file contents');
+          xterm.writeln('  touch <file>             - Create empty file');
+          xterm.writeln('');
+          xterm.writeln('Git:');
           xterm.writeln('  git status              - Show working tree status');
           xterm.writeln('  git branch              - List branches');
           xterm.writeln('  git branch <name>       - Create new branch');
@@ -484,6 +654,13 @@ export function Terminal() {
           xterm.writeln('  git remote [-v]         - List remotes');
           xterm.writeln('  git config <key> [val]  - Get/set config');
           xterm.writeln('');
+          xterm.writeln('WebContainer:');
+          xterm.writeln('  clear    - Clear terminal');
+          xterm.writeln('  help     - Show this help');
+          xterm.writeln('  node     - Run Node.js');
+          xterm.writeln('  npm      - Node package manager');
+          xterm.writeln('  pnpm     - Fast npm alternative');
+          xterm.writeln('');
           xterm.writeln('Use ↑/↓ arrows to navigate command history');
           xterm.writeln('Use Ctrl+C to cancel running command');
           xterm.write('\r\n$ ');
@@ -493,6 +670,61 @@ export function Terminal() {
         // Special handling for 'git' commands
         if (cmd === 'git') {
           await handleGitCommand(args, xterm);
+          xterm.write('\r\n$ ');
+          return;
+        }
+
+        // File system commands
+        if (cmd === 'ls') {
+          await handleLsCommand(args, xterm);
+          xterm.write('\r\n$ ');
+          return;
+        }
+
+        if (cmd === 'pwd') {
+          await handlePwdCommand(args, xterm);
+          xterm.write('\r\n$ ');
+          return;
+        }
+
+        if (cmd === 'cd') {
+          await handleCdCommand(args, xterm);
+          xterm.write('\r\n$ ');
+          return;
+        }
+
+        if (cmd === 'mkdir') {
+          await handleMkdirCommand(args, xterm);
+          xterm.write('\r\n$ ');
+          return;
+        }
+
+        if (cmd === 'rm') {
+          await handleRmCommand(args, xterm);
+          xterm.write('\r\n$ ');
+          return;
+        }
+
+        if (cmd === 'mv') {
+          await handleMvCommand(args, xterm);
+          xterm.write('\r\n$ ');
+          return;
+        }
+
+        if (cmd === 'cp') {
+          await handleCpCommand(args, xterm);
+          xterm.write('\r\n$ ');
+          return;
+        }
+
+        if (cmd === 'cat') {
+          await handleCatCommand(args, xterm);
+          xterm.write('\r\n$ ');
+          return;
+        }
+
+        if (cmd === 'touch') {
+          await handleTouchCommand(args, xterm);
           xterm.write('\r\n$ ');
           return;
         }

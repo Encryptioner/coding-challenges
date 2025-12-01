@@ -4,7 +4,7 @@ import { useIDEStore } from '@/store/useIDEStore';
 import type { FileNode } from '@/types';
 
 export function FileExplorer() {
-  const [expandedDirs, setExpandedDirs] = useState(new Set(['/repo']));
+  const [expandedDirs, setExpandedDirs] = useState(new Set(['/']));
   const {
     fileTree,
     currentFile,
@@ -13,12 +13,16 @@ export function FileExplorer() {
     setFileTree,
   } = useIDEStore();
 
+  // Get current working directory
+  const currentDirectory = fileSystem.getCurrentWorkingDirectory();
+
   useEffect(() => {
     loadFileTree();
   }, []);
 
   async function loadFileTree() {
-    const tree = await fileSystem.buildFileTree('/repo', 5);
+    const currentDir = fileSystem.getCurrentWorkingDirectory();
+    const tree = await fileSystem.buildFileTree(currentDir, 5);
     setFileTree(tree);
   }
 
@@ -35,8 +39,24 @@ export function FileExplorer() {
   }
 
   function handleFileClick(file: FileNode) {
-    setCurrentFile(file.path);
-    addOpenFile(file.path);
+    if (file.type === 'directory') {
+      // Change to directory
+      fileSystem.changeDirectory(file.path);
+      setExpandedDirs(new Set([file.path]));
+    } else {
+      // Open file
+      setCurrentFile(file.path);
+      addOpenFile(file.path);
+    }
+  }
+
+  function handleDirectoryUp() {
+    const currentPath = fileSystem.getCurrentWorkingDirectory();
+    if (currentPath !== '/') {
+      const parentPath = currentPath.split('/').slice(0, -2).join('/') || '/';
+      fileSystem.changeDirectory(parentPath);
+      setExpandedDirs(new Set([parentPath]));
+    }
   }
 
   function getFileIcon(filename: string): string {
@@ -100,15 +120,38 @@ export function FileExplorer() {
 
   return (
     <div className="file-explorer flex flex-col h-full bg-gray-800 text-gray-100">
-      <div className="panel-header flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-700">
-        <h3 className="text-xs font-semibold text-gray-400 uppercase">Explorer</h3>
-        <button
-          onClick={loadFileTree}
-          title="Refresh"
-          className="text-gray-400 hover:text-gray-100 text-sm"
-        >
-          ↻
-        </button>
+      <div className="panel-header flex flex-col gap-2 px-4 py-2 bg-gray-900 border-b border-gray-700">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase">Explorer</h3>
+          <button
+            onClick={loadFileTree}
+            title="Refresh"
+            className="text-gray-400 hover:text-gray-100 text-sm"
+          >
+            ↻
+          </button>
+        </div>
+        {/* Navigation Bar */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleDirectoryUp}
+            disabled={currentDirectory === '/'}
+            className="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed rounded"
+            title="Go up directory"
+          >
+            ↑
+          </button>
+          <div className="flex-1 px-2 py-1 text-xs bg-gray-700 rounded text-gray-100 font-mono">
+            {currentDirectory === '/' ? '/' : currentDirectory}
+          </div>
+          <button
+            onClick={() => fileSystem.changeDirectory('/')}
+            className="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded"
+            title="Go to root"
+          >
+            🏠
+          </button>
+        </div>
       </div>
       <div className="tree flex-1 overflow-auto p-2">
         {fileTree.length > 0 ? (

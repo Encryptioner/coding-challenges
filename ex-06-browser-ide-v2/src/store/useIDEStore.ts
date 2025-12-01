@@ -88,6 +88,10 @@ interface IDEState {
   markFileSaved: (file: string) => void;
   setFileTree: (tree: FileNode[]) => void;
 
+  // Actions - Directory Navigation
+  changeDirectory: (path: string) => void;
+  getCurrentDirectory: () => string,
+
   // Actions - Git
   setCurrentRepo: (repo: string | null) => void;
   setCurrentBranch: (branch: string) => void;

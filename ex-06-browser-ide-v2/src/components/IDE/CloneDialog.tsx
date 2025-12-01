@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { gitService } from '@/services/git';
 import { useIDEStore } from '@/store/useIDEStore';
+import { fileSystem } from '@/services/filesystem';
 
 interface CloneDialogProps {
   onClose: () => void;
@@ -31,20 +32,30 @@ export function CloneDialog({ onClose }: CloneDialogProps) {
     );
 
     if (result.success) {
-      const repoName = repoUrl.split('/').pop() || repoUrl;
-      addRecentProject({ url: repoUrl, name: repoName, path: '/repo' });
+      const repoName = repoUrl.split('/').pop()?.replace('.git', '') || 'repo';
+      const clonedPath = result.data || '/repo'; // Use fallback if data is undefined
+
+      // Add to recent projects with correct path
+      addRecentProject({ url: repoUrl, name: repoName, path: clonedPath });
 
       // Initialize repository to load actual branch and status
       setProgress('Loading repository state...');
-      const initResult = await gitService.initializeRepository('/repo');
+      const initResult = await gitService.initializeRepository(clonedPath);
 
       if (initResult.success) {
         alert(`Repository cloned successfully! Branch: ${initResult.data?.currentBranch}`);
+
+        // Change to the cloned directory
+        const changeResult = await fileSystem.changeDirectory(clonedPath);
+        if (changeResult.success) {
+          console.log(`Changed to cloned directory: ${clonedPath}`);
+        }
       } else {
         alert('Repository cloned but failed to initialize state');
       }
 
       onClose();
+      // Reload to refresh file tree and store state
       window.location.reload();
     } else {
       alert('Failed to clone: ' + result.error);
