@@ -1,23 +1,42 @@
 import { useState, useEffect, useRef } from 'react';
 import { useIDEStore } from '@/store/useIDEStore';
 import { gitService } from '@/services/git';
+import { linterService } from '@/services/linter';
 import type { GitBranch } from '@/types';
 
 export function StatusBar() {
-  const { currentFile, currentBranch, gitStatus, setCurrentBranch } = useIDEStore();
+  const { currentFile, currentBranch, gitStatus, setCurrentBranch, currentRepo } = useIDEStore();
   const [showBranchMenu, setShowBranchMenu] = useState(false);
   const [branches, setBranches] = useState<GitBranch[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showCreateBranch, setShowCreateBranch] = useState(false);
   const [newBranchName, setNewBranchName] = useState('');
+  const [lintProblems, setLintProblems] = useState({ errors: 0, warnings: 0, info: 0 });
+  const [isGitRepo, setIsGitRepo] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Check if git is initialized
+  useEffect(() => {
+    const checkGitRepo = async () => {
+      if (currentRepo) {
+        setIsGitRepo(true);
+        // Load branches for the current repository
+        loadBranches();
+      } else {
+        setIsGitRepo(false);
+        setBranches([]);
+      }
+    };
+
+    checkGitRepo();
+  }, [currentRepo]);
 
   // Load branches when menu opens
   useEffect(() => {
-    if (showBranchMenu && branches.length === 0) {
+    if (showBranchMenu && isGitRepo && branches.length === 0) {
       loadBranches();
     }
-  }, [showBranchMenu]);
+  }, [showBranchMenu, isGitRepo]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -86,8 +105,9 @@ export function StatusBar() {
   return (
     <div className="statusbar flex items-center justify-between px-2 sm:px-4 py-1 bg-blue-600 text-white text-xs">
       <div className="statusbar-left flex items-center gap-2 sm:gap-4">
-        {/* Branch Switcher */}
-        <div className="branch-selector relative" ref={menuRef}>
+        {/* Branch Switcher - Only show if git repository is initialized */}
+        {isGitRepo && (
+          <div className="branch-selector relative" ref={menuRef}>
           <button
             onClick={() => setShowBranchMenu(!showBranchMenu)}
             className="flex items-center gap-1 px-2 py-1 hover:bg-blue-700 rounded transition-colors"
@@ -226,14 +246,15 @@ export function StatusBar() {
             </div>
           )}
         </div>
+        )}
 
         {/* Current file */}
         {currentFile && (
           <span className="status-item hidden sm:inline">📄 {currentFile.split('/').pop()}</span>
         )}
 
-        {/* Git changes indicator */}
-        {changedFilesCount > 0 && (
+        {/* Git changes indicator - Only show if git repository is initialized */}
+        {isGitRepo && changedFilesCount > 0 && (
           <span className="status-item flex items-center gap-1 bg-yellow-500 bg-opacity-20 px-2 py-0.5 rounded">
             <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
             <span className="hidden sm:inline">{changedFilesCount} {changedFilesCount === 1 ? 'change' : 'changes'}</span>

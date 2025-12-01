@@ -16,7 +16,22 @@ export default {
         'text-secondary': '#858585',
         'accent': '#007acc',
       },
+      touchAction: {
+        'manipulation': 'manipulation',
+      },
+      spacing: {
+        '44': '11rem',
+      },
     },
   },
-  plugins: [],
+  plugins: [
+    // Add plugin for touch-manipulation utility
+    function({ addUtilities }) {
+      addUtilities({
+        '.touch-manipulation': {
+          'touch-action': 'manipulation',
+        },
+      });
+    },
+  ],
 }

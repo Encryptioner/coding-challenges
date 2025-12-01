@@ -9,3 +9,5 @@ export { AIAssistant } from './AIAssistant';
 export { ClaudeCodePanel } from './ClaudeCodePanel';
 export { ExtensionsPanel } from './ExtensionsPanel';
 export { WorkspaceSwitcher } from './WorkspaceSwitcher';
+export { CommandPalette } from './CommandPalette';
+export { SearchPanel } from './SearchPanel';

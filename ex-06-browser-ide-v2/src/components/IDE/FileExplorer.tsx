@@ -86,18 +86,22 @@ export function FileExplorer() {
       <div
         key={item.path}
         className="tree-item"
-        style={{ paddingLeft: `${level * 12}px` }}
+        style={{ paddingLeft: `${level * (window.innerWidth < 768 ? 16 : 12)}px` }}
       >
         {item.type === 'directory' ? (
           <>
             <div
-              className="tree-item-row directory cursor-pointer hover:bg-gray-700"
+              className={`tree-item-row directory cursor-pointer hover:bg-gray-700 touch-manipulation ${
+                window.innerWidth < 768 ? 'py-3 px-2 min-h-[44px]' : 'py-2'
+              }`}
               onClick={() => toggleDir(item.path)}
             >
-              <span className="icon">
+              <span className="icon text-lg sm:text-base">
                 {expandedDirs.has(item.path) ? '📂' : '📁'}
               </span>
-              <span className="name ml-2">{item.name}</span>
+              <span className={`name ml-2 text-sm sm:text-xs ${window.innerWidth < 768 ? 'truncate block' : ''}`}>
+                {item.name}
+              </span>
             </div>
             {expandedDirs.has(item.path) && item.children && (
               <div className="children">{renderTree(item.children, level + 1)}</div>
@@ -105,13 +109,15 @@ export function FileExplorer() {
           </>
         ) : (
           <div
-            className={`tree-item-row file cursor-pointer hover:bg-gray-700 ${
+            className={`tree-item-row file cursor-pointer hover:bg-gray-700 touch-manipulation ${
               currentFile === item.path ? 'active bg-blue-600' : ''
-            }`}
+            } ${window.innerWidth < 768 ? 'py-3 px-2 min-h-[44px]' : 'py-2'}`}
             onClick={() => handleFileClick(item)}
           >
-            <span className="icon">{getFileIcon(item.name)}</span>
-            <span className="name ml-2">{item.name}</span>
+            <span className="icon text-lg sm:text-base">{getFileIcon(item.name)}</span>
+            <span className={`name ml-2 text-sm sm:text-xs ${window.innerWidth < 768 ? 'truncate block' : ''}`}>
+              {item.name}
+            </span>
           </div>
         )}
       </div>

@@ -24,12 +24,12 @@ class GitService {
   private corsProxy = 'https://cors.isomorphic-git.org';
 
   // Alternative getCurrentBranch method to avoid parameter collision
-  private async getCurrentBranchNameFs(directory?: string): Promise<string | null> {
+  private async getCurrentBranchNameFs(dir?: string): Promise<string | null> {
     try {
       return await git.currentBranch({
         fs: fileSystem.getFS(),
         dir,
-      });
+      }) || null;
     } catch (error) {
       console.error('Get current branch error:', error);
       return null;
@@ -37,7 +37,7 @@ class GitService {
   }
 
   // Update initializeRepository to use the new method
-  async initializeRepository(dir = dir ?? fileSystem.getCurrentWorkingDirectory()): Promise<GitResult<{
+  async initializeRepository(dir = fileSystem.getCurrentWorkingDirectory()): Promise<GitResult<{
     currentBranch: string;
     gitStatus: GitStatus[];
     commits: GitCommit[];
@@ -45,8 +45,46 @@ class GitService {
     try {
       // Get current branch
       const branch = await this.getCurrentBranchNameFs(dir);
+      if (!branch) {
+        return {
+          success: false,
+          error: 'Could not determine current branch',
+        };
+      }
 
       // Get git status
+      const allStatus = await this.statusMatrix(dir);
+      const gitStatus = allStatus.filter(item => item.status !== 'unmodified');
+
+      // Get recent commits
+      const commits = await this.log(dir, 20);
+
+      // Update IDE store
+      const { useIDEStore } = await import('@/store/useIDEStore');
+      const store = useIDEStore.getState();
+
+      store.setCurrentBranch(branch);
+      store.setGitStatus(gitStatus);
+      store.setCommits(commits);
+
+      console.log(`✅ Repository initialized: branch=${branch}, status=${gitStatus.length} files, commits=${commits.length}`);
+
+      return {
+        success: true,
+        data: {
+          currentBranch: branch,
+          gitStatus,
+          commits,
+        },
+      };
+    } catch (error) {
+      console.error('Initialize repository error:', error);
+      return {
+        success: false,
+        error: String(error),
+      };
+    }
+  }
 
   async clone(
     url: string,
@@ -112,7 +150,7 @@ class GitService {
       // Get all local branches
       const localBranches = await git.listBranches({
         fs: fileSystem.getFS(),
-        dir: directory,
+        dir,
       });
 
       // Get remote branches
@@ -128,7 +166,7 @@ class GitService {
         // No remote branches
       }
 
-      const currentBranch = await this.getCurrentBranch(directory);
+      const currentBranch = await this.getCurrentBranch(dir);
 
       // Combine and deduplicate branches
       const allBranches = [...new Set([...localBranches, ...remoteBranches])];
@@ -154,7 +192,7 @@ class GitService {
   }
 
   async createBranch(branchName: string, dir?: string): Promise<GitResult<void>> {
-    const directory = dir ?? fileSystem.getCurrentWorkingDirectory();
+    const directory = dir || fileSystem.getCurrentWorkingDirectory();
     try {
       await git.branch({
         fs: fileSystem.getFS(),
@@ -169,7 +207,7 @@ class GitService {
   }
 
   async checkout(branchName: string, dir?: string): Promise<GitResult<void>> {
-    const directory = dir ?? fileSystem.getCurrentWorkingDirectory();
+    const directory = dir || fileSystem.getCurrentWorkingDirectory();
     try {
       await git.checkout({
         fs: fileSystem.getFS(),
@@ -184,7 +222,7 @@ class GitService {
   }
 
   async status(filepath = '.', dir?: string): Promise<string> {
-    const directory = dir ?? fileSystem.getCurrentWorkingDirectory();
+    const directory = dir || fileSystem.getCurrentWorkingDirectory();
     try {
       const status = await git.status({
         fs: fileSystem.getFS(),
@@ -199,7 +237,7 @@ class GitService {
   }
 
   async statusMatrix(dir?: string): Promise<GitStatus[]> {
-    const directory = dir ?? fileSystem.getCurrentWorkingDirectory();
+    const directory = dir || fileSystem.getCurrentWorkingDirectory();
     try {
       const matrix = await git.statusMatrix({
         fs: fileSystem.getFS(),
@@ -239,7 +277,7 @@ class GitService {
   }
 
   async add(filepath: string, dir?: string): Promise<GitResult<void>> {
-    const directory = dir ?? fileSystem.getCurrentWorkingDirectory();
+    const directory = dir || fileSystem.getCurrentWorkingDirectory();
     try {
       await git.add({
         fs: fileSystem.getFS(),
@@ -254,7 +292,7 @@ class GitService {
   }
 
   async addAll(dir?: string): Promise<GitResult<void>> {
-    const directory = dir ?? fileSystem.getCurrentWorkingDirectory();
+    const directory = dir || fileSystem.getCurrentWorkingDirectory();
     try {
       const status = await this.statusMatrix(directory);
       for (const file of status) {
@@ -270,7 +308,7 @@ class GitService {
   }
 
   async commit(message: string, author: GitAuthor, dir?: string): Promise<GitResult<string>> {
-    const directory = dir ?? fileSystem.getCurrentWorkingDirectory();
+    const directory = dir || fileSystem.getCurrentWorkingDirectory();
     try {
       const sha = await git.commit({
         fs: fileSystem.getFS(),
@@ -292,10 +330,10 @@ class GitService {
     token: string,
     remote = 'origin',
     remoteRef?: string,
-    dir = dir ?? fileSystem.getCurrentWorkingDirectory()
+    dir?: string
   ): Promise<GitResult<string>> {
     try {
-      const currentBranch = await this.getCurrentBranch(directory);
+      const currentBranch = await this.getCurrentBranch(dir);
       const pushRef = remoteRef || currentBranch || 'main';
 
       console.log(`📤 Pushing branch: ${pushRef} to ${remote}`);
@@ -328,10 +366,10 @@ class GitService {
     token: string,
     remote = 'origin',
     remoteRef?: string,
-    dir = dir ?? fileSystem.getCurrentWorkingDirectory()
+    dir?: string
   ): Promise<GitResult<string>> {
     try {
-      const currentBranch = await this.getCurrentBranch(directory);
+      const currentBranch = await this.getCurrentBranch(dir);
       const pullRef = remoteRef || currentBranch || 'main';
 
       console.log(`📥 Pulling branch: ${pullRef} from ${remote}`);
@@ -361,11 +399,12 @@ class GitService {
     }
   }
 
-  async log(dir = dir ?? fileSystem.getCurrentWorkingDirectory(), depth = 20): Promise<GitCommit[]> {
+  async log(dir?: string, depth = 20): Promise<GitCommit[]> {
+    const directory = dir || fileSystem.getCurrentWorkingDirectory();
     try {
       const commits = await git.log({
         fs: fileSystem.getFS(),
-        dir,
+        dir: directory,
         depth,
       });
 
@@ -389,11 +428,12 @@ class GitService {
     }
   }
 
-  async getConfig(path: string, dir = dir ?? fileSystem.getCurrentWorkingDirectory()): Promise<string | undefined> {
+  async getConfig(path: string, dir?: string): Promise<string | undefined> {
+    const directory = dir || fileSystem.getCurrentWorkingDirectory();
     try {
       return await git.getConfig({
         fs: fileSystem.getFS(),
-        dir,
+        dir: directory,
         path,
       });
     } catch (error) {
@@ -401,11 +441,12 @@ class GitService {
     }
   }
 
-  async setConfig(path: string, value: string, dir = dir ?? fileSystem.getCurrentWorkingDirectory()): Promise<GitResult<void>> {
+  async setConfig(path: string, value: string, dir?: string): Promise<GitResult<void>> {
+    const directory = dir || fileSystem.getCurrentWorkingDirectory();
     try {
       await git.setConfig({
         fs: fileSystem.getFS(),
-        dir,
+        dir: directory,
         path,
         value,
       });
@@ -416,11 +457,12 @@ class GitService {
     }
   }
 
-  async listRemotes(dir = dir ?? fileSystem.getCurrentWorkingDirectory()): Promise<Array<{ remote: string; url: string }>> {
+  async listRemotes(dir?: string): Promise<Array<{ remote: string; url: string }>> {
+    const directory = dir || fileSystem.getCurrentWorkingDirectory();
     try {
       const remotes = await git.listRemotes({
         fs: fileSystem.getFS(),
-        dir,
+        dir: directory,
       });
       return remotes;
     } catch (error) {
@@ -429,7 +471,8 @@ class GitService {
     }
   }
 
-  async getRemoteUrl(remote = 'origin', dir = dir ?? fileSystem.getCurrentWorkingDirectory()): Promise<string | null> {
+  async getRemoteUrl(remote = 'origin', dir?: string): Promise<string | null> {
+    const directory = dir || fileSystem.getCurrentWorkingDirectory();
     try {
       const remotes = await this.listRemotes(directory);
       const found = remotes.find((r) => r.remote === remote);
@@ -512,60 +555,7 @@ class GitService {
     }
   }
 
-  /**
-   * Initialize repository state after clone
-   * Loads current branch, git status, and recent commits
-   * Updates IDE store with actual repository state
-   */
-  async initializeRepository(dir = dir ?? fileSystem.getCurrentWorkingDirectory()): Promise<GitResult<{
-    currentBranch: string;
-    gitStatus: GitStatus[];
-    commits: GitCommit[];
-  }>> {
-    try {
-      // Get current branch
-      const branch = await this.getCurrentBranch(directory);
-      if (!branch) {
-        return {
-          success: false,
-          error: 'Could not determine current branch',
-        };
-      }
-
-      // Get git status
-      const allStatus = await this.statusMatrix(directory);
-      const gitStatus = allStatus.filter(item => item.status !== 'unmodified');
-
-      // Get recent commits
-      const commits = await this.log(dir, 20);
-
-      // Update IDE store
-      const { useIDEStore } = await import('@/store/useIDEStore');
-      const store = useIDEStore.getState();
-
-      store.setCurrentBranch(branch);
-      store.setGitStatus(gitStatus);
-      store.setCommits(commits);
-
-      console.log(`✅ Repository initialized: branch=${branch}, status=${gitStatus.length} files, commits=${commits.length}`);
-
-      return {
-        success: true,
-        data: {
-          currentBranch: branch,
-          gitStatus,
-          commits,
-        },
-      };
-    } catch (error) {
-      console.error('Initialize repository error:', error);
-      return {
-        success: false,
-        error: String(error),
-      };
-    }
-  }
-
+  
   /**
    * Get diff for a file
    */

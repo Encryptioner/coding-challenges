@@ -6,6 +6,7 @@ import { webContainer } from '@/services/webcontainer';
 import { gitService } from '@/services/git';
 import { useIDEStore } from '@/store/useIDEStore';
 import { fileSystem } from '@/services/filesystem';
+import { createGLMAgent, createAnthropicAgent, type ClaudeCodeAgent } from '@/services/claude-agent';
 import '@xterm/xterm/css/xterm.css';
 
 export function Terminal() {
@@ -116,6 +117,7 @@ export function Terminal() {
       }
     }, 100);
 
+  
     // Write welcome message
     xterm.writeln('Browser IDE Terminal');
     xterm.writeln('');
@@ -295,6 +297,125 @@ export function Terminal() {
         xterm.writeln(`Created file: ${fileName}`);
       } else {
         xterm.writeln(`touch: ${result.error}`);
+      }
+    }
+
+    async function handleNanoCommand(args: string[], xterm: XTerm) {
+      if (args.length === 0) {
+        xterm.writeln('nano: missing file operand');
+        return;
+      }
+
+      const fileName = args[0];
+
+      try {
+        // Check if file exists
+        const fileResult = await fileSystem.readFile(fileName);
+        let content = '';
+
+        if (fileResult.success && fileResult.data) {
+          content = fileResult.data;
+        }
+
+        // Show nano interface
+        xterm.writeln(`\x1b[2J nano ${fileName}`);
+        xterm.writeln('─────────────────────────────────────────────────────────────────────────────────');
+
+        const lines = content.split('\n');
+        lines.forEach((line, index) => {
+          xterm.writeln(`│ ${line.padEnd(69)} │`);
+        });
+
+        xterm.writeln('─────────────────────────────────────────────────────────────────────────────────');
+        xterm.writeln('');
+        xterm.writeln('Nano editor (simplified):');
+        xterm.writeln('• Use "Ctrl+X" to exit and save');
+        xterm.writeln('• Use arrow keys to navigate');
+        xterm.writeln('• Type to edit content');
+
+      } catch (error: any) {
+        xterm.writeln(`nano: ${error.message}`);
+      }
+    }
+
+    // Handle claude commands through Claude Code agent
+    async function handleClaudeCommand(args: string[], xterm: XTerm) {
+      const getSettings = () => {
+        return useIDEStore.getState().settings;
+      };
+
+      const settings = getSettings();
+      const apiKey = settings.ai.glmKey || settings.ai.anthropicKey;
+
+      if (!apiKey) {
+        xterm.writeln('error: No AI API key configured');
+        xterm.writeln('Please set API key in Settings > AI Provider Settings');
+        return;
+      }
+
+      if (args.length === 0) {
+        xterm.writeln('usage: claude <task-description>');
+        xterm.writeln('');
+        xterm.writeln('Examples:');
+        xterm.writeln('  claude "Create a React component for user login"');
+        xterm.writeln('  claude "Fix the TypeScript errors in src/main.ts"');
+        xterm.writeln('  claude "Add error handling to the fetch function"');
+        xterm.writeln('  claude "Refactor this code to use modern JavaScript"');
+        return;
+      }
+
+      const task = args.join(' ');
+
+      try {
+        xterm.writeln('🤖 Claude Code Agent starting...');
+        xterm.writeln(`Task: ${task}`);
+        xterm.writeln('');
+
+        // Initialize agent
+        const agent: ClaudeCodeAgent = settings.ai.glmKey
+          ? createGLMAgent(apiKey)
+          : createAnthropicAgent(apiKey);
+
+        // Set working directory to current
+        agent.setWorkingDirectory(fileSystem.getCurrentWorkingDirectory());
+
+        // Execute task
+        const result = await agent.executeTask(task, (progress) => {
+          xterm.writeln(`📋 ${progress}`);
+        });
+
+        if (result.success) {
+          xterm.writeln('');
+          xterm.writeln('✅ Task completed successfully!');
+
+          if (result.output) {
+            xterm.writeln('');
+            xterm.writeln('Output:');
+            xterm.writeln(result.output);
+          }
+
+          if (result.artifacts) {
+            if (result.artifacts.filesCreated?.length) {
+              xterm.writeln('');
+              xterm.writeln(`📁 Files created: ${result.artifacts.filesCreated.join(', ')}`);
+            }
+            if (result.artifacts.filesModified?.length) {
+              xterm.writeln('');
+              xterm.writeln(`📝 Files modified: ${result.artifacts.filesModified.join(', ')}`);
+            }
+            if (result.artifacts.commandsExecuted?.length) {
+              xterm.writeln('');
+              xterm.writeln(`⚡ Commands executed: ${result.artifacts.commandsExecuted.join(', ')}`);
+            }
+          }
+        } else {
+          xterm.writeln('');
+          xterm.writeln('❌ Task failed:');
+          xterm.writeln(result.error || 'Unknown error');
+        }
+      } catch (error: any) {
+        xterm.writeln('');
+        xterm.writeln(`❌ Claude agent error: ${error.message}`);
       }
     }
 
@@ -637,6 +758,15 @@ export function Terminal() {
           xterm.writeln('  cp <src> <dest>         - Copy file');
           xterm.writeln('  cat <file>              - Display file contents');
           xterm.writeln('  touch <file>             - Create empty file');
+          xterm.writeln('  nano <file>             - Simple text editor');
+          xterm.writeln('');
+          xterm.writeln('Claude Code:');
+          xterm.writeln('  claude <task>          - AI-powered coding assistant');
+          xterm.writeln('                          Examples:');
+          xterm.writeln('                            claude "Create React component"');
+          xterm.writeln('                            claude "Fix TypeScript errors"');
+          xterm.writeln('                            claude "Refactor this function"');
+          xterm.writeln('                          Configure API key in Settings > AI Provider');
           xterm.writeln('');
           xterm.writeln('Git:');
           xterm.writeln('  git status              - Show working tree status');
@@ -663,6 +793,13 @@ export function Terminal() {
           xterm.writeln('');
           xterm.writeln('Use ↑/↓ arrows to navigate command history');
           xterm.writeln('Use Ctrl+C to cancel running command');
+          xterm.write('\r\n$ ');
+          return;
+        }
+
+        // Special handling for 'claude' commands
+        if (cmd === 'claude') {
+          await handleClaudeCommand(args, xterm);
           xterm.write('\r\n$ ');
           return;
         }
@@ -725,6 +862,12 @@ export function Terminal() {
 
         if (cmd === 'touch') {
           await handleTouchCommand(args, xterm);
+          xterm.write('\r\n$ ');
+          return;
+        }
+
+        if (cmd === 'nano') {
+          await handleNanoCommand(args, xterm);
           xterm.write('\r\n$ ');
           return;
         }
@@ -918,7 +1061,7 @@ export function Terminal() {
 
   return (
     <div className="terminal flex flex-col h-full bg-gray-900">
-      <div className="terminal-header px-4 py-2 bg-gray-800 border-b border-gray-700 flex items-center justify-between">
+      <div className="terminal-header px-4 py-2 bg-gray-800 border-b border-gray-700 flex items-center justify-between flex-shrink-0">
         <span className="text-gray-300 text-sm">Terminal</span>
         <div className="flex items-center gap-2">
           {bootStatus === 'booting' && (
@@ -943,8 +1086,7 @@ export function Terminal() {
       </div>
       <div
         ref={terminalRef}
-        className="terminal-content flex-1 overflow-hidden"
-        style={{ height: '100%', padding: '12px' }}
+        className="terminal-content flex-1 overflow-hidden min-h-0"
         onClick={() => {
           // Focus terminal when clicked
           if (xtermRef.current) {

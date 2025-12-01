@@ -12,6 +12,8 @@ import {
   ClaudeCodePanel,
   ExtensionsPanel,
   WorkspaceSwitcher,
+  CommandPalette,
+  SearchPanel,
 } from '@/components/IDE';
 import { SourceControlPanel } from '@/components/Git';
 import { useIDEStore } from '@/store/useIDEStore';
@@ -42,6 +44,8 @@ function App() {
   const [showClaudeCode, setShowClaudeCode] = useState(false);
   const [showExtensions, setShowExtensions] = useState(false);
   const [showGit, setShowGit] = useState(false);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [showSearchPanel, setShowSearchPanel] = useState(false);
 
   useEffect(() => {
     logger.info(`Browser IDE Pro v${config.APP_VERSION} - Starting...`);
@@ -93,16 +97,27 @@ function App() {
       }
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    // Listen for custom events from welcome screen
+    const handleOpenCloneDialog = () => {
+      setShowCloneDialog(true);
+    };
 
-    // Listen for app installed event
+    const handleOpenSettingsDialog = () => {
+      setShowSettingsDialog(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', () => {
       setInstalled(true);
       setShowInstallPrompt(false);
     });
+    window.addEventListener('show-clone-dialog', handleOpenCloneDialog);
+    window.addEventListener('show-settings-dialog', handleOpenSettingsDialog);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('open-clone-dialog', handleOpenCloneDialog);
+      window.removeEventListener('open-settings-dialog', handleOpenSettingsDialog);
     };
   }, []);
 
@@ -125,17 +140,35 @@ function App() {
     <div className="app flex flex-col h-screen bg-gray-900 text-gray-100 overflow-hidden">
       {/* Title Bar */}
       <div className="titlebar flex items-center justify-between px-2 sm:px-4 py-2 bg-gray-800 border-b border-gray-700 flex-shrink-0">
-        <div className="titlebar-drag flex items-center gap-2 sm:gap-4 overflow-hidden">
-          <span className="title font-semibold text-xs sm:text-sm truncate">🚀 Browser IDE Pro v{config.APP_VERSION}</span>
+        <div className="titlebar-drag flex items-center gap-2 sm:gap-4 overflow-hidden flex-1 min-w-0">
+          <span className="title font-semibold text-xs sm:text-sm truncate">🚀 IDE v{config.APP_VERSION}</span>
           <WorkspaceSwitcher />
-          <div className="flex gap-1 sm:gap-2">
-            <button
-              onClick={toggleSidebar}
-              className="text-xs px-2 py-1 hover:bg-gray-700 rounded"
-              title="Toggle Sidebar"
-            >
-              📁
-            </button>
+        </div>
+
+        {/* Mobile-optimized action buttons */}
+        <div className="titlebar-actions flex items-center gap-1 sm:gap-2 flex-shrink-0">
+          {/* Mobile: Essential actions first */}
+          <button
+            onClick={toggleSidebar}
+            className="p-2 sm:px-2 sm:py-1 hover:bg-gray-700 rounded text-xs sm:text-sm touch-manipulation"
+            title="Toggle Files"
+            aria-label="Toggle Files"
+          >
+            <span className="text-lg sm:text-sm">📁</span>
+          </button>
+
+          {/* Mobile: Terminal button */}
+          <button
+            onClick={toggleTerminal}
+            className="md:hidden p-2 hover:bg-gray-700 rounded text-xs touch-manipulation"
+            title="Toggle Terminal"
+            aria-label="Toggle Terminal"
+          >
+            <span className="text-base">💻</span>
+          </button>
+
+          {/* Mobile: Compact menu for more actions */}
+          <div className="hidden sm:flex gap-1 sm:gap-2">
             <button
               onClick={toggleTerminal}
               className="text-xs px-2 py-1 hover:bg-gray-700 rounded"
@@ -181,30 +214,40 @@ function App() {
               🔀
             </button>
           </div>
-        </div>
-        <div className="titlebar-actions flex gap-1 sm:gap-2 flex-shrink-0">
+
+          {/* Mobile: Primary action buttons */}
           <button
             onClick={() => setShowCloneDialog(true)}
             title="Clone Repository"
-            className="px-2 sm:px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs sm:text-sm font-medium whitespace-nowrap"
+            className="px-2 sm:px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs sm:text-sm font-medium whitespace-nowrap touch-manipulation min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0"
           >
             <span className="hidden sm:inline">📥 Clone</span>
-            <span className="sm:hidden">📥</span>
+            <span className="sm:hidden text-base">📥</span>
           </button>
+
+          {/* Mobile: More menu button */}
           <button
             onClick={() => setShowAIAssistant(true)}
-            title="AI Assistant (Simple Chat)"
-            className="px-2 sm:px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-xs sm:text-sm font-medium whitespace-nowrap"
+            title="AI Assistant"
+            className="p-2 sm:px-3 sm:py-1 bg-purple-600 hover:bg-purple-700 rounded text-xs sm:text-sm font-medium whitespace-nowrap touch-manipulation min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0"
           >
-            <span className="hidden sm:inline">🤖 AI</span>
-            <span className="sm:hidden">🤖</span>
+            <span className="text-base sm:text-sm">🤖</span>
           </button>
+
+          <button
+            onClick={() => setShowCommandPalette(true)}
+            title="Commands"
+            className="p-2 sm:px-3 sm:py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs sm:text-sm touch-manipulation min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0"
+          >
+            <span className="text-base sm:text-sm">⚡</span>
+          </button>
+
           <button
             onClick={() => setShowSettingsDialog(true)}
             title="Settings"
-            className="px-2 sm:px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs sm:text-sm"
+            className="p-2 sm:px-3 sm:py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs sm:text-sm touch-manipulation min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0"
           >
-            ⚙️
+            <span className="text-base sm:text-sm">⚙️</span>
           </button>
         </div>
       </div>
@@ -264,65 +307,75 @@ function App() {
                   <PanelResizeHandle className="h-1 bg-gray-700 hover:bg-blue-500 transition-colors" />
                   <Panel id="bottom-panel" order={2} defaultSize={30} minSize={15} maxSize={70}>
                     <div className="bottom-panel flex flex-col h-full">
-                      <div className="bottom-panel-tabs flex bg-gray-800 border-b border-gray-700">
+                      <div className="bottom-panel-tabs flex bg-gray-800 border-b border-gray-700 overflow-x-auto">
                         {terminalOpen && (
                           <div
-                            className={`tab px-4 py-2 cursor-pointer text-sm ${
+                            className={`tab px-2 sm:px-4 py-2 cursor-pointer text-xs sm:text-sm touch-manipulation min-w-[60px] sm:min-w-0 flex flex-col items-center justify-center whitespace-nowrap ${
                               activeBottomPanel === 'terminal'
                                 ? 'active bg-gray-900 text-blue-400 border-b-2 border-blue-500'
                                 : 'hover:bg-gray-700 text-gray-300'
                             }`}
                             onClick={() => setActiveBottomPanel('terminal')}
                           >
-                            💻 Terminal
+                            <span className="text-lg sm:text-base mb-1">💻</span>
+                            <span className="hidden sm:inline">Terminal</span>
+                            <span className="sm:hidden text-xs">Term</span>
                           </div>
                         )}
                         {previewOpen && (
                           <div
-                            className={`tab px-4 py-2 cursor-pointer text-sm ${
+                            className={`tab px-2 sm:px-4 py-2 cursor-pointer text-xs sm:text-sm touch-manipulation min-w-[60px] sm:min-w-0 flex flex-col items-center justify-center whitespace-nowrap ${
                               activeBottomPanel === 'preview'
                                 ? 'active bg-gray-900 text-blue-400 border-b-2 border-blue-500'
                                 : 'hover:bg-gray-700 text-gray-300'
                             }`}
                             onClick={() => setActiveBottomPanel('preview')}
                           >
-                            👁️ Preview
+                            <span className="text-lg sm:text-base mb-1">👁️</span>
+                            <span className="hidden sm:inline">Preview</span>
+                            <span className="sm:hidden text-xs">View</span>
                           </div>
                         )}
                         {showClaudeCode && (
                           <div
-                            className={`tab px-4 py-2 cursor-pointer text-sm ${
+                            className={`tab px-2 sm:px-4 py-2 cursor-pointer text-xs sm:text-sm touch-manipulation min-w-[60px] sm:min-w-0 flex flex-col items-center justify-center whitespace-nowrap ${
                               activeBottomPanel === 'claude-code'
                                 ? 'active bg-gray-900 text-blue-400 border-b-2 border-blue-500'
                                 : 'hover:bg-gray-700 text-gray-300'
                             }`}
                             onClick={() => setActiveBottomPanel('claude-code')}
                           >
-                            🧠 Claude Code
+                            <span className="text-lg sm:text-base mb-1">🧠</span>
+                            <span className="hidden sm:inline">Claude</span>
+                            <span className="sm:hidden text-xs">AI</span>
                           </div>
                         )}
                         {showExtensions && (
                           <div
-                            className={`tab px-4 py-2 cursor-pointer text-sm ${
+                            className={`tab px-2 sm:px-4 py-2 cursor-pointer text-xs sm:text-sm touch-manipulation min-w-[60px] sm:min-w-0 flex flex-col items-center justify-center whitespace-nowrap ${
                               activeBottomPanel === 'extensions'
                                 ? 'active bg-gray-900 text-blue-400 border-b-2 border-blue-500'
                                 : 'hover:bg-gray-700 text-gray-300'
                             }`}
                             onClick={() => setActiveBottomPanel('extensions')}
                           >
-                            🧩 Extensions
+                            <span className="text-lg sm:text-base mb-1">🧩</span>
+                            <span className="hidden sm:inline">Extensions</span>
+                            <span className="sm:hidden text-xs">Ext</span>
                           </div>
                         )}
                         {showGit && (
                           <div
-                            className={`tab px-4 py-2 cursor-pointer text-sm ${
+                            className={`tab px-2 sm:px-4 py-2 cursor-pointer text-xs sm:text-sm touch-manipulation min-w-[60px] sm:min-w-0 flex flex-col items-center justify-center whitespace-nowrap ${
                               activeBottomPanel === 'git'
                                 ? 'active bg-gray-900 text-blue-400 border-b-2 border-blue-500'
                                 : 'hover:bg-gray-700 text-gray-300'
                             }`}
                             onClick={() => setActiveBottomPanel('git')}
                           >
-                            🔀 Git
+                            <span className="text-lg sm:text-base mb-1">🔀</span>
+                            <span className="hidden sm:inline">Git</span>
+                            <span className="sm:hidden text-xs">Git</span>
                           </div>
                         )}
                       </div>
@@ -352,6 +405,11 @@ function App() {
 
       {showAIAssistant && <AIAssistant onClose={() => setShowAIAssistant(false)} />}
 
+      {/* Overlays */}
+      {showCommandPalette && <CommandPalette />}
+
+      {showSearchPanel && <SearchPanel />}
+
       {/* Mobile File Explorer Overlay */}
       {sidebarOpen && (
         <div className="md:hidden fixed inset-0 z-50 bg-black bg-opacity-50 backdrop-blur-sm">
@@ -360,16 +418,17 @@ function App() {
               <h2 className="text-sm font-semibold">Files</h2>
               <button
                 onClick={toggleSidebar}
-                className="px-2 py-1 hover:bg-gray-700 rounded"
+                className="p-2 hover:bg-gray-700 rounded touch-manipulation min-w-[44px] min-h-[44px]"
+                aria-label="Close file explorer"
               >
                 ✕
               </button>
             </div>
-            <div className="h-full overflow-y-auto">
+            <div className="h-full overflow-y-auto pb-20"> {/* Add padding for mobile navigation */}
               <FileExplorer />
             </div>
           </div>
-          <div className="absolute right-0 top-0 bottom-0 left-4/5" onClick={toggleSidebar} />
+          <div className="absolute right-0 top-0 bottom-0 left-4/5 touch-manipulation" onClick={toggleSidebar} />
         </div>
       )}
     </div>
