@@ -37,3 +37,19 @@ test-output/
 dist/
 # Python virtual environment
 venv/
+
+# Claude IDE
+.claude/*
+!.claude/*.example*
+
+# Cursor IDE
+.cursor/*
+.cursorignore
+!.cursor/*.example*
+
+# VS Code IDE
+.vscode/*
+!.vscode/*.example.json
+
+# Bitbucket MCP
+bitbucket.log
