@@ -62,6 +62,7 @@ function App() {
   const [showSplitEditor, setShowSplitEditor] = useState(false);
   const [showTerminalTabs, setShowTerminalTabs] = useState(false);
   const [showProblemsPanel, setShowProblemsPanel] = useState(false);
+  const [helpOpen, setShowHelpOpen] = useState(false);
   const [activeBottomPanel, setActiveBottomPanel] = useState<'terminal' | 'preview' | 'claude-code' | 'extensions' | 'git' | 'debugger' | 'split-editor' | 'terminal-tabs' | 'problems' | 'help'>('terminal');
 
   useEffect(() => {
@@ -276,7 +277,10 @@ function App() {
               🔀
             </button>
             <button
-              onClick={toggleHelp}
+              onClick={() => {
+                setShowHelpOpen(!helpOpen);
+                if (!helpOpen) setActiveBottomPanel('help');
+              }}
               className={`text-xs px-2 py-1 hover:bg-gray-700 rounded ${helpOpen ? 'bg-gray-700' : ''}`}
               title="Toggle Help"
             >
@@ -466,7 +470,7 @@ function App() {
                         {activeBottomPanel === 'claude-code' && showClaudeCode && <ClaudeCodePanel />}
                         {activeBottomPanel === 'extensions' && showExtensions && <ExtensionsPanel />}
                         {activeBottomPanel === 'git' && showGit && <SourceControlPanel />}
-                      {activeBottomPanel === 'help' && <HelpPanel />}
+                      {helpOpen && <HelpPanel />}
                       </div>
                     </MobileBottomPanel>
                   </Panel>
