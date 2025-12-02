@@ -6,7 +6,7 @@ import { useVirtualKeyboardControls } from '@/hooks/useKeyboardDetection';
 /**
  * Mobile Keyboard Testing Component
  * Provides testing controls and UI for Virtual Keyboard API functionality
- * Only visible in development mode or when explicitly enabled
+ * Only visible on mobile devices in development mode or when explicitly enabled
  */
 export function MobileKeyboardTest() {
   const keyboardConfig = useKeyboardConfig();
@@ -16,16 +16,17 @@ export function MobileKeyboardTest() {
   const { showKeyboard, hideKeyboard, isVirtualKeyboardEnabled } = useVirtualKeyboardControls();
 
   const [testText, setTestText] = useState('');
+  const [isMinimized, setIsMinimized] = useState(true);
   type TestResult = {
   feature: string;
   status: 'pass' | 'fail' | 'pending';
   message?: string;
-};
+  };
 
-const [testResults, setTestResults] = useState<TestResult[]>([]);
+  const [testResults, setTestResults] = useState<TestResult[]>([]);
 
-  // Only show in development or when testing is enabled
-  if (!keyboardConfig.testing.showKeyboardControls) {
+  // Only show on mobile devices and when testing is enabled in development
+  if (!keyboardConfig.testing.showKeyboardControls || !isMobile) {
     return null;
   }
 
@@ -109,101 +110,123 @@ const [testResults, setTestResults] = useState<TestResult[]>([]);
   }
 
   return (
-    <div className="fixed bottom-4 right-4 bg-gray-800 text-white p-4 rounded-lg shadow-xl z-50 max-w-xs sm:max-w-sm md:max-w-md">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold">📱 Mobile Keyboard Test</h3>
-        <button
-          onClick={clearResults}
-          className="text-xs bg-red-600 hover:bg-red-700 px-2 py-1 rounded"
-        >
-          Clear
-        </button>
-      </div>
-
-      {/* Device Info */}
-      <div className="mb-4 p-3 bg-gray-700 rounded">
-        <div className="text-xs space-y-1">
-          <div>📱 Mobile: {isMobile ? 'Yes' : 'No'}</div>
-          <div>⌨️ Keyboard Visible: {keyboardState.isVisible ? 'Yes' : 'No'}</div>
-          <div>📏 Keyboard Height: {keyboardState.height}px</div>
-          <div>🔄 VK API Enabled: {isVirtualKeyboardEnabled ? 'Yes' : 'No'}</div>
+    <div className="fixed bottom-4 right-4 bg-gray-800 text-white rounded-lg shadow-xl z-50">
+      {/* Header - Always Visible */}
+      <div className="flex items-center justify-between px-3 py-2 border-b border-gray-700">
+        <div className="flex items-center gap-2">
+          <h3 className="text-xs font-semibold">📱 Keyboard Test</h3>
+          <div className="flex items-center gap-1">
+            <div className={`w-2 h-2 rounded-full ${keyboardState.isVisible ? 'bg-green-400' : 'bg-gray-400'}`} />
+            <span className="text-xs text-gray-400">
+              {keyboardState.isVisible ? `${Math.round(keyboardState.height)}px` : 'Hidden'}
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={clearResults}
+            className="text-xs bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded"
+            title="Clear Results"
+          >
+            Clear
+          </button>
+          <button
+            onClick={() => setIsMinimized(!isMinimized)}
+            className="text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded"
+            title={isMinimized ? "Expand" : "Minimize"}
+          >
+            {isMinimized ? '↑' : '↓'}
+          </button>
         </div>
       </div>
 
-      {/* Test Input */}
-      <div className="mb-4">
-        <label className="block text-xs font-medium mb-1">Test Input Field</label>
-        <input
-          id="mobile-keyboard-test-input"
-          type="text"
-          value={testText}
-          onChange={(e) => setTestText(e.target.value)}
-          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Type here to test keyboard..."
-          style={{ fontSize: '16px' }} // Prevent zoom
-        />
-      </div>
+      {/* Collapsible Content */}
+      {!isMinimized && (
+        <div className="p-3 space-y-3 max-w-xs sm:max-w-sm">
+          {/* Device Info - Compact */}
+          <div className="text-xs space-y-1 p-2 bg-gray-700 rounded">
+            <div>📱 Mobile: {isMobile ? 'Yes' : 'No'}</div>
+            <div>🔄 VK API: {isVirtualKeyboardEnabled ? 'Yes' : 'No'}</div>
+            <div>📐 Screen: {window.innerWidth}x{window.innerHeight}</div>
+          </div>
 
-      {/* Test Controls */}
-      <div className="mb-4 grid grid-cols-2 gap-2">
-        <button
-          onClick={showTestKeyboard}
-          className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded text-xs"
-          disabled={!isVirtualKeyboardEnabled}
-        >
-          ⌨️ Show
-        </button>
-        <button
-          onClick={hideTestKeyboard}
-          className="bg-gray-600 hover:bg-gray-700 px-3 py-2 rounded text-xs"
-          disabled={!isVirtualKeyboardEnabled}
-        >
-          ⌨️ Hide
-        </button>
-        <button
-          onClick={runTests}
-          className="bg-green-600 hover:bg-green-700 px-3 py-2 rounded text-xs col-span-2"
-        >
-          🧪 Run Tests
-        </button>
-      </div>
+          {/* Test Input - Compact */}
+          <div>
+            <label className="block text-xs font-medium mb-1">Test Input</label>
+            <input
+              id="mobile-keyboard-test-input"
+              type="text"
+              value={testText}
+              onChange={(e) => setTestText(e.target.value)}
+              className="w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="Test keyboard..."
+              style={{ fontSize: '16px' }} // Prevent zoom
+            />
+          </div>
 
-      {/* Test Results */}
-      {testResults.length > 0 && (
-        <div className="p-3 bg-gray-700 rounded">
-          <h4 className="text-xs font-semibold mb-2">Test Results</h4>
-          <div className="space-y-1">
-            {testResults.map((result, index) => (
-              <div
-                key={index}
-                className={`text-xs p-2 rounded ${
-                  result.status === 'pass'
-                    ? 'bg-green-900 text-green-100'
-                    : result.status === 'fail'
-                    ? 'bg-red-900 text-red-100'
-                    : 'bg-yellow-900 text-yellow-100'
-                }`}
-              >
-                <div className="font-medium">{result.feature}</div>
-                <div className="text-xs opacity-75">{result.message}</div>
+          {/* Test Controls - Compact */}
+          <div className="grid grid-cols-3 gap-1">
+            <button
+              onClick={showTestKeyboard}
+              className="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs"
+              disabled={!isVirtualKeyboardEnabled}
+              title="Show Keyboard"
+            >
+              ⌨️
+            </button>
+            <button
+              onClick={hideTestKeyboard}
+              className="bg-gray-600 hover:bg-gray-700 px-2 py-1 rounded text-xs"
+              disabled={!isVirtualKeyboardEnabled}
+              title="Hide Keyboard"
+            >
+              ⌨️
+            </button>
+            <button
+              onClick={runTests}
+              className="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs"
+              title="Run Tests"
+            >
+              🧪
+            </button>
+          </div>
+
+          {/* Test Results - Compact */}
+          {testResults.length > 0 && (
+            <div className="space-y-1">
+              <h4 className="text-xs font-semibold">Results</h4>
+              <div className="space-y-1">
+                {testResults.map((result, index) => (
+                  <div
+                    key={index}
+                    className={`text-xs p-1 rounded ${
+                      result.status === 'pass'
+                        ? 'bg-green-900 text-green-100'
+                        : result.status === 'fail'
+                        ? 'bg-red-900 text-red-100'
+                        : 'bg-yellow-900 text-yellow-100'
+                    }`}
+                  >
+                    <div className="font-medium">{result.feature}</div>
+                    <div className="text-xs opacity-75 truncate">{result.message}</div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+            </div>
+          )}
 
-      {/* Debug Info */}
-      {enableDebugLogs && (
-        <details className="mt-4 text-xs">
-          <summary className="cursor-pointer font-medium">🔍 Debug Info</summary>
-          <div className="mt-2 p-3 bg-gray-700 rounded text-xs space-y-1">
-            <div>User Agent: {navigator.userAgent.slice(0, 50)}...</div>
-            <div>Viewport: {window.innerWidth}x{window.innerHeight}</div>
-            <div>Touch Points: {navigator.maxTouchPoints}</div>
-            <div>CSS vh: {getComputedStyle(document.documentElement).getPropertyValue('--vh')}</div>
-            <div>Config: {JSON.stringify(keyboardConfig, null, 2)}</div>
-          </div>
-        </details>
+          {/* Debug Info - Compact */}
+          {enableDebugLogs && (
+            <details className="text-xs">
+              <summary className="cursor-pointer font-medium">🔍 Debug</summary>
+              <div className="mt-2 p-2 bg-gray-700 rounded text-xs space-y-1">
+                <div>UA: {navigator.userAgent.slice(0, 30)}...</div>
+                <div>Touch: {navigator.maxTouchPoints}</div>
+                <div>CSS vh: {getComputedStyle(document.documentElement).getPropertyValue('--vh')?.slice(0, 10)}</div>
+              </div>
+            </details>
+          )}
+        </div>
       )}
     </div>
   );

@@ -118,9 +118,18 @@ export function useKeyboardDetection(): KeyboardState {
 
     let initialViewportHeight = (window as any).innerHeight;
 
-    // Check if device is likely mobile
+    // Check if device is likely mobile - more comprehensive detection
     const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent
+    ) || (
+      // Additional mobile detection
+      navigator.maxTouchPoints > 0 &&
+      window.innerWidth <= 768
+    ) || (
+      // Touch-only device detection
+      'ontouchstart' in window &&
+      navigator.maxTouchPoints > 0 &&
+      /Mobile|Tablet|iPad|Android/i.test(navigator.userAgent)
     );
 
     // Update orientation

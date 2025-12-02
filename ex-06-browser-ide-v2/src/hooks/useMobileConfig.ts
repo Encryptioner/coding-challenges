@@ -65,8 +65,8 @@ const DEFAULT_CONFIG: AppMobileConfig = {
         safeAreaSupport: true,
       },
       testing: {
-        showKeyboardControls: false,
-        enableDebugLogs: false,
+        showKeyboardControls: import.meta.env.DEV,  // Only enable in development
+        enableDebugLogs: import.meta.env.DEV,   // Only enable debug logs in development
         forceShowKeyboard: false,
       },
     },

@@ -23,6 +23,7 @@ export interface EnvironmentConfig {
     KEYBOARD_HEIGHT_THRESHOLD: number;
     DEBOUNCE_DELAY: number;
     EXPERIMENTAL_FEATURES: boolean;
+    SHOW_TEST_CONTROLS: boolean; // Only show test controls in development
   };
 }
 
@@ -57,6 +58,7 @@ export const config: EnvironmentConfig = {
     KEYBOARD_HEIGHT_THRESHOLD: 100, // Minimum height to consider keyboard visible
     DEBOUNCE_DELAY: 150, // Debounce keyboard events
     EXPERIMENTAL_FEATURES: env === 'development', // Enable experimental features in dev
+    SHOW_TEST_CONTROLS: env === 'development', // Only show test controls in development
   },
 };
 
