@@ -5,10 +5,15 @@
   "description": "Production-ready VS Code-like IDE in the browser with multi-LLM support",
   "author": "Browser IDE Team",
   "license": "MIT",
+  "bin": {
+    "claude": "./bin/claude-simple.js"
+  },
   "scripts": {
     "dev": "vite",
+    "dev:mobile": "vite --host 0.0.0.0",
     "build": "tsc && vite build",
     "preview": "vite preview",
+    "preview:mobile": "vite preview --host 0.0.0.0",
     "deploy": "pnpm build && gh-pages -d dist",
     "deploy:script": "./scripts/deploy.sh",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
