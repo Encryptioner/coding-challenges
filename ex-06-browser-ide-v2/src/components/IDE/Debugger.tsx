@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Play, Pause, Square, RotateCcw, StepForward, StepOver, StepOut, Bug, X, Plus, Settings, ChevronDown, ChevronRight, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+import { Play, Pause, Square, RotateCcw, StepForward, ArrowRight, SkipForward, Bug, X, Plus, Settings, ChevronDown, ChevronRight, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { useIDEStore } from '@/store/useIDEStore';
 import { DebugSession, DebugBreakpoint, DebugThread, DebugStackFrame, DebugVariable, DebugConfiguration, DebugConsoleMessage, DebugScope } from '@/types';
 import { clsx } from 'clsx';
@@ -375,7 +375,7 @@ export function Debugger({ className }: DebuggerProps) {
               title="Step Over (F10)"
               disabled={selectedThread?.state !== 'stopped'}
             >
-              <StepOver className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4" />
             </button>
 
             <button
@@ -393,7 +393,7 @@ export function Debugger({ className }: DebuggerProps) {
               title="Step Out (Shift+F11)"
               disabled={selectedThread?.state !== 'stopped'}
             >
-              <StepOut className="w-4 h-4" />
+              <SkipForward className="w-4 h-4" />
             </button>
 
             <button

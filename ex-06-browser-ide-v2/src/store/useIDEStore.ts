@@ -566,4 +566,3 @@ export const useIDEStore = create<IDEState & IDEActions>()(
   )
 );
 
-export { useIDEStore };
