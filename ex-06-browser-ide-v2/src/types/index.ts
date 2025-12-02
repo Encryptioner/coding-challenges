@@ -252,6 +252,229 @@ export interface StreamChunk {
   };
 }
 
+// ============= Debugger Types =============
+export interface DebugBreakpoint {
+  id: string;
+  path: string;
+  line: number;
+  column?: number;
+  enabled: boolean;
+  condition?: string;
+  hitCount?: number;
+  logMessage?: string;
+}
+
+export interface DebugStackFrame {
+  id: number;
+  name: string;
+  source: {
+    path: string;
+    name: string;
+  };
+  line: number;
+  column: number;
+  presentationHint?: 'normal' | 'label' | 'subtle';
+}
+
+export interface DebugVariable {
+  name: string;
+  value: string;
+  type?: string;
+  presentationHint?: 'normal' | 'property' | 'method' | 'class' | 'data';
+  variablesReference?: number;
+  indexedVariables?: number;
+  namedVariables?: number;
+  evaluateName?: string;
+  memoryReference?: string;
+}
+
+export interface DebugThread {
+  id: number;
+  name: string;
+  state: 'stopped' | 'running' | 'starting' | 'crashed';
+  stoppedReason?: string;
+  stackFrames?: DebugStackFrame[];
+}
+
+export interface DebugSession {
+  id: string;
+  name: string;
+  type: string;
+  request: 'launch' | 'attach';
+  configuration: any;
+  workspaceFolder?: string;
+  running: boolean;
+  threads: DebugThread[];
+  breakpoints: DebugBreakpoint[];
+  watchExpressions: string[];
+  exceptionFilters?: string[];
+}
+
+export interface DebugConfiguration {
+  type: string;
+  name: string;
+  request: 'launch' | 'attach';
+  program?: string;
+  args?: string[];
+  cwd?: string;
+  env?: Record<string, string>;
+  runtimeExecutable?: string;
+  runtimeArgs?: string[];
+  console?: 'internalConsole' | 'integratedTerminal' | 'externalTerminal';
+  stopOnEntry?: boolean;
+  sourceMaps?: boolean;
+  outFiles?: string[];
+  skipFiles?: string[];
+  port?: number;
+  host?: string;
+  timeout?: number;
+}
+
+export interface DebugAdapter {
+  type: string;
+  start: (session: DebugSession) => Promise<void>;
+  stop: () => Promise<void>;
+  restart: () => Promise<void>;
+  setBreakpoints: (breakpoints: DebugBreakpoint[]) => Promise<void>;
+  setExceptionBreakpoints: (filters: string[]) => Promise<void>;
+  configurationDone: () => Promise<void>;
+  continue: (threadId: number) => Promise<void>;
+  next: (threadId: number) => Promise<void>;
+  stepIn: (threadId: number) => Promise<void>;
+  stepOut: (threadId: number) => Promise<void>;
+  pause: (threadId: number) => Promise<void>;
+  stackTrace: (threadId: number) => Promise<DebugStackFrame[]>;
+  scopes: (frameId: number) => Promise<DebugScope[]>;
+  variables: (variablesReference: number) => Promise<DebugVariable[]>;
+  evaluate: (expression: string, frameId?: number) => Promise<DebugVariable>;
+}
+
+export interface DebugScope {
+  name: string;
+  presentationHint?: 'arguments' | 'locals' | 'registers' | 'static' | 'constants';
+  variablesReference: number;
+  namedVariables?: number;
+  indexedVariables?: number;
+  expensive: boolean;
+}
+
+export interface DebugConsoleMessage {
+  id: string;
+  type: 'log' | 'error' | 'warning' | 'info' | 'debug';
+  message: string;
+  timestamp: number;
+  source?: {
+    path: string;
+    line: number;
+    column: number;
+  };
+}
+
+// ============= Split Editor Types =============
+export interface EditorGroup {
+  id: string;
+  orientation: 'horizontal' | 'vertical';
+  size: number;
+  editors: EditorInstance[];
+  groups?: EditorGroup[];
+}
+
+export interface EditorInstance {
+  id: string;
+  path: string;
+  title: string;
+  content: string;
+  language: string;
+  modified: boolean;
+  viewState?: {
+    cursorPosition: { line: number; column: number };
+    scrollPosition: { scrollTop: number; scrollLeft: number };
+    viewZones?: any[];
+    decorations?: any[];
+  };
+}
+
+export interface SplitEditorState {
+  groups: EditorGroup[];
+  activeGroup: string;
+  activeEditor: string;
+  orientation: 'horizontal' | 'vertical';
+  sizes: number[];
+}
+
+// ============= Code Snippets Types =============
+export interface CodeSnippet {
+  id: string;
+  name: string;
+  prefix: string;
+  body: string[];
+  description?: string;
+  scope?: string;
+  author?: string;
+  isBuiltin?: boolean;
+  language?: string;
+  priority?: number;
+}
+
+export interface SnippetPlaceholder {
+  index: number;
+  text: string;
+  transform?: string;
+  choices?: string[];
+  default?: string;
+}
+
+export interface SnippetSession {
+  id: string;
+  snippet: CodeSnippet;
+  placeholders: SnippetPlaceholder[];
+  activePlaceholder: number;
+  isActive: boolean;
+  editorId: string;
+}
+
+// ============= Problems Panel Types =============
+export interface Problem {
+  id: string;
+  resource: string;
+  severity: 'error' | 'warning' | 'info';
+  message: string;
+  code?: string | { value: string; target: string };
+  source?: string;
+  startLineNumber: number;
+  startColumn: number;
+  endLineNumber: number;
+  endColumn: number;
+  related?: ProblemRelatedInformation[];
+  tags?: ProblemTag[];
+}
+
+export interface ProblemRelatedInformation {
+  message: string;
+  resource: string;
+  startLineNumber: number;
+  startColumn: number;
+  endLineNumber: number;
+  endColumn: number;
+}
+
+export enum ProblemTag {
+  Unnecessary = 1,
+  Deprecated = 2,
+}
+
+export interface ProblemsCollection {
+  resource: string;
+  problems: Problem[];
+}
+
+export interface ProblemsFilter {
+  type?: 'all' | 'errors' | 'warnings' | 'info';
+  resource?: string;
+  source?: string;
+  tag?: ProblemTag;
+}
+
 // ============= WebContainer Types =============
 export interface WebContainerProcess {
   id: string;

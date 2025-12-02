@@ -14,6 +14,11 @@ import {
   WorkspaceSwitcher,
   CommandPalette,
   SearchPanel,
+  Debugger,
+  SplitEditor,
+  TerminalTabs,
+  ProblemsPanel,
+  HelpPanel,
 } from '@/components/IDE';
 import { SourceControlPanel } from '@/components/Git';
 import { MobileOptimizedLayout, MobileBottomPanel } from '@/components/MobileOptimizedLayout';
@@ -39,6 +44,8 @@ function App() {
     toggleSidebar,
     toggleTerminal,
     togglePreview,
+    toggleHelp,
+    helpOpen,
   } = useIDEStore();
 
   const [showCloneDialog, setShowCloneDialog] = useState(false);
@@ -51,6 +58,11 @@ function App() {
   const [showGit, setShowGit] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [showSearchPanel, setShowSearchPanel] = useState(false);
+  const [showDebugger, setShowDebugger] = useState(false);
+  const [showSplitEditor, setShowSplitEditor] = useState(false);
+  const [showTerminalTabs, setShowTerminalTabs] = useState(false);
+  const [showProblemsPanel, setShowProblemsPanel] = useState(false);
+  const [activeBottomPanel, setActiveBottomPanel] = useState<'terminal' | 'preview' | 'claude-code' | 'extensions' | 'git' | 'debugger' | 'split-editor' | 'terminal-tabs' | 'problems' | 'help'>('terminal');
 
   useEffect(() => {
     logger.info(`Browser IDE Pro v${config.APP_VERSION} - Starting...`);
@@ -199,6 +211,50 @@ function App() {
             >
               🧠
             </button>
+
+            <button
+              onClick={() => {
+                setShowDebugger(!showDebugger);
+                if (!showDebugger) setActiveBottomPanel('debugger');
+              }}
+              className={`text-xs px-2 py-1 hover:bg-gray-700 rounded ${showDebugger ? 'bg-gray-700' : ''}`}
+              title="Toggle Debugger"
+            >
+              🐛
+            </button>
+
+            <button
+              onClick={() => {
+                setShowSplitEditor(!showSplitEditor);
+                if (!showSplitEditor) setActiveBottomPanel('split-editor');
+              }}
+              className={`text-xs px-2 py-1 hover:bg-gray-700 rounded ${showSplitEditor ? 'bg-gray-700' : ''}`}
+              title="Toggle Split Editor"
+            >
+              📄
+            </button>
+
+            <button
+              onClick={() => {
+                setShowTerminalTabs(!showTerminalTabs);
+                if (!showTerminalTabs) setActiveBottomPanel('terminal-tabs');
+              }}
+              className={`text-xs px-2 py-1 hover:bg-gray-700 rounded ${showTerminalTabs ? 'bg-gray-700' : ''}`}
+              title="Toggle Terminal Tabs"
+            >
+              💻
+            </button>
+
+            <button
+              onClick={() => {
+                setShowProblemsPanel(!showProblemsPanel);
+                if (!showProblemsPanel) setActiveBottomPanel('problems');
+              }}
+              className={`text-xs px-2 py-1 hover:bg-gray-700 rounded ${showProblemsPanel ? 'bg-gray-700' : ''}`}
+              title="Toggle Problems Panel"
+            >
+              ⚠️
+            </button>
             <button
               onClick={() => {
                 setShowExtensions(!showExtensions);
@@ -218,6 +274,13 @@ function App() {
               title="Toggle Source Control"
             >
               🔀
+            </button>
+            <button
+              onClick={toggleHelp}
+              className={`text-xs px-2 py-1 hover:bg-gray-700 rounded ${helpOpen ? 'bg-gray-700' : ''}`}
+              title="Toggle Help"
+            >
+              📚
             </button>
           </div>
 
@@ -317,11 +380,11 @@ function App() {
                         {terminalOpen && (
                           <div
                             className={`tab px-2 sm:px-4 py-2 cursor-pointer text-xs sm:text-sm touch-manipulation min-w-[60px] sm:min-w-0 flex flex-col items-center justify-center whitespace-nowrap ${
-                              activeBottomPanel === 'terminal'
+                              activeBottomPanel === 'terminal-tabs'
                                 ? 'active bg-gray-900 text-blue-400 border-b-2 border-blue-500'
                                 : 'hover:bg-gray-700 text-gray-300'
                             }`}
-                            onClick={() => setActiveBottomPanel('terminal')}
+                            onClick={() => setActiveBottomPanel('terminal-tabs')}
                           >
                             <span className="text-lg sm:text-base mb-1">💻</span>
                             <span className="hidden sm:inline">Terminal</span>
@@ -384,6 +447,18 @@ function App() {
                             <span className="sm:hidden text-xs">Git</span>
                           </div>
                         )}
+                        <div
+                          className={`tab px-2 sm:px-4 py-2 cursor-pointer text-xs sm:text-sm touch-manipulation min-w-[60px] sm:min-w-0 flex flex-col items-center justify-center whitespace-nowrap ${
+                            activeBottomPanel === 'help'
+                              ? 'active bg-gray-900 text-blue-400 border-b-2 border-blue-500'
+                              : 'hover:bg-gray-700 text-gray-300'
+                          }`}
+                          onClick={() => setActiveBottomPanel('help')}
+                        >
+                          <span className="text-lg sm:text-base mb-1">📚</span>
+                          <span className="hidden sm:inline">Help</span>
+                          <span className="sm:hidden text-xs">Help</span>
+                        </div>
                       </div>
                       <div className="bottom-panel-content flex-1 overflow-hidden">
                         {activeBottomPanel === 'terminal' && terminalOpen && <Terminal />}
@@ -391,6 +466,7 @@ function App() {
                         {activeBottomPanel === 'claude-code' && showClaudeCode && <ClaudeCodePanel />}
                         {activeBottomPanel === 'extensions' && showExtensions && <ExtensionsPanel />}
                         {activeBottomPanel === 'git' && showGit && <SourceControlPanel />}
+                      {activeBottomPanel === 'help' && <HelpPanel />}
                       </div>
                     </MobileBottomPanel>
                   </Panel>

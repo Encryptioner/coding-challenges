@@ -12,3 +12,8 @@ export { WorkspaceSwitcher } from './WorkspaceSwitcher';
 export { CommandPalette } from './CommandPalette';
 export { SearchPanel } from './SearchPanel';
 export { MobileKeyboardTest } from './MobileKeyboardTest';
+export { Debugger } from './Debugger';
+export { SplitEditor } from './SplitEditor';
+export { TerminalTabs } from './TerminalTabs';
+export { ProblemsPanel } from './ProblemsPanel';
+export { HelpPanel } from './HelpPanel';

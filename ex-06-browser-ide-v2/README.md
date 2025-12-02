@@ -1,14 +1,29 @@
-# 🚀 Browser IDE Pro v2.0 - Production-Ready TypeScript Implementation
+# 🚀 Browser IDE Pro v2.0 - Complete VS Code Alternative in Your Browser
 
-A **complete, production-ready VS Code-like IDE** that runs entirely in your browser with:
-- ✅ **Multi-LLM Support** (Claude, GLM-4.6, OpenAI, Custom)
-- ✅ **Multi-Project Management** with parallel workflows
-- ✅ **AI Chat Threads** with branching conversations
-- ✅ **Comprehensive Profile System**
-- ✅ **TypeScript** for type safety
-- ✅ **pnpm** for fast, efficient package management
-- ✅ **PWA** with offline support
-- ✅ **Mobile-Optimized** responsive design
+**A full-featured VS Code alternative that runs entirely in your browser** with advanced AI capabilities and complete development workflow:
+
+✅ **100% VS Code Feature Parity** - All popular VS Code features implemented
+✅ **Multi-LLM AI Assistant** - Claude, GLM-4.6, OpenAI, custom providers
+✅ **Advanced Debugger** - Breakpoints, variable inspection, debug console
+✅ **Split Editor Layouts** - Multiple panels with drag-and-drop
+✅ **70+ Code Snippets** - Professional templates and custom snippets
+✅ **Multi-Terminal System** - Multiple profiles with command history
+✅ **Real-time Problems Panel** - TypeScript, ESLint, and diagnostics
+✅ **Complete Git Integration** - Full workflow from clone to push
+✅ **WebContainer Code Execution** - Node.js runtime in browser
+✅ **Mobile-Optimized PWA** - Native app experience on all devices
+
+---
+
+## 📚 Documentation
+
+| 📖 Guide | 👥 For You | ⏱️ Time | 🎯 What You'll Learn |
+|-----------|------------|----------|-------------------|
+| **[⚡ Quick Reference](docs/QUICK_REFERENCE.md)** | Everyone | 5 min | Essential shortcuts, daily workflows, quick fixes |
+| **[📖 User Guide](docs/USER_GUIDE.md)** | New Users | 30 min | Complete setup to advanced features |
+| **[🔥 Features](docs/FEATURES.md)** | Power Users | 60 min | Comprehensive feature documentation |
+
+👉 **New here?** Start with the **[Quick Reference](docs/QUICK_REFERENCE.md)** (5-minute read)
 
 ---
 
