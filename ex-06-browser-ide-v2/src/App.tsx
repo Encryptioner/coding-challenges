@@ -13,11 +13,6 @@ import {
   ExtensionsPanel,
   WorkspaceSwitcher,
   CommandPalette,
-  SearchPanel,
-  Debugger,
-  SplitEditor,
-  TerminalTabs,
-  ProblemsPanel,
   HelpPanel,
 } from '@/components/IDE';
 import { SourceControlPanel } from '@/components/Git';
@@ -46,24 +41,22 @@ function App() {
     togglePreview,
     toggleHelp,
     helpOpen,
+    activeBottomPanel,
+    setActiveBottomPanel,
   } = useIDEStore();
 
   const [showCloneDialog, setShowCloneDialog] = useState(false);
   const [showSettingsDialog, setShowSettingsDialog] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
-  const [activeBottomPanel, setActiveBottomPanel] = useState<'terminal' | 'preview' | 'claude-code' | 'extensions' | 'git'>('terminal');
   const [showClaudeCode, setShowClaudeCode] = useState(false);
   const [showExtensions, setShowExtensions] = useState(false);
   const [showGit, setShowGit] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
-  const [showSearchPanel, setShowSearchPanel] = useState(false);
   const [showDebugger, setShowDebugger] = useState(false);
   const [showSplitEditor, setShowSplitEditor] = useState(false);
   const [showTerminalTabs, setShowTerminalTabs] = useState(false);
   const [showProblemsPanel, setShowProblemsPanel] = useState(false);
-  const [helpOpen, setShowHelpOpen] = useState(false);
-  const [activeBottomPanel, setActiveBottomPanel] = useState<'terminal' | 'preview' | 'claude-code' | 'extensions' | 'git' | 'debugger' | 'split-editor' | 'terminal-tabs' | 'problems' | 'help'>('terminal');
 
   useEffect(() => {
     logger.info(`Browser IDE Pro v${config.APP_VERSION} - Starting...`);
@@ -278,7 +271,7 @@ function App() {
             </button>
             <button
               onClick={() => {
-                setShowHelpOpen(!helpOpen);
+                toggleHelp();
                 if (!helpOpen) setActiveBottomPanel('help');
               }}
               className={`text-xs px-2 py-1 hover:bg-gray-700 rounded ${helpOpen ? 'bg-gray-700' : ''}`}
@@ -493,8 +486,6 @@ function App() {
 
       {/* Overlays */}
       {showCommandPalette && <CommandPalette />}
-
-      {showSearchPanel && <SearchPanel />}
 
       {/* Mobile File Explorer Overlay */}
       {sidebarOpen && (

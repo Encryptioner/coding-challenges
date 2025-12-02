@@ -802,7 +802,7 @@ export function HelpPanel({ className }: { className?: string }) {
   const [selectedSection, setSelectedSection] = useState('quick-reference');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  const { toggleHelp, setHelpOpen } = useIDEStore();
+  const { toggleHelp } = useIDEStore((state) => state.helpOpen);
 
   const filteredCategories = useMemo(() => {
     if (!searchQuery) return DOCUMENTATION_CATEGORIES;

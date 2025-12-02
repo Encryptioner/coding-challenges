@@ -3,69 +3,23 @@ import { persist } from 'zustand/middleware';
 import type {
   EditorSettings,
   GitSettings,
-  AISettings,
   AppSettings,
   FileNode,
-  OpenFile,
   Project,
+  CodeSnippet,
+  Problem,
+  WebContainerServer,
+  EditorTab,
   DebugSession,
   DebugBreakpoint,
   SplitEditorState,
-  CodeSnippet,
   SnippetSession,
   TerminalTab,
   ProblemsFilter,
-  Problem,
   WebContainerProcess,
-  WebContainerServer,
-  WebContainerService,
-  FileSystemService,
-  GitService,
-  AIServiceRegistry,
 } from '@/types';
 
-// Services will be injected
-let webContainerService: WebContainerService | null = null;
-let fileSystemService: FileSystemService | null;
-let gitService: GitService | null;
-let aiServiceRegistry: AIServiceRegistry | null = null;
-
-export const setServices = {
-  setWebContainerService: (service: WebContainerService) => { webContainerService = service; },
-  setFileSystemService: (service: FileSystemService) => { fileSystemService = service; },
-  setGitService: (service: GitService) => { gitService = service; },
-  setAIServiceRegistry: (registry: AIServiceRegistry) => { aiServiceRegistry = registry; },
-};
-
-// Basic Settings Types
-export interface EditorSettings {
-  theme: string;
-  fontSize: number;
-  tabSize: number;
-  wordWrap: 'on' | 'off';
-  autoSave: boolean;
-  autoSaveDelay: number;
-  lineNumbers: 'on' | 'off';
-  minimap: boolean;
-}
-
-export interface GitSettings {
-  githubToken: string;
-  githubUsername: string;
-  githubEmail: string;
-}
-
-export interface AISettings {
-  anthropicKey: string;
-  glmKey: string;
-  openaiKey: string;
-  defaultProvider: 'anthropic' | 'glm' | 'openai';
-}
-
-export interface Settings extends EditorSettings, GitSettings {
-  ai: AISettings;
-}
-
+// RecentProject is defined here since it doesn't exist in types
 export interface RecentProject {
   name: string;
   url: string;
@@ -73,12 +27,20 @@ export interface RecentProject {
   lastOpened: number;
 }
 
-export interface FileNode {
-  name: string;
-  path: string;
-  type: 'file' | 'directory';
-  children?: FileNode[];
+// Services will be added later when needed
+let webContainerServer: WebContainerServer | null = null;
+
+// Settings interface combines editor, git, and AI settings
+export interface Settings extends EditorSettings, GitSettings {
+  ai: {
+    anthropicKey: string;
+    glmKey: string;
+    openaiKey: string;
+    defaultProvider: 'anthropic' | 'glm' | 'openai';
+  };
 }
+
+// RecentProject and FileNode are imported from types
 
 interface IDEState {
   // Project Management
@@ -137,6 +99,7 @@ interface IDEState {
   previewOpen: boolean;
   commandPaletteOpen: boolean;
   helpOpen: boolean;
+  activeBottomPanel: 'terminal' | 'preview' | 'claude-code' | 'extensions' | 'git' | 'debugger' | 'split-editor' | 'terminal-tabs' | 'problems' | 'help';
 
   // Settings
   settings: Settings;
@@ -220,6 +183,7 @@ interface IDEActions {
   setAIOpen: (open: boolean) => void;
   setCommandPaletteOpen: (open: boolean) => void;
   setHelpOpen: (open: boolean) => void;
+  setActiveBottomPanel: (panel: 'terminal' | 'preview' | 'claude-code' | 'extensions' | 'git' | 'debugger' | 'split-editor' | 'terminal-tabs' | 'problems' | 'help') => void;
 
   // Settings
   updateSettings: (newSettings: Partial<Settings>) => void;
@@ -247,7 +211,7 @@ const DEFAULT_SETTINGS: Settings = {
   lineNumbers: 'on',
   minimap: true,
   githubToken: '',
-  githubUsername: '',
+  username: '',
   githubEmail: '',
   ai: {
     anthropicKey: '',
@@ -307,6 +271,7 @@ export const useIDEStore = create<IDEState & IDEActions>()(
       previewOpen: false,
       commandPaletteOpen: false,
       helpOpen: false,
+      activeBottomPanel: 'terminal' as const,
 
       settings: DEFAULT_SETTINGS,
 
@@ -543,6 +508,7 @@ export const useIDEStore = create<IDEState & IDEActions>()(
       setAIOpen: (open) => set({ aiOpen: open }),
       setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
       setHelpOpen: (open) => set({ helpOpen: open }),
+      setActiveBottomPanel: (panel) => set({ activeBottomPanel: panel }),
 
       // Settings Actions
       updateSettings: (newSettings) => set((state) => ({
@@ -600,4 +566,4 @@ export const useIDEStore = create<IDEState & IDEActions>()(
   )
 );
 
-export { useIDEStore, setServices };
+export { useIDEStore };
