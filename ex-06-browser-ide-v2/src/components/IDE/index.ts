@@ -11,3 +11,4 @@ export { ExtensionsPanel } from './ExtensionsPanel';
 export { WorkspaceSwitcher } from './WorkspaceSwitcher';
 export { CommandPalette } from './CommandPalette';
 export { SearchPanel } from './SearchPanel';
+export { MobileKeyboardTest } from './MobileKeyboardTest';

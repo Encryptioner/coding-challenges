@@ -16,13 +16,17 @@ import {
   SearchPanel,
 } from '@/components/IDE';
 import { SourceControlPanel } from '@/components/Git';
+import { MobileOptimizedLayout, MobileBottomPanel } from '@/components/MobileOptimizedLayout';
+import { MobileKeyboardTest } from '@/components/IDE/MobileKeyboardTest';
 import { useIDEStore } from '@/store/useIDEStore';
 import { gitService } from '@/services/git';
 import { fileSystem } from '@/services/filesystem';
 import { logger } from '@/utils/logger';
 import { config } from '@/config/environment';
+import { useKeyboardDetection } from '@/hooks/useKeyboardDetection';
 
 function App() {
+  useKeyboardDetection();
   const {
     sidebarOpen,
     terminalOpen,
@@ -137,7 +141,8 @@ function App() {
   const bottomPanelVisible = terminalOpen || previewOpen || showClaudeCode || showExtensions || showGit;
 
   return (
-    <div className="app flex flex-col h-screen bg-gray-900 text-gray-100 overflow-hidden">
+    <>
+      <MobileOptimizedLayout className="app flex flex-col bg-gray-900 text-gray-100 overflow-hidden">
       {/* Title Bar */}
       <div className="titlebar flex items-center justify-between px-2 sm:px-4 py-2 bg-gray-800 border-b border-gray-700 flex-shrink-0">
         <div className="titlebar-drag flex items-center gap-2 sm:gap-4 overflow-hidden flex-1 min-w-0">
@@ -306,7 +311,7 @@ function App() {
                 <>
                   <PanelResizeHandle className="h-1 bg-gray-700 hover:bg-blue-500 transition-colors" />
                   <Panel id="bottom-panel" order={2} defaultSize={30} minSize={15} maxSize={70}>
-                    <div className="bottom-panel flex flex-col h-full">
+                    <MobileBottomPanel isOpen={bottomPanelVisible} className="bottom-panel flex flex-col h-full bg-gray-900">
                       <div className="bottom-panel-tabs flex bg-gray-800 border-b border-gray-700 overflow-x-auto">
                         {terminalOpen && (
                           <div
@@ -386,7 +391,7 @@ function App() {
                         {activeBottomPanel === 'extensions' && showExtensions && <ExtensionsPanel />}
                         {activeBottomPanel === 'git' && showGit && <SourceControlPanel />}
                       </div>
-                    </div>
+                    </MobileBottomPanel>
                   </Panel>
                 </>
               )}
@@ -431,7 +436,11 @@ function App() {
           <div className="absolute right-0 top-0 bottom-0 left-4/5 touch-manipulation" onClick={toggleSidebar} />
         </div>
       )}
-    </div>
+    </MobileOptimizedLayout>
+
+    {/* Mobile Keyboard Test - only visible in development */}
+      <MobileKeyboardTest />
+    </>
   );
 }
 

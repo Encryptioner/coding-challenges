@@ -15,6 +15,15 @@ export interface EnvironmentConfig {
   ENABLE_ANALYTICS: boolean;
   ENABLE_ERROR_TRACKING: boolean;
   LOG_LEVEL: 'debug' | 'info' | 'warn' | 'error';
+  // Mobile Keyboard Configuration
+  MOBILE_KEYBOARD: {
+    ENABLE_VIRTUAL_KEYBOARD_API: boolean;
+    AUTO_HIDE_ON_BLUR: boolean;
+    OVERLAYS_CONTENT: boolean;
+    KEYBOARD_HEIGHT_THRESHOLD: number;
+    DEBOUNCE_DELAY: number;
+    EXPERIMENTAL_FEATURES: boolean;
+  };
 }
 
 // Get environment from Vite
@@ -39,6 +48,16 @@ export const config: EnvironmentConfig = {
 
   // Logging
   LOG_LEVEL: env === 'production' ? 'warn' : 'debug',
+
+  // Mobile Keyboard Configuration
+  MOBILE_KEYBOARD: {
+    ENABLE_VIRTUAL_KEYBOARD_API: env === 'development', // Enable in dev for testing
+    AUTO_HIDE_ON_BLUR: true,
+    OVERLAYS_CONTENT: true,
+    KEYBOARD_HEIGHT_THRESHOLD: 100, // Minimum height to consider keyboard visible
+    DEBOUNCE_DELAY: 150, // Debounce keyboard events
+    EXPERIMENTAL_FEATURES: env === 'development', // Enable experimental features in dev
+  },
 };
 
 // Freeze config to prevent modifications
