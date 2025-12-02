@@ -231,6 +231,25 @@ class FileSystemService {
     }
   }
 
+  // Rename file or directory
+  async rename(oldPath: string, newPath: string): Promise<FileSystemResult<void>> {
+    await this.ensureInitialized();
+
+    try {
+      const fullOldPath = this.resolvePath(oldPath);
+      const fullNewPath = this.resolvePath(newPath);
+
+      await this.pfs.rename(fullOldPath, fullNewPath);
+      console.log(`✏️ Renamed: ${fullOldPath} → ${fullNewPath}`);
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to rename'
+      };
+    }
+  }
+
   // Create directory
   async createDirectory(path: string): Promise<FileSystemResult<void>> {
     await this.ensureInitialized();

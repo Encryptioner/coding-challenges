@@ -368,8 +368,10 @@ class GitService {
     remoteRef?: string,
     dir?: string
   ): Promise<GitResult<string>> {
+    const directory = dir || fileSystem.getCurrentWorkingDirectory();
+
     try {
-      const currentBranch = await this.getCurrentBranch(dir);
+      const currentBranch = await this.getCurrentBranch(directory);
       const pullRef = remoteRef || currentBranch || 'main';
 
       console.log(`📥 Pulling branch: ${pullRef} from ${remote}`);
@@ -377,7 +379,7 @@ class GitService {
       await git.pull({
         fs: fileSystem.getFS(),
         http,
-        dir,
+        dir: directory,
         remote,
         ref: pullRef,
         corsProxy: this.corsProxy,
@@ -646,6 +648,411 @@ class GitService {
     }
 
     return diff.join('\n');
+  }
+
+  /**
+   * Stash uncommitted changes
+   * Note: isomorphic-git doesn't have native stash support, so we implement it manually
+   */
+  async stash(message?: string, dir?: string): Promise<GitResult<string>> {
+    const directory = dir || fileSystem.getCurrentWorkingDirectory();
+
+    try {
+      const fs = fileSystem.getFS();
+
+      // Get current status
+      const statusMatrix = await git.statusMatrix({ fs, dir: directory });
+      const hasChanges = statusMatrix.some(
+        ([, head, workdir, stage]) => head !== workdir || workdir !== stage
+      );
+
+      if (!hasChanges) {
+        return {
+          success: false,
+          error: 'No local changes to stash',
+        };
+      }
+
+      // Create stash metadata
+      const stashMessage = message || `WIP on branch: ${Date.now()}`;
+      const timestamp = Date.now();
+
+      // Get current HEAD
+      const currentOid = await git.resolveRef({ fs, dir: directory, ref: 'HEAD' });
+
+      // Stage all changes
+      for (const [filepath, , worktreeStatus] of statusMatrix) {
+        if (worktreeStatus !== 1) {
+          // If file exists in working tree
+          if (worktreeStatus === 2) {
+            await git.add({ fs, dir: directory, filepath });
+          } else if (worktreeStatus === 0) {
+            // File deleted
+            await git.remove({ fs, dir: directory, filepath });
+          }
+        }
+      }
+
+      // Create stash commit
+      const stashOid = await git.commit({
+        fs,
+        dir: directory,
+        message: `stash: ${stashMessage}`,
+        author: {
+          name: 'Browser IDE User',
+          email: 'user@browser-ide.dev',
+        },
+      });
+
+      // Store stash info in a custom location
+      const stashData = {
+        oid: stashOid,
+        message: stashMessage,
+        timestamp,
+        parentOid: currentOid,
+      };
+
+      // Save stash metadata to localStorage
+      const existingStashes = this.getStashList();
+      existingStashes.unshift(stashData);
+      localStorage.setItem('git-stashes', JSON.stringify(existingStashes));
+
+      // Reset working directory to HEAD
+      await git.checkout({
+        fs,
+        dir: directory,
+        ref: 'HEAD',
+        force: true,
+      });
+
+      console.log(`📦 Created stash: ${stashMessage}`);
+      return {
+        success: true,
+        data: stashOid,
+      };
+    } catch (error) {
+      console.error('Stash error:', error);
+      return {
+        success: false,
+        error: String(error),
+      };
+    }
+  }
+
+  /**
+   * List all stashes
+   */
+  async stashList(): Promise<GitResult<Array<{
+    index: number;
+    oid: string;
+    message: string;
+    timestamp: number;
+  }>>> {
+    try {
+      const stashes = this.getStashList();
+      return {
+        success: true,
+        data: stashes.map((stash, index) => ({
+          index,
+          oid: stash.oid,
+          message: stash.message,
+          timestamp: stash.timestamp,
+        })),
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: String(error),
+      };
+    }
+  }
+
+  /**
+   * Apply a stash (without removing it)
+   */
+  async stashApply(stashIndex: number, dir?: string): Promise<GitResult<void>> {
+    const directory = dir || fileSystem.getCurrentWorkingDirectory();
+
+    try {
+      const stashes = this.getStashList();
+      const stash = stashes[stashIndex];
+
+      if (!stash) {
+        return {
+          success: false,
+          error: `Stash index ${stashIndex} not found`,
+        };
+      }
+
+      const fs = fileSystem.getFS();
+
+      // Cherry-pick the stash commit
+      await git.checkout({
+        fs,
+        dir: directory,
+        ref: stash.oid,
+        force: false,
+      });
+
+      console.log(`✅ Applied stash ${stashIndex}: ${stash.message}`);
+      return { success: true };
+    } catch (error) {
+      console.error('Stash apply error:', error);
+      return {
+        success: false,
+        error: String(error),
+      };
+    }
+  }
+
+  /**
+   * Remove a stash from the list
+   */
+  async stashDrop(stashIndex: number): Promise<GitResult<void>> {
+    try {
+      const stashes = this.getStashList();
+
+      if (stashIndex < 0 || stashIndex >= stashes.length) {
+        return {
+          success: false,
+          error: `Stash index ${stashIndex} out of range`,
+        };
+      }
+
+      stashes.splice(stashIndex, 1);
+      localStorage.setItem('git-stashes', JSON.stringify(stashes));
+
+      console.log(`🗑️ Dropped stash ${stashIndex}`);
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: String(error),
+      };
+    }
+  }
+
+  /**
+   * Apply and remove a stash (pop)
+   */
+  async stashPop(stashIndex: number, dir?: string): Promise<GitResult<void>> {
+    const applyResult = await this.stashApply(stashIndex, dir);
+
+    if (!applyResult.success) {
+      return applyResult;
+    }
+
+    return this.stashDrop(stashIndex);
+  }
+
+  /**
+   * Get stash list from localStorage
+   */
+  private getStashList(): Array<{
+    oid: string;
+    message: string;
+    timestamp: number;
+    parentOid: string;
+  }> {
+    try {
+      const stashesJson = localStorage.getItem('git-stashes');
+      return stashesJson ? JSON.parse(stashesJson) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Merge a branch into the current branch
+   * Supports both fast-forward and regular merges
+   */
+  async merge(
+    branchName: string,
+    dir?: string,
+    options?: { fastForwardOnly?: boolean }
+  ): Promise<GitResult<{ oid: string; fastForward: boolean }>> {
+    const directory = dir || fileSystem.getCurrentWorkingDirectory();
+
+    try {
+      const fs = fileSystem.getFS();
+
+      // Get current branch
+      const currentBranch = await git.currentBranch({ fs, dir: directory });
+      if (!currentBranch) {
+        return {
+          success: false,
+          error: 'Not currently on any branch',
+        };
+      }
+
+      // Check if branch exists
+      try {
+        await git.resolveRef({ fs, dir: directory, ref: branchName });
+      } catch {
+        return {
+          success: false,
+          error: `Branch '${branchName}' not found`,
+        };
+      }
+
+      // Check for uncommitted changes
+      const statusMatrix = await git.statusMatrix({ fs, dir: directory });
+      const hasChanges = statusMatrix.some(
+        ([, head, workdir, stage]) => head !== workdir || workdir !== stage
+      );
+
+      if (hasChanges) {
+        return {
+          success: false,
+          error: 'You have uncommitted changes. Please commit or stash them before merging.',
+        };
+      }
+
+      // Attempt fast-forward merge first
+      try {
+        const result = await git.merge({
+          fs,
+          dir: directory,
+          ours: currentBranch,
+          theirs: branchName,
+          fastForward: true,
+          dryRun: false,
+        });
+
+        console.log(`✅ Fast-forward merge completed: ${currentBranch} ← ${branchName}`);
+        return {
+          success: true,
+          data: {
+            oid: result.oid || '',
+            fastForward: true,
+          },
+        };
+      } catch (ffError) {
+        // Fast-forward not possible
+        if (options?.fastForwardOnly) {
+          return {
+            success: false,
+            error: 'Fast-forward merge not possible. Use regular merge or rebase.',
+          };
+        }
+
+        // Try regular merge
+        try {
+          const result = await git.merge({
+            fs,
+            dir: directory,
+            ours: currentBranch,
+            theirs: branchName,
+            fastForward: false,
+            dryRun: false,
+            author: {
+              name: 'Browser IDE User',
+              email: 'user@browser-ide.dev',
+            },
+          });
+
+          console.log(`✅ Merge completed: ${currentBranch} ← ${branchName}`);
+          return {
+            success: true,
+            data: {
+              oid: result.oid || '',
+              fastForward: false,
+            },
+          };
+        } catch (mergeError) {
+          console.error('Merge error:', mergeError);
+          return {
+            success: false,
+            error: `Merge failed: ${String(mergeError)}`,
+          };
+        }
+      }
+    } catch (error) {
+      console.error('Merge error:', error);
+      return {
+        success: false,
+        error: String(error),
+      };
+    }
+  }
+
+  /**
+   * Abort an in-progress merge
+   */
+  async abortMerge(dir?: string): Promise<GitResult<void>> {
+    const directory = dir || fileSystem.getCurrentWorkingDirectory();
+
+    try {
+      const fs = fileSystem.getFS();
+
+      // Reset to HEAD to abort merge
+      await git.checkout({
+        fs,
+        dir: directory,
+        ref: 'HEAD',
+        force: true,
+      });
+
+      console.log('✅ Merge aborted');
+      return { success: true };
+    } catch (error) {
+      console.error('Abort merge error:', error);
+      return {
+        success: false,
+        error: String(error),
+      };
+    }
+  }
+
+  /**
+   * Check if a merge is in progress
+   */
+  async isMergeInProgress(dir?: string): Promise<boolean> {
+    const directory = dir || fileSystem.getCurrentWorkingDirectory();
+
+    try {
+      const fs = fileSystem.getFS();
+
+      // Check for MERGE_HEAD file
+      try {
+        await fs.promises.readFile(`${directory}/.git/MERGE_HEAD`, 'utf8');
+        return true;
+      } catch {
+        return false;
+      }
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Get merge conflicts (if any)
+   */
+  async getMergeConflicts(dir?: string): Promise<GitResult<string[]>> {
+    const directory = dir || fileSystem.getCurrentWorkingDirectory();
+
+    try {
+      const fs = fileSystem.getFS();
+      const statusMatrix = await git.statusMatrix({ fs, dir: directory });
+
+      // Files with stage 0 and workdir !== head are conflicts
+      const conflicts = statusMatrix
+        .filter(([, head, workdir, stage]) => {
+          // Conflict markers: stage !== 1 or (head !== workdir && stage === 0)
+          return stage === 0 && head !== workdir;
+        })
+        .map(([filepath]) => filepath);
+
+      return {
+        success: true,
+        data: conflicts,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: String(error),
+      };
+    }
   }
 }
 

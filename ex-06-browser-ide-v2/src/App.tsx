@@ -24,6 +24,7 @@ import { fileSystem } from '@/services/filesystem';
 import { logger } from '@/utils/logger';
 import { config } from '@/config/environment';
 import { useKeyboardDetection } from '@/hooks/useKeyboardDetection';
+import { Toaster } from 'sonner';
 
 function App() {
   useKeyboardDetection();
@@ -440,6 +441,9 @@ function App() {
 
     {/* Mobile Keyboard Test - only visible in development */}
       <MobileKeyboardTest />
+
+      {/* Toast Notifications */}
+      <Toaster position="top-right" richColors closeButton />
     </>
   );
 }

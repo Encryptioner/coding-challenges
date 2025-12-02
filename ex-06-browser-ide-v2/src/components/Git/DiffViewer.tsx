@@ -3,10 +3,12 @@
  *
  * Side-by-side or unified diff view for file changes
  * Supports syntax highlighting and inline change indicators
+ * Uses character-level diff highlighting for precise change visualization
  */
 
 import { useState, useEffect } from 'react';
 import { gitService } from '@/services/git';
+import * as Diff from 'diff';
 
 interface DiffViewerProps {
   filepath: string;
@@ -18,6 +20,8 @@ interface DiffLine {
   oldLineNumber?: number;
   newLineNumber?: number;
   content: string;
+  // Character-level changes for improved visualization
+  changes?: Array<{ added?: boolean; removed?: boolean; value: string }>;
 }
 
 export function DiffViewer({ filepath, onClose }: DiffViewerProps) {
@@ -54,6 +58,15 @@ export function DiffViewer({ filepath, onClose }: DiffViewerProps) {
     setIsLoading(false);
   };
 
+  /**
+   * Compute character-level differences between two lines
+   * Used to highlight specific changes within modified lines
+   */
+  const computeIntraLineDiff = (oldLine: string, newLine: string) => {
+    const changes = Diff.diffChars(oldLine, newLine);
+    return changes;
+  };
+
   const parseDiff = (diffText: string): DiffLine[] => {
     const lines: DiffLine[] = [];
     const diffLines = diffText.split('\n');
@@ -61,8 +74,79 @@ export function DiffViewer({ filepath, onClose }: DiffViewerProps) {
     let oldLineNum = 0;
     let newLineNum = 0;
 
+    // Track consecutive removed/added lines for character-level diff
+    const pendingRemoved: Array<{ content: string; lineNum: number }> = [];
+    const pendingAdded: Array<{ content: string; lineNum: number }> = [];
+
+    const flushPending = () => {
+      // If we have matching removed/added pairs, compute character-level diffs
+      if (pendingRemoved.length > 0 && pendingAdded.length > 0) {
+        const minLength = Math.min(pendingRemoved.length, pendingAdded.length);
+
+        for (let i = 0; i < minLength; i++) {
+          const removed = pendingRemoved[i];
+          const added = pendingAdded[i];
+          const changes = computeIntraLineDiff(removed.content, added.content);
+
+          lines.push({
+            type: 'remove',
+            oldLineNumber: removed.lineNum,
+            content: removed.content,
+            changes: changes,
+          });
+
+          lines.push({
+            type: 'add',
+            newLineNumber: added.lineNum,
+            content: added.content,
+            changes: changes,
+          });
+        }
+
+        // Add remaining removed lines without character diff
+        for (let i = minLength; i < pendingRemoved.length; i++) {
+          lines.push({
+            type: 'remove',
+            oldLineNumber: pendingRemoved[i].lineNum,
+            content: pendingRemoved[i].content,
+          });
+        }
+
+        // Add remaining added lines without character diff
+        for (let i = minLength; i < pendingAdded.length; i++) {
+          lines.push({
+            type: 'add',
+            newLineNumber: pendingAdded[i].lineNum,
+            content: pendingAdded[i].content,
+          });
+        }
+      } else {
+        // No matching pairs, add as-is
+        pendingRemoved.forEach(({ content, lineNum }) => {
+          lines.push({
+            type: 'remove',
+            oldLineNumber: lineNum,
+            content,
+          });
+        });
+
+        pendingAdded.forEach(({ content, lineNum }) => {
+          lines.push({
+            type: 'add',
+            newLineNumber: lineNum,
+            content,
+          });
+        });
+      }
+
+      pendingRemoved.length = 0;
+      pendingAdded.length = 0;
+    };
+
     for (const line of diffLines) {
       if (line.startsWith('@@')) {
+        flushPending();
+
         // Parse hunk header: @@ -oldStart,oldCount +newStart,newCount @@
         const match = line.match(/@@ -(\d+),?\d* \+(\d+),?\d* @@/);
         if (match) {
@@ -74,18 +158,18 @@ export function DiffViewer({ filepath, onClose }: DiffViewerProps) {
           content: line,
         });
       } else if (line.startsWith('+')) {
-        lines.push({
-          type: 'add',
-          newLineNumber: newLineNum++,
+        pendingAdded.push({
           content: line.slice(1),
+          lineNum: newLineNum++,
         });
       } else if (line.startsWith('-')) {
-        lines.push({
-          type: 'remove',
-          oldLineNumber: oldLineNum++,
+        pendingRemoved.push({
           content: line.slice(1),
+          lineNum: oldLineNum++,
         });
       } else if (!line.startsWith('\\')) {
+        flushPending();
+
         // Context line
         lines.push({
           type: 'context',
@@ -95,6 +179,9 @@ export function DiffViewer({ filepath, onClose }: DiffViewerProps) {
         });
       }
     }
+
+    // Flush any remaining pending lines
+    flushPending();
 
     return lines;
   };
@@ -176,8 +263,38 @@ export function DiffViewer({ filepath, onClose }: DiffViewerProps) {
   );
 }
 
-// Unified Diff View
+// Unified Diff View with character-level highlighting
 function UnifiedDiffView({ lines }: { lines: DiffLine[] }) {
+  const renderLineContent = (line: DiffLine) => {
+    // If we have character-level changes, render them with highlighting
+    if (line.changes && line.changes.length > 0) {
+      return (
+        <>
+          {line.changes.map((change, idx) => {
+            if (change.added && line.type === 'add') {
+              return (
+                <span key={idx} className="bg-green-500 bg-opacity-40">
+                  {change.value}
+                </span>
+              );
+            } else if (change.removed && line.type === 'remove') {
+              return (
+                <span key={idx} className="bg-red-500 bg-opacity-40">
+                  {change.value}
+                </span>
+              );
+            } else {
+              return <span key={idx}>{change.value}</span>;
+            }
+          })}
+        </>
+      );
+    }
+
+    // Otherwise, render plain content
+    return line.content;
+  };
+
   return (
     <div className="unified-diff font-mono text-sm">
       {lines.map((line, index) => {
@@ -212,7 +329,7 @@ function UnifiedDiffView({ lines }: { lines: DiffLine[] }) {
               </span>
             </div>
             <pre className={`flex-1 px-4 py-1 ${textColor} whitespace-pre-wrap break-all`}>
-              {line.content}
+              {renderLineContent(line)}
             </pre>
           </div>
         );
@@ -221,8 +338,38 @@ function UnifiedDiffView({ lines }: { lines: DiffLine[] }) {
   );
 }
 
-// Split Diff View
+// Split Diff View with character-level highlighting
 function SplitDiffView({ lines }: { lines: DiffLine[] }) {
+  const renderLineContent = (line: DiffLine) => {
+    // If we have character-level changes, render them with highlighting
+    if (line.changes && line.changes.length > 0) {
+      return (
+        <>
+          {line.changes.map((change, idx) => {
+            if (change.added && line.type === 'add') {
+              return (
+                <span key={idx} className="bg-green-500 bg-opacity-40">
+                  {change.value}
+                </span>
+              );
+            } else if (change.removed && line.type === 'remove') {
+              return (
+                <span key={idx} className="bg-red-500 bg-opacity-40">
+                  {change.value}
+                </span>
+              );
+            } else {
+              return <span key={idx}>{change.value}</span>;
+            }
+          })}
+        </>
+      );
+    }
+
+    // Otherwise, render plain content
+    return line.content;
+  };
+
   // Group lines into pairs for side-by-side view
   const pairs: Array<{ old?: DiffLine; new?: DiffLine }> = [];
   let i = 0;
@@ -282,7 +429,7 @@ function SplitDiffView({ lines }: { lines: DiffLine[] }) {
                       : 'text-gray-300'
                   }`}
                 >
-                  {pair.old.content}
+                  {renderLineContent(pair.old)}
                 </pre>
               </>
             )}
@@ -312,7 +459,7 @@ function SplitDiffView({ lines }: { lines: DiffLine[] }) {
                       : 'text-gray-300'
                   }`}
                 >
-                  {pair.new.content}
+                  {renderLineContent(pair.new)}
                 </pre>
               </>
             )}

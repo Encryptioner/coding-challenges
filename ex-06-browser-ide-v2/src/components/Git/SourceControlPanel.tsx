@@ -11,8 +11,10 @@ import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 import { gitService } from '@/services/git';
 import type { GitStatus, GitCommit } from '@/types';
 import { DiffViewer } from './DiffViewer';
+import { toast } from 'sonner';
+import { useHotkeys } from 'react-hotkeys-hook';
 
-type Tab = 'changes' | 'history' | 'branches';
+type Tab = 'changes' | 'history' | 'branches' | 'stash';
 
 export function SourceControlPanel() {
   const [activeTab, setActiveTab] = useState<Tab>('changes');
@@ -26,12 +28,72 @@ export function SourceControlPanel() {
   const [isPulling, setIsPulling] = useState(false);
   const [diffFilePath, setDiffFilePath] = useState<string | null>(null);
 
+  // Keyboard shortcuts
+  // Git panel focus
+  useHotkeys('ctrl+shift+g, cmd+shift+g', () => {
+    toast.info('Git panel focused');
+  }, { enableOnFormTags: true });
+
+  // Quick commit from commit message textarea
+  useHotkeys('ctrl+enter, cmd+enter', () => {
+    if (activeTab === 'changes' && stagedFiles.length > 0 && commitMessage.trim()) {
+      handleCommit();
+    }
+  }, { enableOnFormTags: true });
+
+  // Refresh git status
+  useHotkeys('ctrl+r, cmd+r', (e) => {
+    e.preventDefault();
+    handleRefresh();
+    toast.info('Refreshing git status...');
+  });
+
+  // Stage all unstaged files
+  useHotkeys('ctrl+shift+a, cmd+shift+a', () => {
+    if (activeTab === 'changes' && unstagedFiles.length > 0) {
+      handleStageAll();
+      toast.success('Staged all files');
+    }
+  }, { enableOnFormTags: true });
+
+  // Unstage all staged files
+  useHotkeys('ctrl+shift+u, cmd+shift+u', () => {
+    if (activeTab === 'changes' && stagedFiles.length > 0) {
+      handleUnstageAll();
+      toast.success('Unstaged all files');
+    }
+  }, { enableOnFormTags: true });
+
+  // Tab navigation - Changes
+  useHotkeys('ctrl+1, cmd+1', (e) => {
+    e.preventDefault();
+    setActiveTab('changes');
+  }, { enableOnFormTags: true });
+
+  // Tab navigation - History
+  useHotkeys('ctrl+2, cmd+2', (e) => {
+    e.preventDefault();
+    setActiveTab('history');
+  }, { enableOnFormTags: true });
+
+  // Tab navigation - Branches
+  useHotkeys('ctrl+3, cmd+3', (e) => {
+    e.preventDefault();
+    setActiveTab('branches');
+  }, { enableOnFormTags: true });
+
+  // Tab navigation - Stash
+  useHotkeys('ctrl+4, cmd+4', (e) => {
+    e.preventDefault();
+    setActiveTab('stash');
+  }, { enableOnFormTags: true });
+
   // Refresh git status
   const handleRefresh = async () => {
     setIsRefreshing(true);
     const result = await gitService.initializeRepository('/repo');
     if (!result.success) {
-      alert('Failed to refresh: ' + result.error);
+      toast.error('Failed to refresh: ' + result.error);
     }
     setIsRefreshing(false);
   };
@@ -53,7 +115,7 @@ export function SourceControlPanel() {
     if (result.success) {
       await handleRefresh();
     } else {
-      alert('Failed to stage: ' + result.error);
+      toast.error('Failed to stage: ' + result.error);
     }
   };
 
@@ -62,7 +124,7 @@ export function SourceControlPanel() {
     if (result.success) {
       await handleRefresh();
     } else {
-      alert('Failed to unstage: ' + result.error);
+      toast.error('Failed to unstage: ' + result.error);
     }
   };
 
@@ -82,12 +144,12 @@ export function SourceControlPanel() {
 
   const handleCommit = async () => {
     if (!commitMessage.trim()) {
-      alert('Please enter a commit message');
+      toast.error('Please enter a commit message');
       return;
     }
 
     if (stagedFiles.length === 0) {
-      alert('No staged changes to commit');
+      toast.error('No staged changes to commit');
       return;
     }
 
@@ -104,9 +166,9 @@ export function SourceControlPanel() {
     if (result.success) {
       setCommitMessage('');
       await handleRefresh();
-      alert('Committed successfully!');
+      toast.success('Committed successfully!');
     } else {
-      alert('Commit failed: ' + result.error);
+      toast.error('Commit failed: ' + result.error);
     }
     setIsCommitting(false);
   };
@@ -117,9 +179,9 @@ export function SourceControlPanel() {
 
     if (result.success) {
       await handleRefresh();
-      alert('Pushed successfully!');
+      toast.success('Pushed successfully!');
     } else {
-      alert('Push failed: ' + result.error);
+      toast.error('Push failed: ' + result.error);
     }
     setIsPushing(false);
   };
@@ -130,9 +192,9 @@ export function SourceControlPanel() {
 
     if (result.success) {
       await handleRefresh();
-      alert('Pulled successfully!');
+      toast.success('Pulled successfully!');
     } else {
-      alert('Pull failed: ' + result.error);
+      toast.error('Pull failed: ' + result.error);
     }
     setIsPulling(false);
   };
@@ -207,6 +269,16 @@ export function SourceControlPanel() {
         >
           Branches
         </button>
+        <button
+          onClick={() => setActiveTab('stash')}
+          className={`tab px-4 py-2 text-sm transition-colors ${
+            activeTab === 'stash'
+              ? 'bg-gray-900 text-blue-400 border-b-2 border-blue-500'
+              : 'text-gray-400 hover:bg-gray-700 hover:text-gray-200'
+          }`}
+        >
+          Stash
+        </button>
       </div>
 
       {/* Content */}
@@ -231,6 +303,9 @@ export function SourceControlPanel() {
         )}
         {activeTab === 'branches' && (
           <BranchesView currentBranch={currentBranch} onRefresh={handleRefresh} />
+        )}
+        {activeTab === 'stash' && (
+          <StashView onRefresh={handleRefresh} />
         )}
       </div>
 
@@ -526,15 +601,16 @@ function BranchesView({ currentBranch, onRefresh }: BranchesViewProps) {
     if (result.success) {
       await gitService.initializeRepository('/repo');
       onRefresh();
+      toast.success(`Switched to ${branchName}`);
     } else {
-      alert('Failed to switch branch: ' + result.error);
+      toast.error('Failed to switch branch: ' + result.error);
     }
     setIsLoading(false);
   };
 
   const handleCreateBranch = async () => {
     if (!newBranchName.trim()) {
-      alert('Please enter a branch name');
+      toast.error('Please enter a branch name');
       return;
     }
 
@@ -545,15 +621,16 @@ function BranchesView({ currentBranch, onRefresh }: BranchesViewProps) {
       setNewBranchName('');
       setShowCreateBranch(false);
       await loadBranches();
+      toast.success(`Created branch ${newBranchName}`);
     } else {
-      alert('Failed to create branch: ' + result.error);
+      toast.error('Failed to create branch: ' + result.error);
     }
     setIsCreating(false);
   };
 
   const handleDeleteBranch = async (branchName: string) => {
     if (branchName === currentBranch) {
-      alert('Cannot delete the current branch');
+      toast.error('Cannot delete the current branch');
       return;
     }
 
@@ -565,9 +642,34 @@ function BranchesView({ currentBranch, onRefresh }: BranchesViewProps) {
 
     if (result.success) {
       await loadBranches();
+      toast.success(`Deleted branch ${branchName}`);
     } else {
-      alert('Failed to delete branch: ' + result.error);
+      toast.error('Failed to delete branch: ' + result.error);
     }
+  };
+
+  const handleMergeBranch = async (branchName: string) => {
+    if (branchName === currentBranch) {
+      toast.error('Cannot merge current branch into itself');
+      return;
+    }
+
+    if (!confirm(`Merge "${branchName}" into "${currentBranch}"?`)) {
+      return;
+    }
+
+    setIsLoading(true);
+    const result = await gitService.merge(branchName, '/repo');
+
+    if (result.success) {
+      const mergeType = result.data?.fastForward ? 'Fast-forward' : 'Merge';
+      toast.success(`${mergeType} merge completed: ${branchName} → ${currentBranch}`);
+      await gitService.initializeRepository('/repo');
+      onRefresh();
+    } else {
+      toast.error('Merge failed: ' + result.error);
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -644,18 +746,32 @@ function BranchesView({ currentBranch, onRefresh }: BranchesViewProps) {
             )}
             <span className="flex-1 text-sm font-medium">{branch.name}</span>
             {!branch.current && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDeleteBranch(branch.name);
-                }}
-                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-600 rounded text-gray-400 hover:text-white transition-colors"
-                title="Delete branch"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
+              <div className="flex gap-1 opacity-0 group-hover:opacity-100">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleMergeBranch(branch.name);
+                  }}
+                  className="p-1 hover:bg-green-600 rounded text-gray-400 hover:text-white transition-colors"
+                  title="Merge into current branch"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                  </svg>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteBranch(branch.name);
+                  }}
+                  className="p-1 hover:bg-red-600 rounded text-gray-400 hover:text-white transition-colors"
+                  title="Delete branch"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
             )}
           </div>
         ))}
@@ -663,6 +779,196 @@ function BranchesView({ currentBranch, onRefresh }: BranchesViewProps) {
         {branches.length === 0 && !isLoading && (
           <div className="text-center py-8 text-gray-500 text-sm">No branches found</div>
         )}
+      </div>
+    </div>
+  );
+}
+
+// Stash View Component
+interface StashViewProps {
+  onRefresh: () => void;
+}
+
+function StashView({ onRefresh }: StashViewProps) {
+  const [stashes, setStashes] = useState<Array<{
+    index: number;
+    oid: string;
+    message: string;
+    timestamp: number;
+  }>>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [stashMessage, setStashMessage] = useState('');
+  const [isCreatingStash, setIsCreatingStash] = useState(false);
+
+  // Load stashes
+  const loadStashes = async () => {
+    setIsLoading(true);
+    const result = await gitService.stashList();
+    if (result.success && result.data) {
+      setStashes(result.data);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    loadStashes();
+  }, []);
+
+  const handleCreateStash = async () => {
+    setIsCreatingStash(true);
+    const result = await gitService.stash(stashMessage || undefined, '/repo');
+
+    if (result.success) {
+      setStashMessage('');
+      toast.success('Stash created successfully');
+      await loadStashes();
+      onRefresh();
+    } else {
+      toast.error('Failed to create stash: ' + result.error);
+    }
+    setIsCreatingStash(false);
+  };
+
+  const handleApplyStash = async (index: number) => {
+    const result = await gitService.stashApply(index, '/repo');
+
+    if (result.success) {
+      toast.success('Stash applied successfully');
+      onRefresh();
+    } else {
+      toast.error('Failed to apply stash: ' + result.error);
+    }
+  };
+
+  const handlePopStash = async (index: number) => {
+    const result = await gitService.stashPop(index, '/repo');
+
+    if (result.success) {
+      toast.success('Stash popped successfully');
+      await loadStashes();
+      onRefresh();
+    } else {
+      toast.error('Failed to pop stash: ' + result.error);
+    }
+  };
+
+  const handleDropStash = async (index: number) => {
+    if (!confirm(`Drop stash "${stashes[index].message}"?`)) {
+      return;
+    }
+
+    const result = await gitService.stashDrop(index);
+
+    if (result.success) {
+      toast.success('Stash dropped');
+      await loadStashes();
+    } else {
+      toast.error('Failed to drop stash: ' + result.error);
+    }
+  };
+
+  const formatTimestamp = (timestamp: number) => {
+    const date = new Date(timestamp);
+    const now = Date.now();
+    const diff = now - timestamp;
+
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 30) return `${days}d ago`;
+
+    return date.toLocaleDateString();
+  };
+
+  return (
+    <div className="stash-view p-4 space-y-4">
+      {/* Create Stash */}
+      <div className="create-stash bg-gray-800 rounded-lg p-4 space-y-2">
+        <h3 className="text-sm font-semibold text-gray-300 mb-2">Create New Stash</h3>
+        <input
+          type="text"
+          value={stashMessage}
+          onChange={(e) => setStashMessage(e.target.value)}
+          placeholder="Stash message (optional)"
+          className="w-full bg-gray-900 text-gray-100 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button
+          onClick={handleCreateStash}
+          disabled={isCreatingStash}
+          className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-500 rounded text-sm font-medium transition-colors"
+        >
+          {isCreatingStash ? 'Stashing...' : '📦 Stash Changes'}
+        </button>
+      </div>
+
+      {/* Stash List */}
+      <div className="stash-list space-y-2">
+        <h3 className="text-sm font-semibold text-gray-300">Stashed Changes ({stashes.length})</h3>
+
+        {isLoading && stashes.length === 0 && (
+          <div className="text-center py-8 text-gray-500 text-sm">Loading stashes...</div>
+        )}
+
+        {stashes.length === 0 && !isLoading && (
+          <div className="text-center py-12 text-gray-500">
+            <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+            <p className="text-sm">No stashes yet</p>
+            <p className="text-xs mt-2">Create a stash to save your work-in-progress</p>
+          </div>
+        )}
+
+        {stashes.map((stash) => (
+          <div
+            key={stash.index}
+            className="stash-item bg-gray-800 rounded-lg p-4 hover:bg-gray-750 transition-colors"
+          >
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-xs font-bold">
+                {stash.index}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className="text-sm font-medium text-gray-100 truncate">
+                    {stash.message}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-xs text-gray-400">
+                  <span>{formatTimestamp(stash.timestamp)}</span>
+                  <span>•</span>
+                  <span className="font-mono">{stash.oid.slice(0, 7)}</span>
+                </div>
+              </div>
+              <div className="flex gap-1 flex-shrink-0">
+                <button
+                  onClick={() => handleApplyStash(stash.index)}
+                  className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded text-xs font-medium transition-colors"
+                  title="Apply stash (keep in list)"
+                >
+                  Apply
+                </button>
+                <button
+                  onClick={() => handlePopStash(stash.index)}
+                  className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs font-medium transition-colors"
+                  title="Apply and remove stash"
+                >
+                  Pop
+                </button>
+                <button
+                  onClick={() => handleDropStash(stash.index)}
+                  className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-xs font-medium transition-colors"
+                  title="Delete stash"
+                >
+                  Drop
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
