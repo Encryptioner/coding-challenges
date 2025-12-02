@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Search, Book, Zap, Code, Terminal, Git, Settings, HelpCircle, X, ChevronRight, ExternalLink, Menu } from 'lucide-react';
+import { clsx } from 'clsx';
 import { useIDEStore } from '@/store/useIDEStore';
 
 interface DocumentationSection {
@@ -857,9 +858,9 @@ export function HelpPanel({ className }: { className?: string }) {
           ${rows.map(row => `<td class="border border-gray-700 px-4 py-2 text-gray-300">${row}</td>`).join('')}
         </tr>`;
       })
-      .replace(/^[\s\S]*?\n/g, (match, content) => {
+      .replace(/^(?!.*<tr).*\n/gm, (match) => {
         if (match.includes('<tr')) return match;
-        return `<p class="text-gray-300 mb-4 leading-relaxed">${content.trim()}</p>`;
+        return `<p class="text-gray-300 mb-4 leading-relaxed">${match.trim()}</p>`;
       })
       .replace(/- (.*$)/gim, '<li class="text-gray-300 mb-2 ml-4">$1</li>')
       .replace(/(<li[\s\S]*?<\/li>)/g, '<ul class="list-disc list-inside mb-4">$1</ul>');

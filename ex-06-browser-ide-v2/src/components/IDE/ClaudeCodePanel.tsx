@@ -11,7 +11,7 @@ import { useIDEStore } from '@/store/useIDEStore';
 import { fileSystem } from '@/services/filesystem';
 import { webContainer } from '@/services/webcontainer';
 import { toast } from 'sonner';
-import { Check, X, GitBranch, FileText, Terminal, Zap, Users, Clock, ChevronRight, Sparkles, Eye, Code, FilePlus, Layers, Share2, GitMerge, Play, Users2, Bot, MessageSquare, Lightbulb, Bug, Shield, Gauge, Cpu, Wand2 } from 'lucide-react';
+import { Check, X, GitBranch, FileText, Terminal, Zap, Users, Clock, ChevronRight, Sparkles, Eye, Code, FilePlus, Layers, Share2, GitMerge, Play, Users2, Bot, MessageSquare, Lightbulb, Bug, Shield, Gauge, Cpu, Wand2, RefreshCw } from 'lucide-react';
 
 interface Message {
   id: string;
