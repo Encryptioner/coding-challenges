@@ -563,7 +563,42 @@ export function FileExplorer() {
       {/* File Tree */}
       <div className="tree flex-1 overflow-auto">
         {fileTree.length > 0 ? (
-          renderTree(fileTree)
+          <>
+            {/* New Item Input at Root Level */}
+            {newItemParent?.path === currentDirectory && !fileTree.some(item => item.path === newItemParent.path) && (
+              <div
+                className="tree-item-row flex items-center gap-2 py-1.5 px-2"
+                style={{ paddingLeft: '8px' }}
+              >
+                {newItemParent.type === 'file' ? (
+                  <File className="w-4 h-4 text-gray-400" />
+                ) : (
+                  <Folder className="w-4 h-4 text-blue-400" />
+                )}
+                <input
+                  type="text"
+                  placeholder={newItemParent.type === 'file' ? 'filename.txt' : 'foldername'}
+                  autoFocus
+                  className="flex-1 bg-gray-900 text-gray-100 px-2 py-1 rounded text-sm border border-blue-500 focus:outline-none"
+                  onBlur={(e) => {
+                    if (e.target.value.trim()) {
+                      handleCreateNew(currentDirectory, e.target.value, newItemParent.type);
+                    } else {
+                      setNewItemParent(null);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleCreateNew(currentDirectory, e.currentTarget.value, newItemParent.type);
+                    } else if (e.key === 'Escape') {
+                      setNewItemParent(null);
+                    }
+                  }}
+                />
+              </div>
+            )}
+            {renderTree(fileTree)}
+          </>
         ) : (
           <div className="empty-state flex flex-col items-center justify-center h-full text-gray-500 px-4">
             <Folder className="w-16 h-16 mb-4 opacity-50" />
@@ -571,6 +606,38 @@ export function FileExplorer() {
             <p className="text-xs text-center mt-2 text-gray-600">
               Clone a repository or create files to get started
             </p>
+            {/* New Item Input in Empty State */}
+            {newItemParent && (
+              <div className="mt-4 flex flex-col gap-2">
+                <div className="flex items-center gap-2 px-4">
+                  {newItemParent.type === 'file' ? (
+                    <File className="w-4 h-4 text-gray-400" />
+                  ) : (
+                    <Folder className="w-4 h-4 text-blue-400" />
+                  )}
+                  <input
+                    type="text"
+                    placeholder={newItemParent.type === 'file' ? 'filename.txt' : 'foldername'}
+                    autoFocus
+                    className="flex-1 bg-gray-900 text-gray-100 px-2 py-1 rounded text-sm border border-blue-500 focus:outline-none"
+                    onBlur={(e) => {
+                      if (e.target.value.trim()) {
+                        handleCreateNew(currentDirectory, e.target.value, newItemParent.type);
+                      } else {
+                        setNewItemParent(null);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleCreateNew(currentDirectory, e.currentTarget.value, newItemParent.type);
+                      } else if (e.key === 'Escape') {
+                        setNewItemParent(null);
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

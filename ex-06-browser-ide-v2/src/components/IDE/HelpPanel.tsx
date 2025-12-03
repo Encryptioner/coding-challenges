@@ -1,6 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Book, Zap, Code, Terminal, Git, Settings, HelpCircle, X, ChevronRight, ExternalLink, Menu } from 'lucide-react';
+import { Search, Book, Zap, Code, Terminal, HelpCircle, X, ExternalLink, Maximize2 } from 'lucide-react';
 import { clsx } from 'clsx';
+import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useIDEStore } from '@/store/useIDEStore';
 
 interface DocumentationSection {
@@ -802,6 +805,7 @@ export function HelpPanel({ className }: { className?: string }) {
   const [selectedCategory, setSelectedCategory] = useState('quick');
   const [selectedSection, setSelectedSection] = useState('quick-reference');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [externalMarkdown, setExternalMarkdown] = useState<{ title: string; content: string } | null>(null);
 
   const { toggleHelp } = useIDEStore((state) => state.helpOpen);
 
@@ -830,40 +834,363 @@ export function HelpPanel({ className }: { className?: string }) {
     }
   };
 
-  const handleExternalLink = (url: string) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
+  const handleExternalLink = async (url: string) => {
+    // For external markdown files, load them in the panel instead of opening in new tab
+    if (url.endsWith('.md')) {
+      try {
+        const response = await fetch(url);
+        if (response.ok) {
+          const content = await response.text();
+          const title = url.split('/').pop()?.replace('.md', '').replace(/-/g, ' ') || 'Document';
+          setExternalMarkdown({ title, content });
+          // Clear the sidebar on mobile when viewing external doc
+          if (window.innerWidth < 768) {
+            setSidebarCollapsed(true);
+          }
+        } else {
+          // If fetch fails, open in new tab as fallback
+          window.open(url, '_blank', 'noopener,noreferrer');
+        }
+      } catch (error) {
+        console.error('Failed to load external markdown:', error);
+        // Fallback to opening in new tab
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+    } else {
+      // For non-markdown URLs, open in new tab
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
   };
 
-  const renderMarkdown = (content: string) => {
-    // Simple markdown rendering for the preview
-    return content
-      .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold text-white mb-4">$1</h1>')
-      .replace(/^## (.*$)/gim, '<h2 class="text-xl font-semibold text-white mt-6 mb-3">$1</h2>')
-      .replace(/^### (.*$)/gim, '<h3 class="text-lg font-medium text-white mt-4 mb-2">$1</h3>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong class="text-blue-400">$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em class="text-gray-300">$1</em>')
-      .replace(/`([^`]+)`/g, '<code class="bg-gray-800 text-green-400 px-2 py-1 rounded font-mono text-sm">$1</code>')
-      .replace(/```(.*?)\n([\s\S]*?)```/g, '<pre class="bg-gray-900 border border-gray-700 rounded-lg p-4 overflow-x-auto mb-4"><code class="text-green-400 font-mono text-sm">$2</code></pre>')
-      .replace(/^\| (.*) \|/gm, (match, content) => {
-        const rows = content.split(' | ');
-        return `<table class="w-full border-collapse border border-gray-700 mb-4">
-          <tr class="border-b border-gray-700">
-            ${rows.map(row => `<th class="border border-gray-700 px-4 py-2 text-left text-white">${row}</th>`).join('')}
-          </tr>
-        </table>`;
-      })
-      .replace(/^\| (.*) \|/gm, (match, content) => {
-        const rows = content.split(' | ');
-        return `<tr class="border-b border-gray-700">
-          ${rows.map(row => `<td class="border border-gray-700 px-4 py-2 text-gray-300">${row}</td>`).join('')}
-        </tr>`;
-      })
-      .replace(/^(?!.*<tr).*\n/gm, (match) => {
-        if (match.includes('<tr')) return match;
-        return `<p class="text-gray-300 mb-4 leading-relaxed">${match.trim()}</p>`;
-      })
-      .replace(/- (.*$)/gim, '<li class="text-gray-300 mb-2 ml-4">$1</li>')
-      .replace(/(<li[\s\S]*?<\/li>)/g, '<ul class="list-disc list-inside mb-4">$1</ul>');
+  const openFullScreenUserGuide = () => {
+    const userGuideUrl = '/docs/USER_GUIDE.md';
+    const newWindow = window.open(userGuideUrl, '_blank', 'width=1400,height=900,scrollbars=yes,resizable=yes,toolbar=yes,menubar=yes');
+
+    if (newWindow) {
+      newWindow.document.title = '📚 Browser IDE Pro - User Guide';
+
+      newWindow.addEventListener('load', () => {
+        try {
+          const style = newWindow.document.createElement('style');
+          style.textContent = `
+            body {
+              font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+              background: #0d1117;
+              color: #c9d1d9;
+              line-height: 1.6;
+              margin: 0;
+              padding: 2rem;
+            }
+            h1, h2, h3, h4, h5, h6 {
+              color: #f9fafb;
+              border-bottom: 1px solid #374151;
+              padding-bottom: 0.5rem;
+              margin-top: 2rem;
+              margin-bottom: 1rem;
+            }
+            h1 { font-size: 2.25rem; border-bottom: 2px solid #3b82f6; }
+            h2 { font-size: 1.875rem; border-bottom: 2px solid #3b82f6; }
+            h3 { font-size: 1.5rem; }
+            code {
+              background: #1e293b;
+              border: 1px solid #334155;
+              border-radius: 0.375rem;
+              padding: 0.25rem 0.5rem;
+              font-family: 'Monaco', 'Menlo', monospace;
+              font-size: 0.875rem;
+            }
+            pre {
+              background: #1e293b;
+              border: 1px solid #334155;
+              border-radius: 0.5rem;
+              padding: 1rem;
+              overflow-x: auto;
+              white-space: pre-wrap;
+            }
+            blockquote {
+              border-left: 4px solid #3b82f6;
+              background: #1e293b;
+              padding: 1rem;
+              margin: 1rem 0;
+              font-style: italic;
+              color: #d1d5db;
+            }
+            table {
+              border-collapse: collapse;
+              width: 100%;
+              margin: 1rem 0;
+            }
+            th, td {
+              border: 1px solid #374151;
+              padding: 0.75rem;
+              text-align: left;
+            }
+            th {
+              background: #1f2937;
+              font-weight: 600;
+            }
+            a {
+              color: #60a5fa;
+              text-decoration: underline;
+            }
+            a:hover {
+              color: #93c5fd;
+            }
+            .header {
+              position: fixed;
+              top: 0;
+              left: 0;
+              right: 0;
+              background: #1f2937;
+              border-bottom: 1px solid #374151;
+              padding: 1rem 2rem;
+              z-index: 1000;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            }
+            @media print {
+              body { background: white !important; color: black !important; }
+              h1, h2, h3, h4, h5, h6 { color: black !important; border-color: black !important; }
+              code, pre { background: #f5f5f5 !important; border-color: #ccc !important; color: black !important; }
+              a { color: black !important; }
+              .header { display: none !important; }
+            }
+          `;
+          newWindow.document.head.appendChild(style);
+
+          const header = newWindow.document.createElement('div');
+          header.className = 'header';
+          header.innerHTML = `
+            <h1 style="margin: 0; font-size: 1.5rem;">📚 Browser IDE Pro - User Guide</h1>
+            <div>
+              <button onclick="window.print()" style="background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer; margin-right: 0.5rem;">🖨️ Print</button>
+              <button onclick="window.close()" style="background: #dc2626; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer;">✕ Close</button>
+            </div>
+          `;
+          newWindow.document.body.insertBefore(header, newWindow.document.body.firstChild);
+
+          // Add padding to account for fixed header
+          newWindow.document.body.style.paddingTop = '5rem';
+
+        } catch (error) {
+          console.error('Failed to enhance user guide:', error);
+        }
+      });
+    }
+  };
+
+  const openFullScreenQuickReference = () => {
+    const quickRefUrl = '/docs/QUICK_REFERENCE.md';
+    const newWindow = window.open(quickRefUrl, '_blank', 'width=1400,height=900,scrollbars=yes,resizable=yes,toolbar=yes,menubar=yes');
+
+    if (newWindow) {
+      newWindow.document.title = '⚡ Browser IDE Pro - Quick Reference';
+
+      newWindow.addEventListener('load', () => {
+        try {
+          const style = newWindow.document.createElement('style');
+          style.textContent = `
+            body {
+              font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+              background: #0d1117;
+              color: #c9d1d9;
+              line-height: 1.6;
+              margin: 0;
+              padding: 2rem;
+            }
+            h1, h2, h3, h4, h5, h6 {
+              color: #f9fafb;
+              border-bottom: 1px solid #374151;
+              padding-bottom: 0.5rem;
+              margin-top: 2rem;
+              margin-bottom: 1rem;
+            }
+            h1 { font-size: 2.25rem; border-bottom: 2px solid #fbbf24; }
+            h2 { font-size: 1.875rem; border-bottom: 2px solid #fbbf24; }
+            h3 { font-size: 1.5rem; }
+            code {
+              background: #1e293b;
+              border: 1px solid #334155;
+              border-radius: 0.375rem;
+              padding: 0.25rem 0.5rem;
+              font-family: 'Monaco', 'Menlo', monospace;
+              font-size: 0.875rem;
+            }
+            pre {
+              background: #1e293b;
+              border: 1px solid #334155;
+              border-radius: 0.5rem;
+              padding: 1rem;
+              overflow-x: auto;
+              white-space: pre-wrap;
+            }
+            blockquote {
+              border-left: 4px solid #fbbf24;
+              background: #1e293b;
+              padding: 1rem;
+              margin: 1rem 0;
+              font-style: italic;
+              color: #d1d5db;
+            }
+            table {
+              border-collapse: collapse;
+              width: 100%;
+              margin: 1rem 0;
+            }
+            th, td {
+              border: 1px solid #374151;
+              padding: 0.75rem;
+              text-align: left;
+            }
+            th {
+              background: #1f2937;
+              font-weight: 600;
+            }
+            a {
+              color: #60a5fa;
+              text-decoration: underline;
+            }
+            a:hover {
+              color: #93c5fd;
+            }
+            .header {
+              position: fixed;
+              top: 0;
+              left: 0;
+              right: 0;
+              background: #1f2937;
+              border-bottom: 1px solid #374151;
+              padding: 1rem 2rem;
+              z-index: 1000;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            }
+            @media print {
+              body { background: white !important; color: black !important; }
+              h1, h2, h3, h4, h5, h6 { color: black !important; border-color: black !important; }
+              code, pre { background: #f5f5f5 !important; border-color: #ccc !important; color: black !important; }
+              a { color: black !important; }
+              .header { display: none !important; }
+            }
+          `;
+          newWindow.document.head.appendChild(style);
+
+          const header = newWindow.document.createElement('div');
+          header.className = 'header';
+          header.innerHTML = `
+            <h1 style="margin: 0; font-size: 1.5rem;">⚡ Browser IDE Pro - Quick Reference</h1>
+            <div>
+              <button onclick="window.print()" style="background: #fbbf24; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer; margin-right: 0.5rem;">🖨️ Print</button>
+              <button onclick="window.close()" style="background: #dc2626; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer;">✕ Close</button>
+            </div>
+          `;
+          newWindow.document.body.appendChild(header);
+
+        } catch (error) {
+          console.error('Failed to enhance quick reference:', error);
+        }
+      });
+    }
+  };
+
+  // Custom components for ReactMarkdown
+  const markdownComponents = {
+    h1: ({ children }: { children: React.ReactNode }) => (
+      <h1 className="text-2xl font-bold text-white mb-4 mt-6">{children}</h1>
+    ),
+    h2: ({ children }: { children: React.ReactNode }) => (
+      <h2 className="text-xl font-semibold text-white mt-6 mb-3">{children}</h2>
+    ),
+    h3: ({ children }: { children: React.ReactNode }) => (
+      <h3 className="text-lg font-medium text-white mt-4 mb-2">{children}</h3>
+    ),
+    h4: ({ children }: { children: React.ReactNode }) => (
+      <h4 className="text-base font-medium text-gray-200 mt-3 mb-2">{children}</h4>
+    ),
+    p: ({ children }: { children: React.ReactNode }) => (
+      <p className="text-gray-300 mb-4 leading-relaxed">{children}</p>
+    ),
+    ul: ({ children }: { children: React.ReactNode }) => (
+      <ul className="list-disc list-inside mb-4 space-y-2">{children}</ul>
+    ),
+    ol: ({ children }: { children: React.ReactNode }) => (
+      <ol className="list-decimal list-inside mb-4 space-y-2">{children}</ol>
+    ),
+    li: ({ children }: { children: React.ReactNode }) => (
+      <li className="text-gray-300">{children}</li>
+    ),
+    blockquote: ({ children }: { children: React.ReactNode }) => (
+      <blockquote className="border-l-4 border-blue-500 pl-4 py-2 mb-4 bg-gray-800 italic text-gray-300">
+        {children}
+      </blockquote>
+    ),
+    table: ({ children }: { children: React.ReactNode }) => (
+      <div className="overflow-x-auto mb-4">
+        <table className="w-full border-collapse border border-gray-700">{children}</table>
+      </div>
+    ),
+    thead: ({ children }: { children: React.ReactNode }) => (
+      <thead className="bg-gray-800">{children}</thead>
+    ),
+    tbody: ({ children }: { children: React.ReactNode }) => (
+      <tbody>{children}</tbody>
+    ),
+    tr: ({ children }: { children: React.ReactNode }) => (
+      <tr className="border-b border-gray-700">{children}</tr>
+    ),
+    th: ({ children }: { children: React.ReactNode }) => (
+      <th className="border border-gray-700 px-4 py-2 text-left text-white font-semibold">{children}</th>
+    ),
+    td: ({ children }: { children: React.ReactNode }) => (
+      <td className="border border-gray-700 px-4 py-2 text-gray-300">{children}</td>
+    ),
+    a: ({ href, children }: { href?: string; children: React.ReactNode }) => (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-400 hover:text-blue-300 underline"
+      >
+        {children}
+      </a>
+    ),
+    strong: ({ children }: { children: React.ReactNode }) => (
+      <strong className="text-blue-400 font-semibold">{children}</strong>
+    ),
+    em: ({ children }: { children: React.ReactNode }) => (
+      <em className="text-gray-300 italic">{children}</em>
+    ),
+    hr: () => (
+      <hr className="border-gray-700 my-6" />
+    ),
+    code: ({ inline, children, className }: { inline?: boolean; children: React.ReactNode; className?: string }) => {
+      if (inline) {
+        return (
+          <code className="bg-gray-800 text-green-400 px-2 py-1 rounded font-mono text-sm">
+            {children}
+          </code>
+        );
+      }
+
+      const language = className?.replace(/language-/, '') || 'text';
+      return (
+        <div className="rounded-lg overflow-hidden mb-4">
+          <SyntaxHighlighter
+            language={language}
+            style={oneDark}
+            customStyle={{
+              margin: 0,
+              borderRadius: '0.5rem',
+              fontSize: '0.875rem',
+            }}
+          >
+            {String(children).replace(/\n$/, '')}
+          </SyntaxHighlighter>
+        </div>
+      );
+    },
   };
 
   return (
@@ -883,7 +1210,7 @@ export function HelpPanel({ className }: { className?: string }) {
             <ExternalLink className="w-4 h-4 text-gray-400" />
           </button>
           <button
-            onClick={() => setHelpOpen(false)}
+            onClick={toggleHelp}
             className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
             title="Close Help"
           >
@@ -957,29 +1284,77 @@ export function HelpPanel({ className }: { className?: string }) {
           {/* External Links */}
           <div className="p-4 border-t border-gray-700">
             <div className="space-y-2">
-              <button
-                onClick={() => handleExternalLink('/docs/USER_GUIDE.md')}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-left"
-              >
-                <Book className="w-4 h-4" />
-                <span>Full User Guide</span>
-                <ExternalLink className="w-3 h-3 ml-auto" />
-              </button>
-              <button
-                onClick={() => handleExternalLink('/docs/QUICK_REFERENCE.md')}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-left"
-              >
-                <Zap className="w-4 h-4" />
-                <span>Quick Reference</span>
-                <ExternalLink className="w-3 h-3 ml-auto" />
-              </button>
+              {/* Side-by-side button layout for mobile and desktop */}
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex gap-1 flex-1">
+                  <button
+                    onClick={() => handleExternalLink('/docs/USER_GUIDE.md')}
+                    className="flex-1 flex items-center gap-2 px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-left"
+                    title="View in panel"
+                  >
+                    <Book className="w-4 h-4" />
+                    <span className="text-xs">User Guide</span>
+                  </button>
+                  <button
+                    onClick={openFullScreenUserGuide}
+                    className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                    title="Open in full-screen window"
+                  >
+                    <Maximize2 className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="flex gap-1 flex-1">
+                  <button
+                    onClick={() => handleExternalLink('/docs/QUICK_REFERENCE.md')}
+                    className="flex-1 flex items-center gap-2 px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-left"
+                    title="View in panel"
+                  >
+                    <Zap className="w-4 h-4" />
+                    <span className="text-xs">Quick Ref</span>
+                  </button>
+                  <button
+                    onClick={openFullScreenQuickReference}
+                    className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                    title="Open in full-screen window"
+                  >
+                    <Maximize2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {currentSection ? (
+          {externalMarkdown ? (
+            <>
+              {/* External Document Header */}
+              <div className="p-4 border-b border-gray-800">
+                <div className="flex items-center gap-3 mb-2">
+                  <Book className="w-5 h-5 text-blue-400" />
+                  <h3 className="text-lg font-semibold text-white">{externalMarkdown.title}</h3>
+                  <button
+                    onClick={() => setExternalMarkdown(null)}
+                    className="ml-auto p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                    title="Back to help sections"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-gray-400 text-sm">External documentation file</p>
+              </div>
+
+              {/* External Document Content */}
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="prose prose-invert max-w-none prose-lg">
+                  <ReactMarkdown components={markdownComponents}>
+                    {externalMarkdown.content}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            </>
+          ) : currentSection ? (
             <>
               {/* Section Header */}
               <div className="p-4 border-b border-gray-800">
@@ -996,10 +1371,11 @@ export function HelpPanel({ className }: { className?: string }) {
 
               {/* Content */}
               <div className="flex-1 overflow-y-auto p-6">
-                <div
-                  className="prose prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: renderMarkdown(currentSection.content) }}
-                />
+                <div className="prose prose-invert max-w-none prose-lg">
+                  <ReactMarkdown components={markdownComponents}>
+                    {currentSection.content}
+                  </ReactMarkdown>
+                </div>
               </div>
             </>
           ) : (

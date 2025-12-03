@@ -872,6 +872,13 @@ export function Terminal() {
           return;
         }
 
+        // Default case - unknown command
+        if (!cmd?.trim()) {
+          xterm.writeln(`Command not found: ${cmd}. Type 'help' for available commands.`);
+          xterm.write('$ ');
+          return;
+        }
+
         // Execute via WebContainer - check actual boot status, not local state
         if (!webContainer.isBooted()) {
           console.log('⚠️ Command blocked: WebContainer not booted yet');

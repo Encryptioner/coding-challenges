@@ -25,6 +25,7 @@ export default {
     },
   },
   plugins: [
+    require('@tailwindcss/typography'),
     // Add plugin for touch-manipulation utility
     function({ addUtilities }) {
       addUtilities({

@@ -123,11 +123,11 @@ function App() {
       setShowInstallPrompt(false);
     });
     window.addEventListener('show-clone-dialog', handleOpenCloneDialog);
-    window.addEventListener('show-settings-dialog', handleOpenSettingsDialog);
+    window.addEventListener('open-settings-dialog', handleOpenSettingsDialog);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('open-clone-dialog', handleOpenCloneDialog);
+      window.removeEventListener('show-clone-dialog', handleOpenCloneDialog);
       window.removeEventListener('open-settings-dialog', handleOpenSettingsDialog);
     };
   }, []);
