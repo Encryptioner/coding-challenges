@@ -1237,7 +1237,7 @@ export function HelpPanel({ className }: { className?: string }) {
         {/* Sidebar */}
         <div className={clsx(
           'flex flex-col bg-gray-800 border-r border-gray-700 transition-all duration-300',
-          sidebarCollapsed ? 'w-0 overflow-hidden' : 'w-80'
+          sidebarCollapsed ? 'w-0' : 'w-80'
         )}>
           {/* Categories */}
           <div className="flex-1 overflow-y-auto">
