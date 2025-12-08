@@ -43,6 +43,8 @@ function App() {
     helpOpen,
     activeBottomPanel,
     setActiveBottomPanel,
+    terminalMaximized,
+    bottomPanelSize,
   } = useIDEStore();
 
   const [showCloneDialog, setShowCloneDialog] = useState(false);
@@ -363,15 +365,29 @@ function App() {
           <Panel id="main-editor" order={2}>
             <PanelGroup direction="vertical" id="main-vertical">
               {/* Editor */}
-              <Panel id="editor" order={1} defaultSize={bottomPanelVisible ? 70 : 100} minSize={30}>
+              <Panel
+                id="editor"
+                order={1}
+                defaultSize={bottomPanelVisible ? (100 - bottomPanelSize) : 100}
+                minSize={terminalMaximized ? 0 : 30}
+                maxSize={terminalMaximized ? (100 - bottomPanelSize) : 100}
+              >
                 <Editor />
               </Panel>
 
               {/* Bottom Panel */}
               {bottomPanelVisible && (
                 <>
-                  <PanelResizeHandle className="h-1 bg-gray-700 hover:bg-blue-500 transition-colors" />
-                  <Panel id="bottom-panel" order={2} defaultSize={30} minSize={15} maxSize={70}>
+                  <PanelResizeHandle
+                    className={`h-1 bg-gray-700 hover:bg-blue-500 transition-colors ${terminalMaximized ? 'hidden' : ''}`}
+                  />
+                  <Panel
+                    id="bottom-panel"
+                    order={2}
+                    defaultSize={bottomPanelSize}
+                    minSize={terminalMaximized ? 100 : 15}
+                    maxSize={terminalMaximized ? 100 : 100}
+                  >
                     <MobileBottomPanel isOpen={bottomPanelVisible} className="bottom-panel flex flex-col h-full bg-gray-900">
                       <div className="bottom-panel-tabs flex bg-gray-800 border-b border-gray-700 overflow-x-auto">
                         {terminalOpen && (
@@ -458,6 +474,7 @@ function App() {
                         </div>
                       </div>
                       <div className="bottom-panel-content flex-1 overflow-hidden">
+                        {activeBottomPanel === 'terminal-tabs' && terminalOpen && <Terminal />}
                         {activeBottomPanel === 'terminal' && terminalOpen && <Terminal />}
                         {activeBottomPanel === 'preview' && previewOpen && <Preview />}
                         {activeBottomPanel === 'claude-code' && showClaudeCode && <ClaudeCodePanel />}

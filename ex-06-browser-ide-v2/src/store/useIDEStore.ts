@@ -101,6 +101,10 @@ interface IDEState {
   helpOpen: boolean;
   activeBottomPanel: 'terminal' | 'preview' | 'claude-code' | 'extensions' | 'git' | 'debugger' | 'split-editor' | 'terminal-tabs' | 'problems' | 'help';
 
+  // Panel Sizing
+  terminalMaximized: boolean;
+  bottomPanelSize: number; // Percentage (0-100)
+
   // Settings
   settings: Settings;
 
@@ -184,6 +188,11 @@ interface IDEActions {
   setCommandPaletteOpen: (open: boolean) => void;
   setHelpOpen: (open: boolean) => void;
   setActiveBottomPanel: (panel: 'terminal' | 'preview' | 'claude-code' | 'extensions' | 'git' | 'debugger' | 'split-editor' | 'terminal-tabs' | 'problems' | 'help') => void;
+
+  // Panel Sizing
+  toggleTerminalMaximized: () => void;
+  setTerminalMaximized: (maximized: boolean) => void;
+  setBottomPanelSize: (size: number) => void;
 
   // Settings
   updateSettings: (newSettings: Partial<Settings>) => void;
@@ -272,6 +281,10 @@ export const useIDEStore = create<IDEState & IDEActions>()(
       commandPaletteOpen: false,
       helpOpen: false,
       activeBottomPanel: 'terminal' as const,
+
+      // Panel Sizing
+      terminalMaximized: false,
+      bottomPanelSize: 30, // 30% default height
 
       settings: DEFAULT_SETTINGS,
 
@@ -509,6 +522,20 @@ export const useIDEStore = create<IDEState & IDEActions>()(
       setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
       setHelpOpen: (open) => set({ helpOpen: open }),
       setActiveBottomPanel: (panel) => set({ activeBottomPanel: panel }),
+
+      // Panel Sizing Actions
+      toggleTerminalMaximized: () => set((state) => {
+        const newMaximized = !state.terminalMaximized;
+        return {
+          terminalMaximized: newMaximized,
+          bottomPanelSize: newMaximized ? 100 : Math.max(15, Math.min(70, state.bottomPanelSize)),
+        };
+      }),
+      setTerminalMaximized: (maximized) => set((state) => ({
+        terminalMaximized: maximized,
+        bottomPanelSize: maximized ? 100 : Math.max(15, Math.min(70, state.bottomPanelSize)),
+      })),
+      setBottomPanelSize: (size) => set({ bottomPanelSize: Math.max(15, Math.min(100, size)) }),
 
       // Settings Actions
       updateSettings: (newSettings) => set((state) => ({

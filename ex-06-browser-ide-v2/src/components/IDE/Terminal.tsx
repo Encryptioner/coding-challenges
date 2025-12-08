@@ -7,6 +7,9 @@ import { gitService } from '@/services/git';
 import { useIDEStore } from '@/store/useIDEStore';
 import { fileSystem } from '@/services/filesystem';
 import { createGLMAgent, createAnthropicAgent, type ClaudeCodeAgent } from '@/services/claude-agent';
+import { useIsMobile } from '@/hooks/useKeyboardDetection';
+import { MobileInputWrapper } from '@/components/MobileOptimizedLayout';
+import { Maximize2, Minimize2 } from 'lucide-react';
 import '@xterm/xterm/css/xterm.css';
 
 export function Terminal() {
@@ -17,6 +20,32 @@ export function Terminal() {
   const commandHistoryRef = useRef<string[]>([]);
   const historyIndexRef = useRef<number>(-1);
   const currentProcessRef = useRef<string | null>(null);
+  const isMobile = useIsMobile();
+
+  const {
+    terminalMaximized,
+    toggleTerminalMaximized,
+    setTerminalMaximized
+  } = useIDEStore();
+
+  // Handle keyboard shortcuts for terminal maximize
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl/Cmd + Shift + M to toggle terminal maximize (like VS Code)
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'M') {
+        e.preventDefault();
+        toggleTerminalMaximized();
+      }
+      // Escape to unmaximize (convenient exit)
+      if (e.key === 'Escape' && terminalMaximized) {
+        e.preventDefault();
+        setTerminalMaximized(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [terminalMaximized, toggleTerminalMaximized, setTerminalMaximized]);
 
   // Initialize WebContainer
   useEffect(() => {
@@ -67,11 +96,12 @@ export function Terminal() {
       return;
     }
 
-    // Create terminal instance
+    // Create terminal instance with mobile-optimized settings
     const xterm = new XTerm({
       cursorBlink: true,
-      fontSize: 14,
+      fontSize: isMobile ? 12 : 14,
       fontFamily: 'Consolas, Monaco, monospace',
+      scrollback: 1000,
       theme: {
         background: '#1e1e1e',
         foreground: '#d4d4d4',
@@ -93,6 +123,9 @@ export function Terminal() {
         brightCyan: '#29b8db',
         brightWhite: '#ffffff',
       },
+      // Mobile-specific options
+      cols: isMobile ? Math.min(80, Math.floor(window.innerWidth / 8)) : 80,
+      rows: isMobile ? 15 : 24,
     });
 
     // Add addons
@@ -1039,7 +1072,7 @@ export function Terminal() {
     xtermRef.current = xterm;
     fitAddonRef.current = fitAddon;
 
-    // Fit on resize
+    // Fit on resize with mobile optimization
     const resizeObserver = new ResizeObserver(() => {
       if (fitAddonRef.current && terminalRef.current) {
         try {
@@ -1047,6 +1080,20 @@ export function Terminal() {
           const rect = terminalRef.current.getBoundingClientRect();
           if (rect.width > 0 && rect.height > 0) {
             fitAddonRef.current.fit();
+
+            // On mobile, ensure we don't exceed readable columns
+            if (isMobile && xterm) {
+              const maxCols = Math.min(80, Math.floor(rect.width / 8));
+              const maxRows = Math.max(10, Math.floor(rect.height / 16));
+
+              // Apply gentle size constraints for mobile
+              if (xterm.cols > maxCols) {
+                xterm.resize(maxCols, xterm.rows);
+              }
+              if (xterm.rows > maxRows) {
+                xterm.resize(xterm.cols, maxRows);
+              }
+            }
           }
         } catch (err) {
           // Ignore fit errors during resize
@@ -1067,40 +1114,88 @@ export function Terminal() {
   }, []);
 
   return (
-    <div className="terminal flex flex-col h-full bg-gray-900">
-      <div className="terminal-header px-4 py-2 bg-gray-800 border-b border-gray-700 flex items-center justify-between flex-shrink-0">
-        <span className="text-gray-300 text-sm">Terminal</span>
-        <div className="flex items-center gap-2">
-          {bootStatus === 'booting' && (
-            <div className="flex items-center gap-2 text-xs text-yellow-400">
-              <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
-              <span>Booting WebContainer...</span>
-            </div>
-          )}
-          {bootStatus === 'ready' && (
-            <div className="flex items-center gap-2 text-xs text-green-400">
-              <div className="w-2 h-2 bg-green-400 rounded-full" />
-              <span>Ready</span>
-            </div>
-          )}
-          {bootStatus === 'error' && (
-            <div className="flex items-center gap-2 text-xs text-red-400">
-              <div className="w-2 h-2 bg-red-400 rounded-full" />
-              <span>Boot Failed</span>
-            </div>
-          )}
+    <MobileInputWrapper shouldPreventZoom={true}>
+      <div className={`
+        terminal flex flex-col h-full bg-gray-900
+        ${terminalMaximized ? 'terminal-maximized terminal-maximize-transition' : ''}
+      `}>
+        <div className="terminal-header px-2 sm:px-4 py-1 sm:py-2 bg-gray-800 border-b border-gray-700 flex items-center justify-between flex-shrink-0 min-h-[32px] sm:min-h-[40px]">
+          <div className="flex items-center gap-2">
+            <span className="text-gray-300 text-xs sm:text-sm">
+              Terminal
+              {terminalMaximized && <span className="ml-2 text-xs text-blue-400">(Maximized)</span>}
+            </span>
+          </div>
+          <div className="flex items-center gap-1 sm:gap-2">
+            {bootStatus === 'booting' && (
+              <div className="flex items-center gap-1 sm:gap-2 text-xs text-yellow-400">
+                <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+                <span className="hidden sm:inline">Booting WebContainer...</span>
+                <span className="sm:hidden">Booting...</span>
+              </div>
+            )}
+            {bootStatus === 'ready' && (
+              <div className="flex items-center gap-1 sm:gap-2 text-xs text-green-400">
+                <div className="w-2 h-2 bg-green-400 rounded-full" />
+                <span className="hidden sm:inline">Ready</span>
+                <span className="sm:hidden">Ready</span>
+              </div>
+            )}
+            {bootStatus === 'error' && (
+              <div className="flex items-center gap-1 sm:gap-2 text-xs text-red-400">
+                <div className="w-2 h-2 bg-red-400 rounded-full" />
+                <span className="hidden sm:inline">Boot Failed</span>
+                <span className="sm:hidden">Error</span>
+              </div>
+            )}
+
+            {/* Maximize/Restore Button */}
+            <button
+              onClick={toggleTerminalMaximized}
+              className={`
+                maximize-button p-1 sm:p-2 rounded hover:bg-gray-700 transition-colors
+                touch-manipulation min-w-[32px] min-h-[32px] sm:min-w-0 sm:min-h-0
+                ${terminalMaximized ? 'text-blue-400' : 'text-gray-400'}
+              `}
+              title={`${terminalMaximized ? 'Restore Terminal' : 'Maximize Terminal'} (Ctrl+Shift+M)`}
+              aria-label={`${terminalMaximized ? 'Restore Terminal' : 'Maximize Terminal'}`}
+            >
+              {terminalMaximized ? (
+                <Minimize2 className="w-3 h-3 sm:w-4 sm:h-4" />
+              ) : (
+                <Maximize2 className="w-3 h-3 sm:w-4 sm:h-4" />
+              )}
+            </button>
+          </div>
         </div>
+        <div
+          ref={terminalRef}
+          className="terminal-content flex-1 overflow-hidden min-h-0 touch-manipulation"
+          onClick={() => {
+            // Focus terminal when clicked
+            if (xtermRef.current) {
+              xtermRef.current.focus();
+            }
+          }}
+          onTouchEnd={(e) => {
+            // Ensure terminal gets focus on touch on mobile
+            e.preventDefault();
+            if (xtermRef.current) {
+              // Small delay to ensure proper focus handling
+              setTimeout(() => {
+                xtermRef.current?.focus();
+              }, 50);
+            }
+          }}
+          style={{
+            // Ensure proper touch handling on mobile
+            WebkitUserSelect: 'none',
+            userSelect: 'none',
+            WebkitTapHighlightColor: 'transparent',
+            WebkitTouchCallout: 'none',
+          }}
+        />
       </div>
-      <div
-        ref={terminalRef}
-        className="terminal-content flex-1 overflow-hidden min-h-0"
-        onClick={() => {
-          // Focus terminal when clicked
-          if (xtermRef.current) {
-            xtermRef.current.focus();
-          }
-        }}
-      />
-    </div>
+    </MobileInputWrapper>
   );
 }
