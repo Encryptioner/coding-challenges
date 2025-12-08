@@ -10,6 +10,7 @@ import { createGLMAgent, createAnthropicAgent, type ClaudeCodeAgent } from '@/se
 import { useIsMobile } from '@/hooks/useKeyboardDetection';
 import { MobileInputWrapper } from '@/components/MobileOptimizedLayout';
 import { Maximize2, Minimize2 } from 'lucide-react';
+import { NanoEditor } from './NanoEditor';
 import '@xterm/xterm/css/xterm.css';
 
 export function Terminal() {
@@ -21,6 +22,12 @@ export function Terminal() {
   const historyIndexRef = useRef<number>(-1);
   const currentProcessRef = useRef<string | null>(null);
   const isMobile = useIsMobile();
+
+  // Nano editor state
+  const [nanoActive, setNanoActive] = useState(false);
+  const nanoActiveRef = useRef(false);
+  const [nanoFilePath, setNanoFilePath] = useState('');
+  const [nanoContent, setNanoContent] = useState('');
 
   const {
     terminalMaximized,
@@ -342,30 +349,21 @@ export function Terminal() {
       const fileName = args[0];
 
       try {
-        // Check if file exists
+        // Check if file exists and read content
         const fileResult = await fileSystem.readFile(fileName);
         let content = '';
 
         if (fileResult.success && fileResult.data) {
           content = fileResult.data;
+        } else {
+          // File doesn't exist - will be created on save
+          content = '';
         }
 
-        // Show nano interface
-        xterm.writeln(`\x1b[2J nano ${fileName}`);
-        xterm.writeln('─────────────────────────────────────────────────────────────────────────────────');
-
-        const lines = content.split('\n');
-        lines.forEach((line, index) => {
-          xterm.writeln(`│ ${line.padEnd(69)} │`);
-        });
-
-        xterm.writeln('─────────────────────────────────────────────────────────────────────────────────');
-        xterm.writeln('');
-        xterm.writeln('Nano editor (simplified):');
-        xterm.writeln('• Use "Ctrl+X" to exit and save');
-        xterm.writeln('• Use arrow keys to navigate');
-        xterm.writeln('• Type to edit content');
-
+        // Launch nano editor
+        setNanoFilePath(fileName);
+        setNanoContent(content);
+        setNanoActive(true);
       } catch (error: any) {
         xterm.writeln(`nano: ${error.message}`);
       }
@@ -989,6 +987,11 @@ export function Terminal() {
 
     // Handle input
     xterm.onData((data) => {
+      // Ignore input when nano is active
+      if (nanoActiveRef.current) {
+        return;
+      }
+
       const code = data.charCodeAt(0);
       console.log('Terminal input received:', { data, code });
 
@@ -1113,6 +1116,16 @@ export function Terminal() {
     };
   }, []);
 
+  // Sync nano active state to ref for input handler
+  useEffect(() => {
+    nanoActiveRef.current = nanoActive;
+    if (nanoActive) {
+      console.log('🔧 Nano editor active - terminal input disabled');
+    } else {
+      console.log('🔧 Nano editor inactive - terminal input enabled');
+    }
+  }, [nanoActive]);
+
   return (
     <MobileInputWrapper shouldPreventZoom={true}>
       <div className={`
@@ -1195,6 +1208,25 @@ export function Terminal() {
             WebkitTouchCallout: 'none',
           }}
         />
+
+        {/* Nano Editor - rendered when active */}
+        {nanoActive && xtermRef.current && (
+          <NanoEditor
+            xterm={xtermRef.current}
+            filePath={nanoFilePath}
+            initialContent={nanoContent}
+            onExit={() => {
+              setNanoActive(false);
+              setNanoFilePath('');
+              setNanoContent('');
+              // Return to terminal prompt
+              if (xtermRef.current) {
+                xtermRef.current.write('\r\n$ ');
+                xtermRef.current.focus();
+              }
+            }}
+          />
+        )}
       </div>
     </MobileInputWrapper>
   );
