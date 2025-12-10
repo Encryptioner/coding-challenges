@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { X, Square, Circle, Undo, Check, Move } from 'lucide-react';
+import { X, Square, Circle, Undo, Check, Move3D } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAppStore } from '@/store/useAppStore';
 import { Region } from '@/types';
 import { logger } from '@/utils/logger';
 
-type SelectionTool = 'rect' | 'circle' | 'move';
+type SelectionTool = 'rect' | 'circle';
 
 interface SelectionState {
   isDrawing: boolean;
@@ -27,8 +27,9 @@ interface MoveState {
 export function ImageEditor() {
   const { images, editingImageId, setEditingImage, setManualRegions } = useAppStore();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [tool, setTool] = useState<SelectionTool>('move');
+  const [tool, setTool] = useState<SelectionTool>('rect');
   const [regions, setRegions] = useState<Region[]>([]);
+  const [moveActiveRegion, setMoveActiveRegion] = useState<number | null>(null);
   const [selection, setSelection] = useState<SelectionState>({
     isDrawing: false,
     startX: 0,
@@ -136,7 +137,7 @@ export function ImageEditor() {
     if (imageScale > 0) {
       drawCanvas(imageScale);
     }
-  }, [image, regions, selection, tool, moveState, imageScale]);
+  }, [image, regions, selection, tool, moveState, imageScale, moveActiveRegion]);
 
   const drawRegion = (ctx: CanvasRenderingContext2D, region: Region, isActive = false, isMoving = false, regionIndex?: number) => {
     ctx.save();
@@ -145,7 +146,7 @@ export function ImageEditor() {
     if (isMoving) {
       ctx.strokeStyle = '#10b981';
       ctx.fillStyle = 'rgba(16, 185, 129, 0.3)';
-    } else if (tool === 'move') {
+    } else if (moveActiveRegion === regionIndex) {
       ctx.strokeStyle = '#6366f1';
       ctx.fillStyle = 'rgba(99, 102, 241, 0.15)';
     } else {
@@ -167,32 +168,56 @@ export function ImageEditor() {
       ctx.fill();
       ctx.stroke();
 
-      // Draw move icon when in move mode
-      if (tool === 'move') {
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, 8, 0, 2 * Math.PI);
-        ctx.fillStyle = '#6366f1';
-        ctx.fill();
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
-    } else {
+          } else {
       // Draw rectangle
       ctx.fillRect(region.x, region.y, region.width, region.height);
       ctx.strokeRect(region.x, region.y, region.width, region.height);
-
-      // Draw move icon when in move mode
-      if (tool === 'move') {
-        ctx.beginPath();
-        ctx.arc(region.x + region.width / 2, region.y + region.height / 2, 8, 0, 2 * Math.PI);
-        ctx.fillStyle = '#6366f1';
-        ctx.fill();
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
     }
+
+    // Draw move toggle button (on the left side)
+    const moveButtonSize = 20;
+    const moveX = region.x - moveButtonSize/2 - 8; // Outside the region on the left
+    const moveY = region.y + region.height / 2; // Center vertically
+
+    // Move button background (circle)
+    ctx.beginPath();
+    ctx.arc(moveX, moveY, moveButtonSize/2, 0, 2 * Math.PI);
+    ctx.fillStyle = moveActiveRegion === regionIndex ? '#6366f1' : '#94a3b8';
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Draw move icon (arrows)
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // Draw a simple move icon (4 arrows)
+    const arrowSize = 4;
+    ctx.beginPath();
+    // Up arrow
+    ctx.moveTo(moveX, moveY - arrowSize);
+    ctx.lineTo(moveX - 2, moveY - arrowSize + 2);
+    ctx.moveTo(moveX, moveY - arrowSize);
+    ctx.lineTo(moveX + 2, moveY - arrowSize + 2);
+    // Down arrow
+    ctx.moveTo(moveX, moveY + arrowSize);
+    ctx.lineTo(moveX - 2, moveY + arrowSize - 2);
+    ctx.moveTo(moveX, moveY + arrowSize);
+    ctx.lineTo(moveX + 2, moveY + arrowSize - 2);
+    // Left arrow
+    ctx.moveTo(moveX - arrowSize, moveY);
+    ctx.lineTo(moveX - arrowSize + 2, moveY - 2);
+    ctx.moveTo(moveX - arrowSize, moveY);
+    ctx.lineTo(moveX - arrowSize + 2, moveY + 2);
+    // Right arrow
+    ctx.moveTo(moveX + arrowSize, moveY);
+    ctx.lineTo(moveX + arrowSize - 2, moveY - 2);
+    ctx.moveTo(moveX + arrowSize, moveY);
+    ctx.lineTo(moveX + arrowSize - 2, moveY + 2);
+    ctx.stroke();
 
     // Draw delete button (small X outside top-right corner)
     const deleteButtonSize = 16;
@@ -254,6 +279,18 @@ export function ImageEditor() {
            y <= deleteY + deleteButtonSize/2;
   };
 
+  // Check if point is on move toggle button
+  const isPointOnMoveButton = (x: number, y: number, region: Region): boolean => {
+    const moveButtonSize = 20;
+    const moveX = region.x - moveButtonSize/2 - 8; // Outside the region on the left
+    const moveY = region.y + region.height / 2; // Center vertically
+
+    // Check if point is within the circular button
+    const dx = x - moveX;
+    const dy = y - moveY;
+    return Math.sqrt(dx * dx + dy * dy) <= moveButtonSize/2;
+  };
+
   // Get coordinates from mouse or touch event
   const getCoordinates = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -289,43 +326,57 @@ export function ImageEditor() {
       height: region.height * imageScale,
     }));
 
+    // Check move buttons first (from top to bottom)
+    for (let i = scaledRegions.length - 1; i >= 0; i--) {
+      if (isPointOnMoveButton(coords.x, coords.y, scaledRegions[i])) {
+        // Toggle move mode for this region
+        setMoveActiveRegion(moveActiveRegion === i ? null : i);
+        logger.info(`Toggled move mode for region ${i}`);
+        return;
+      }
+    }
+
+    // Check delete buttons (from top to bottom)
     for (let i = scaledRegions.length - 1; i >= 0; i--) {
       if (isPointOnDeleteButton(coords.x, coords.y, scaledRegions[i])) {
         // Delete this region
         setRegions(prev => prev.filter((_, index) => index !== i));
+        // Clear move mode if this region had it active
+        if (moveActiveRegion === i) {
+          setMoveActiveRegion(null);
+        }
         logger.info(`Deleted region ${i}`);
         return;
       }
     }
 
-    if (tool === 'move') {
-      // Check if clicking on an existing region to move it
-      for (let i = scaledRegions.length - 1; i >= 0; i--) {
-        if (isPointInRegion(coords.x, coords.y, scaledRegions[i])) {
-          // Start moving this region
-          const region = regions[i];
-          setMoveState({
-            isMoving: true,
-            regionIndex: i,
-            offsetX: coords.x - (region.x * imageScale),
-            offsetY: coords.y - (region.y * imageScale),
-            originalX: region.x,
-            originalY: region.y,
-          });
-          logger.info(`Started moving region ${i}`);
-          return;
-        }
+    // Check if move mode is active and clicking on a region to move it
+    if (moveActiveRegion !== null) {
+      const regionIndex = moveActiveRegion;
+      if (isPointInRegion(coords.x, coords.y, scaledRegions[regionIndex])) {
+        // Start moving this region
+        const region = regions[regionIndex];
+        setMoveState({
+          isMoving: true,
+          regionIndex: regionIndex,
+          offsetX: coords.x - (region.x * imageScale),
+          offsetY: coords.y - (region.y * imageScale),
+          originalX: region.x,
+          originalY: region.y,
+        });
+        logger.info(`Started moving region ${regionIndex}`);
+        return;
       }
-    } else {
-      // Drawing mode
-      setSelection({
-        isDrawing: true,
-        startX: coords.x,
-        startY: coords.y,
-        currentX: coords.x,
-        currentY: coords.y,
-      });
     }
+
+    // Drawing mode
+    setSelection({
+      isDrawing: true,
+      startX: coords.x,
+      startY: coords.y,
+      currentX: coords.x,
+      currentY: coords.y,
+    });
   };
 
   const handleMove = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
@@ -333,7 +384,7 @@ export function ImageEditor() {
 
     const coords = getCoordinates(e);
 
-    if (tool === 'move' && moveState.isMoving) {
+    if (moveState.isMoving) {
       // Update region position
       const newX = (coords.x - moveState.offsetX) / imageScale;
       const newY = (coords.y - moveState.offsetY) / imageScale;
@@ -356,7 +407,7 @@ export function ImageEditor() {
         currentY: coords.y,
       }));
     } else {
-      // Drawing mode - check if hovering over delete button
+      // Drawing mode - check if hovering over buttons
       const scaledRegions = regions.map(region => ({
         ...region,
         x: region.x * imageScale,
@@ -365,12 +416,23 @@ export function ImageEditor() {
         height: region.height * imageScale,
       }));
 
-      const isOverDeleteButton = scaledRegions.some(region =>
-        isPointOnDeleteButton(coords.x, coords.y, region)
-      );
+      // Check if hovering over any button
+      let cursorStyle = 'crosshair';
+      for (const region of scaledRegions) {
+        if (isPointOnDeleteButton(coords.x, coords.y, region) ||
+            isPointOnMoveButton(coords.x, coords.y, region)) {
+          cursorStyle = 'pointer';
+          break;
+        }
+        // Check if hovering over a region with move mode active
+        if (moveActiveRegion !== null && isPointInRegion(coords.x, coords.y, region)) {
+          cursorStyle = 'move';
+          break;
+        }
+      }
 
       if (canvasRef.current) {
-        canvasRef.current.style.cursor = isOverDeleteButton ? 'pointer' : 'crosshair';
+        canvasRef.current.style.cursor = cursorStyle;
       }
     }
   };
@@ -451,15 +513,6 @@ export function ImageEditor() {
         <div className="flex flex-col sm:flex-row gap-2 p-4 border-b border-border bg-secondary/30">
           <div className="flex gap-2">
             <Button
-              variant={tool === 'move' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setTool('move')}
-              className="flex-1 sm:flex-initial"
-            >
-              <Move className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Move</span>
-            </Button>
-            <Button
               variant={tool === 'rect' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setTool('rect')}
@@ -519,9 +572,7 @@ export function ImageEditor() {
               onTouchEnd={handleEnd}
               onTouchCancel={handleEnd}
               // Styles
-              className={`border border-border rounded shadow-lg touch-none max-w-full ${
-                tool === 'move' ? 'cursor-default' : 'cursor-crosshair'
-              }`}
+              className="border border-border rounded shadow-lg touch-none max-w-full cursor-crosshair"
               style={{ touchAction: 'none' }} // Prevent default touch actions
             />
           </div>
@@ -530,10 +581,9 @@ export function ImageEditor() {
         {/* Instructions */}
         <div className="p-4 border-t border-border bg-secondary/30">
           <p className="text-sm text-muted-foreground">
-            <strong>Instructions:</strong>
-            {tool === 'move'
-              ? ' Click and drag regions to move them. Click the red X button to delete a region.'
-              : ' Touch and drag to select watermarked regions. Click the red X button to delete a region.'}
+            <strong>Instructions:</strong> Touch and drag to select watermarked regions.
+            Click the move button (←→) on the left of a region to activate move mode, then drag to reposition.
+            Click the red X button to delete a region.
             For Gemini watermarks, typically found in the bottom-right corner.
             Use circle tool for rounded watermarks, rectangle for text watermarks.
           </p>
