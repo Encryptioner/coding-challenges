@@ -31,6 +31,7 @@ export const useAppStore = create<AppState>()(
       // State
       images: [],
       selectedImageId: null,
+      currentSessionId: Date.now().toString(),
       isProcessing: false,
       processingQueue: [],
       processingProgress: {},
@@ -112,6 +113,26 @@ export const useAppStore = create<AppState>()(
         toast.success('Image removed');
       },
 
+      deleteProcessedImage: (id: string) => {
+        set(state => {
+          const image = state.images.find(img => img.id === id);
+          if (image) {
+            // Revoke URLs to free memory
+            if (image.originalUrl) URL.revokeObjectURL(image.originalUrl);
+            if (image.processedUrl) URL.revokeObjectURL(image.processedUrl);
+            if (image.editedUrl) URL.revokeObjectURL(image.editedUrl);
+          }
+
+          return {
+            images: state.images.filter(img => img.id !== id),
+            selectedImageId: state.selectedImageId === id ? null : state.selectedImageId,
+          };
+        });
+
+        logger.info(`Deleted processed image: ${id}`);
+        toast.success('Result deleted');
+      },
+
       processImage: async (id: string) => {
         const state = get();
         const image = state.images.find(img => img.id === id);
@@ -123,14 +144,11 @@ export const useAppStore = create<AppState>()(
 
         // Ensure OpenCV is loaded
         if (!opencvService.isLoaded()) {
-          toast.loading('Loading OpenCV...');
           try {
             await opencvService.load();
-            toast.dismiss();
-            toast.success('OpenCV loaded!');
+            logger.info('OpenCV loaded successfully');
           } catch (error) {
-            toast.dismiss();
-            toast.error('Failed to load OpenCV');
+            toast.error('Failed to load OpenCV - cannot process image');
             logger.error('OpenCV load failed:', error);
             return;
           }
@@ -191,23 +209,42 @@ export const useAppStore = create<AppState>()(
 
           const processedUrl = canvas.toDataURL('image/png');
 
-          // Update image
-          set(state => ({
-            images: state.images.map(img =>
-              img.id === id
-                ? {
-                    ...img,
-                    processedUrl,
-                    detectedRegions: regions,
-                    status: 'completed' as const,
-                    error: null,
-                  }
-                : img
-            ),
-            processingProgress: { ...state.processingProgress, [id]: 100 },
-          }));
+          // Convert original image to Data URL for persistence
+          const originalCanvas = document.createElement('canvas');
+          originalCanvas.width = image.dimensions.width;
+          originalCanvas.height = image.dimensions.height;
+          const originalCtx = originalCanvas.getContext('2d')!;
+
+          const originalImg = new Image();
+          originalImg.onload = () => {
+            originalCtx.drawImage(originalImg, 0, 0);
+            const originalDataUrl = originalCanvas.toDataURL('image/png');
+
+            // Update image
+            set(state => ({
+              images: state.images.map(img =>
+                img.id === id
+                  ? {
+                      ...img,
+                      originalUrl: originalDataUrl, // Use Data URL instead of blob URL
+                      processedUrl,
+                      detectedRegions: regions,
+                      status: 'completed' as const,
+                      error: null,
+                      processedAt: Date.now(),
+                      sessionId: state.currentSessionId,
+                    }
+                  : img
+              ),
+              processingProgress: { ...state.processingProgress, [id]: 100 },
+            }));
+          };
+          originalImg.src = image.originalUrl;
 
           toast.success(`Processed: ${image.name}`);
+
+          // Auto-switch to download tab immediately after successful processing
+          set({ activeTab: 'download' });
         } catch (error) {
           logger.error('Processing failed:', error);
 
@@ -349,12 +386,55 @@ export const useAppStore = create<AppState>()(
         logger.info(`Set ${regions.length} manual regions for image ${id}`);
         toast.success(`${regions.length} region(s) selected`);
       },
+
+      clearAllResults: () => {
+        set(state => {
+          // Revoke all URLs to free memory
+          state.images.forEach(img => {
+            if (img.originalUrl) URL.revokeObjectURL(img.originalUrl);
+            if (img.processedUrl) URL.revokeObjectURL(img.processedUrl);
+            if (img.editedUrl) URL.revokeObjectURL(img.editedUrl);
+          });
+
+          return {
+            images: [],
+          };
+        });
+
+        toast.success('All results cleared');
+        logger.info('All processed images cleared');
+      },
     }),
     {
       name: 'watermark-remover-storage',
       partialize: (state) => ({
+        // Persist completed images and settings, but exclude File objects
+        images: state.images.filter(img => img.status === 'completed').map(img => ({
+          ...img,
+          name: img.name,
+          originalUrl: img.originalUrl, // Now also persisted as Data URL
+          processedUrl: img.processedUrl, // Data URLs can be persisted
+          detectedRegions: img.detectedRegions,
+          manualRegions: img.manualRegions,
+          status: img.status,
+          error: img.error,
+          size: img.size,
+          dimensions: img.dimensions,
+          processedAt: img.processedAt,
+          sessionId: img.sessionId,
+        })),
         settings: state.settings,
       }),
+      // Custom hydration to restore File objects
+      onRehydrateStorage: () => (state) => {
+        if (!state) return;
+
+        // Regenerate File objects for processed images (using placeholder)
+        state.images = state.images.map(img => ({
+          ...img,
+          originalFile: new File([], img.name), // Empty file placeholder
+        }));
+      },
     }
   )
 );

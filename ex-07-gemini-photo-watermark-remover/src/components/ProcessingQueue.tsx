@@ -5,16 +5,25 @@ import { Button } from './ui/button';
 export function ProcessingQueue() {
   const { images, processImage, processAll, removeImage, isProcessing, setEditingImage } = useAppStore();
 
-  if (images.length === 0) {
+  // Filter to show only pending, processing, and error images
+  const processingImages = images.filter(img =>
+    img.status === 'pending' || img.status === 'processing' || img.status === 'error'
+  );
+
+  if (processingImages.length === 0) {
     return (
       <div className="w-full max-w-2xl mx-auto text-center py-12">
-        <p className="text-muted-foreground">No images uploaded yet</p>
+        <p className="text-muted-foreground">
+          {images.length > 0
+            ? 'All images processed! Go to Download tab to view results.'
+            : 'No images uploaded yet'}
+        </p>
       </div>
     );
   }
 
-  const pendingCount = images.filter(img => img.status === 'pending').length;
-  const completedCount = images.filter(img => img.status === 'completed').length;
+  const pendingCount = processingImages.filter(img => img.status === 'pending').length;
+  const processingCount = processingImages.filter(img => img.status === 'processing').length;
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -23,7 +32,8 @@ export function ProcessingQueue() {
         <div>
           <h2 className="text-2xl font-bold">Processing Queue</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            {completedCount} of {images.length} processed
+            {processingImages.length} image(s) to process
+            {processingCount > 0 && ` (${processingCount} in progress)`}
           </p>
         </div>
 
@@ -47,7 +57,7 @@ export function ProcessingQueue() {
 
       {/* Image List */}
       <div className="space-y-3">
-        {images.map((image) => (
+        {processingImages.map((image) => (
           <div
             key={image.id}
             className="flex items-center gap-4 p-4 bg-secondary/30 rounded-lg border border-border"

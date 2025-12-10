@@ -32,7 +32,7 @@ class OpenCVService {
       // Check if already loaded by another script
       if (window.cv && window.cv.Mat) {
         this.cv = window.cv;
-        logger.info('OpenCV found on window object');
+        logger.info('OpenCV found on window object, setting instance');
         resolve();
         return;
       }
@@ -52,7 +52,7 @@ class OpenCVService {
           if (window.cv && window.cv.Mat) {
             this.cv = window.cv;
             clearInterval(checkInterval);
-            logger.info('OpenCV initialized successfully');
+            logger.info('OpenCV initialized successfully, instance set');
 
             // Call any pending callbacks
             this.loadCallbacks.forEach(cb => cb());
@@ -100,6 +100,19 @@ class OpenCVService {
    * Check if OpenCV is loaded
    */
   isLoaded(): boolean {
+    // Check both our instance and window object
+    const hasInstance = this.cv !== null;
+    const hasWindowCV = window.cv && typeof window.cv === 'object';
+    const hasMat = hasWindowCV && window.cv.Mat;
+
+    logger.debug(`OpenCV isLoaded check: instance=${hasInstance}, window.cv=${hasWindowCV}, Mat=${hasMat}`);
+
+    // If we don't have instance but window has it, set our instance
+    if (!hasInstance && hasWindowCV && hasMat) {
+      this.cv = window.cv;
+      logger.info('OpenCV instance restored from window object');
+    }
+
     return this.cv !== null;
   }
 

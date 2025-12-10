@@ -13,6 +13,8 @@ export interface ProcessedImage {
   editedUrl: string | null; // After crop/resize/filters
   size: number; // File size in bytes
   dimensions: { width: number; height: number };
+  processedAt?: number; // Timestamp when processing completed
+  sessionId?: string; // Session ID to track new vs previous results
 }
 
 export interface Region {
@@ -47,6 +49,7 @@ export interface AppState {
   // Images
   images: ProcessedImage[];
   selectedImageId: string | null;
+  currentSessionId: string;
 
   // Processing
   isProcessing: boolean;
@@ -65,6 +68,7 @@ export interface AppState {
   // Actions
   addImages: (files: File[]) => void;
   removeImage: (id: string) => void;
+  deleteProcessedImage: (id: string) => void;
   processImage: (id: string) => Promise<void>;
   processAll: () => Promise<void>;
   updateSettings: (settings: Partial<Settings>) => void;
@@ -76,6 +80,7 @@ export interface AppState {
   toggleGuidelines: () => void;
   setEditingImage: (id: string | null) => void;
   setManualRegions: (id: string, regions: Region[]) => void;
+  clearAllResults: () => void;
 }
 
 // OpenCV types (augmented)

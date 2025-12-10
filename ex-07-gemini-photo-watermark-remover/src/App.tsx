@@ -12,15 +12,14 @@ import { Button } from './components/ui/button';
 function App() {
   const { activeTab, setActiveTab, editingImageId } = useAppStore();
 
-  // Load OpenCV on mount
+  // Pre-load OpenCV silently on mount
   useEffect(() => {
     const loadOpenCV = async () => {
       try {
-        toast.loading('Loading OpenCV.js...', { id: 'opencv-load' });
         await opencvService.load();
-        toast.success('OpenCV.js loaded!', { id: 'opencv-load' });
+        console.info('OpenCV.js pre-loaded successfully');
       } catch (error) {
-        toast.error('Failed to load OpenCV.js', { id: 'opencv-load' });
+        toast.error('Failed to load OpenCV.js - watermark removal may not work');
         console.error('OpenCV load error:', error);
       }
     };
