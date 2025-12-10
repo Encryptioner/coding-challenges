@@ -1,9 +1,9 @@
-import { Check, X, Loader2, Trash2 } from 'lucide-react';
+import { Check, X, Loader2, Trash2, Edit } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { Button } from './ui/button';
 
 export function ProcessingQueue() {
-  const { images, processImage, processAll, removeImage, isProcessing } = useAppStore();
+  const { images, processImage, processAll, removeImage, isProcessing, setEditingImage } = useAppStore();
 
   if (images.length === 0) {
     return (
@@ -75,25 +75,41 @@ export function ProcessingQueue() {
                 <p className="text-xs text-destructive mt-1">{image.error}</p>
               )}
 
-              {/* Detected regions */}
-              {image.detectedRegions.length > 0 && (
+              {/* Detected/Manual regions */}
+              {image.manualRegions.length > 0 && (
+                <p className="text-xs text-green-500 mt-1">
+                  {image.manualRegions.length} manual region(s) selected
+                </p>
+              )}
+              {image.detectedRegions.length > 0 && image.manualRegions.length === 0 && (
                 <p className="text-xs text-muted-foreground mt-1">
-                  {image.detectedRegions.length} watermark region(s) detected
+                  {image.detectedRegions.length} watermark region(s) auto-detected
                 </p>
               )}
             </div>
 
             {/* Status */}
             <div className="flex items-center gap-2">
-              {image.status === 'pending' && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => processImage(image.id)}
-                  disabled={isProcessing}
-                >
-                  Process
-                </Button>
+              {(image.status === 'pending' || image.status === 'error') && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setEditingImage(image.id)}
+                    disabled={isProcessing}
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => processImage(image.id)}
+                    disabled={isProcessing}
+                  >
+                    Process
+                  </Button>
+                </>
               )}
 
               {image.status === 'processing' && (

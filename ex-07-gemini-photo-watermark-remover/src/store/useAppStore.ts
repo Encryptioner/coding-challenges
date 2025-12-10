@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { AppState, ProcessedImage, Settings, DownloadOptions } from '@/types';
+import { AppState, ProcessedImage, Settings, DownloadOptions, Region } from '@/types';
 import { validateImageFile, loadImageData } from '@/services/image-processor';
 import { detectWatermark } from '@/services/watermark-detector';
 import { removeWatermark } from '@/services/watermark-remover';
@@ -38,6 +38,7 @@ export const useAppStore = create<AppState>()(
       activeTab: 'upload',
       showSettings: false,
       showGuidelines: false,
+      editingImageId: null,
 
       // Actions
       addImages: async (files: File[]) => {
@@ -65,6 +66,7 @@ export const useAppStore = create<AppState>()(
               originalUrl: url,
               processedUrl: null,
               detectedRegions: [],
+              manualRegions: [],
               status: 'pending',
               error: null,
               editedUrl: null,
@@ -149,15 +151,22 @@ export const useAppStore = create<AppState>()(
             processingProgress: { ...state.processingProgress, [id]: 25 },
           }));
 
-          // Detect watermarks
-          const regions = await detectWatermark(imageData, {
-            threshold: state.settings.detectionThreshold,
-            regionSize: state.settings.regionSize,
-            kernelSize: 5,
-            dilationIterations: state.settings.dilationIterations,
-          });
+          // Use manual regions if available, otherwise detect automatically
+          let regions: any[];
 
-          logger.info(`Detected ${regions.length} regions for ${image.name}`);
+          if (image.manualRegions.length > 0) {
+            logger.info(`Using ${image.manualRegions.length} manual regions for ${image.name}`);
+            regions = image.manualRegions;
+          } else {
+            // Detect watermarks automatically
+            regions = await detectWatermark(imageData, {
+              threshold: state.settings.detectionThreshold,
+              regionSize: state.settings.regionSize,
+              kernelSize: 5,
+              dilationIterations: state.settings.dilationIterations,
+            });
+            logger.info(`Detected ${regions.length} auto regions for ${image.name}`);
+          }
 
           set(state => ({
             processingProgress: { ...state.processingProgress, [id]: 50 },
@@ -322,6 +331,23 @@ export const useAppStore = create<AppState>()(
 
       toggleGuidelines: () => {
         set(state => ({ showGuidelines: !state.showGuidelines }));
+      },
+
+      setEditingImage: (id: string | null) => {
+        set({ editingImageId: id });
+      },
+
+      setManualRegions: (id: string, regions: Region[]) => {
+        set(state => ({
+          images: state.images.map(img =>
+            img.id === id
+              ? { ...img, manualRegions: regions, status: 'pending' as const }
+              : img
+          ),
+        }));
+
+        logger.info(`Set ${regions.length} manual regions for image ${id}`);
+        toast.success(`${regions.length} region(s) selected`);
       },
     }),
     {

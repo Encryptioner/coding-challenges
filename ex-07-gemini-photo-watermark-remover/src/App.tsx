@@ -6,10 +6,11 @@ import { opencvService } from './services/opencv';
 import { ImageUploader } from './components/ImageUploader';
 import { ProcessingQueue } from './components/ProcessingQueue';
 import { DownloadManager } from './components/DownloadManager';
+import { ImageEditor } from './components/ImageEditor';
 import { Button } from './components/ui/button';
 
 function App() {
-  const { activeTab, setActiveTab } = useAppStore();
+  const { activeTab, setActiveTab, editingImageId } = useAppStore();
 
   // Load OpenCV on mount
   useEffect(() => {
@@ -91,6 +92,9 @@ function App() {
           {activeTab === 'process' && <ProcessingQueue />}
           {activeTab === 'download' && <DownloadManager />}
         </main>
+
+        {/* Image Editor Modal */}
+        {editingImageId && <ImageEditor />}
 
         {/* Footer */}
         <footer className="mt-16 pt-8 border-t border-border text-center text-sm text-muted-foreground">

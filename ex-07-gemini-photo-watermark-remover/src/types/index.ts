@@ -7,6 +7,7 @@ export interface ProcessedImage {
   originalUrl: string;
   processedUrl: string | null;
   detectedRegions: Region[];
+  manualRegions: Region[]; // User-selected regions
   status: 'pending' | 'processing' | 'completed' | 'error';
   error: string | null;
   editedUrl: string | null; // After crop/resize/filters
@@ -19,6 +20,7 @@ export interface Region {
   y: number;
   width: number;
   height: number;
+  type?: 'auto' | 'manual-rect' | 'manual-circle';
 }
 
 export interface DetectionConfig {
@@ -58,6 +60,7 @@ export interface AppState {
   activeTab: 'upload' | 'process' | 'download';
   showSettings: boolean;
   showGuidelines: boolean;
+  editingImageId: string | null;
 
   // Actions
   addImages: (files: File[]) => void;
@@ -71,6 +74,8 @@ export interface AppState {
   setActiveTab: (tab: 'upload' | 'process' | 'download') => void;
   toggleSettings: () => void;
   toggleGuidelines: () => void;
+  setEditingImage: (id: string | null) => void;
+  setManualRegions: (id: string, regions: Region[]) => void;
 }
 
 // OpenCV types (augmented)
