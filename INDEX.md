@@ -9,11 +9,11 @@ This index provides a comprehensive list of all completed challenges in the repo
 - **Progress:** 25.5%
 
 ### Progress on Extra Challenges
-- **Completed:** 2 out of 2
+- **Completed:** 3 out of 3
 - **Progress:** 100%
 
 ### Total Progress
-- **Overall Completed:** 26 challenges
+- **Overall Completed:** 27 challenges
 - **Repository Status:** Active development
 
 ---
@@ -77,6 +77,7 @@ This index provides a comprehensive list of all completed challenges in the repo
 |-----------|-------------|---------------|
 | ✓ | [01 - Div Copy Extension](./ex-01-div-copy-extension) | Browser extension for copying div content | JavaScript/HTML/CSS |
 | ✓ | [02 - WordPress Form Autosave](./ex-02-wp-form-autosave) | Auto-save functionality for WordPress forms | JavaScript/PHP |
+| ✓ | [07 - Gemini Photo Watermark Remover](./ex-07-gemini-photo-watermark-remover) | Browser-based PWA for removing watermarks using OpenCV.js | TypeScript/React/OpenCV |
 
 ---
 
