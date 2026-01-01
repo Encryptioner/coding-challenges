@@ -76,10 +76,11 @@ NN-challenge-name/
 
 **Adding a Web Challenge to Deployment:**
 
-1. Implement the challenge with an `index.html` file
-2. Add to `INDEX.md` file's `Web-Deployable Challenges` section after completion
-3. Ensure documentation files exist (README.md, CHALLENGE.md, docs/)
-4. Test locally: `./deploy-github-pages.sh`
+1. Implement the challenge with an `index.html` file OR a build script that outputs to `dist/` or `build/`
+2. If using a build tool (Vite, React, etc.), add build scripts to main `package.json` (see Build Process section)
+3. Add to `INDEX.md` file's `Web-Deployable Challenges` section after completion
+4. Ensure documentation files exist (README.md, CHALLENGE.md, docs/)
+5. Test locally: `pnpm deploy:local` or `./DOCS/deployment/deploy-github-pages.sh`
 
 **Deployed URL Structure:**
 ```
@@ -124,6 +125,48 @@ When implementing a new challenge:
 5. Create build system (Makefile, package.json, etc.)
 6. Create comprehensive test suite
 7. Update `INDEX.md` & add the challenge to INDEX.md with summary details
+
+### Build Process for Web Challenges
+
+**IMPORTANT:** For challenges that require a build step (TypeScript, React, Vite, Webpack, etc.):
+
+1. **Add to Main package.json:**
+   - Add individual build script: `"build:challenge-name": "cd challenge-name && pnpm install && pnpm run build"`
+   - Add to `build:all` script chain
+   - Add corresponding clean script: `"clean:challenge-name": "rm -rf challenge-name/dist challenge-name/build challenge-name/node_modules"`
+   - Add to `clean:all` script chain
+
+2. **Example:**
+   ```json
+   "install:all": "... && pnpm run install:new-challenge",
+   "install:new-challenge": "cd new-challenge && pnpm install",
+   "build:all": "pnpm run build:ex-04 && pnpm run build:ex-05 && pnpm run build:new-challenge",
+   "build:new-challenge": "cd new-challenge && pnpm install && pnpm run build",
+   "clean:all": "... && pnpm run clean:new-challenge",
+   "clean:new-challenge": "rm -rf new-challenge/dist new-challenge/build new-challenge/node_modules"
+   ```
+
+3. **Build Output:**
+   - Ensure build outputs to `dist/` or `build/` directory
+   - The deployment script automatically detects and copies built files
+
+4. **Create .gitignore:**
+   - ALWAYS create a `.gitignore` file for buildable challenges
+   - Ignore build output directories: `dist/`, `build/`, `lib/`, `src-gen/`
+   - Ignore `node_modules/`, coverage, logs, environment files
+   - See existing challenges (ex-05, ex-07) for reference templates
+
+5. **Testing:**
+   ```bash
+   pnpm install:all        # Install deps for all challenges
+   pnpm build              # Build all challenges
+   pnpm build:challenge    # Build specific challenge
+   pnpm deploy:local       # Test deployment locally
+   ```
+
+**IMPORTANT:** Only add challenges with actual build requirements. Backend Node.js apps that run with `node server.js` do NOT need build scripts.
+
+**Never commit build artifacts:** Generated files (`dist/`, `lib/`, `src-gen/`, etc.) should be in `.gitignore`, not in git.
 
 ### Challenge Independence
 
@@ -223,8 +266,23 @@ For distributable tools, follow the 14-shell pattern:
 ## Progress Tracking
 
 When completing a challenge:
-1. Update `INDEX.md` file only:
+1. **Update `INDEX.md`:**
    - Add the challenge to the appropriate category table
    - Include challenge number, name, description, and tech stack
-   - Ensure statistics are updated
-2. Ensure the challenge folder has proper documentation (CHALLENGE.md, README.md, docs/)
+   - Update statistics (Completed count, Progress percentage)
+   - If it's a web challenge, add to "Web-Deployable Challenges" section
+
+2. **Update `README.md`:**
+   - Add to the numbered list in the appropriate section
+   - For extra challenges, add to "Extra Challenges" section
+   - Update statistics at the top (match with INDEX.md)
+
+3. **Add Build Scripts (if needed):**
+   - If challenge requires build (TypeScript, React, Vite, etc.), update main `package.json`
+   - Add `build:challenge-name` and `clean:challenge-name` scripts
+   - Update `build:all` and `clean:all` chains
+   - See "Build Process for Web Challenges" section above
+
+4. **Ensure Documentation:**
+   - Challenge folder has CHALLENGE.md, README.md, and docs/
+   - For web challenges, ensure index.html or dist/ output exists

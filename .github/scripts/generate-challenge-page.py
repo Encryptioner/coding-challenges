@@ -61,7 +61,7 @@ def generate_challenge_page(challenge_dir, challenge_name):
             <div class="action-buttons">
                 <a href="./index.html" class="btn btn-primary">Launch App</a>
                 <a href="../" class="btn btn-secondary">Back to All Challenges</a>
-                <a href="https://github.com/Encryptioner/coding-challenges/tree/main/{challenge_dir}" class="btn btn-secondary" target="_blank">View Code</a>
+                <a href="https://github.com/Encryptioner/coding-challenges/tree/master/{challenge_dir}" class="btn btn-secondary" target="_blank">View Code</a>
             </div>
         </div>
     </div>
@@ -84,7 +84,7 @@ def generate_challenge_page(challenge_dir, challenge_name):
         <h2>Documentation</h2>
         <p>
             For detailed information about the implementation, see the
-            <a href="https://github.com/Encryptioner/coding-challenges/tree/main/{challenge_dir}" target="_blank">GitHub repository</a>.
+            <a href="https://github.com/Encryptioner/coding-challenges/tree/master/{challenge_dir}" target="_blank">GitHub repository</a>.
         </p>
     </div>
 

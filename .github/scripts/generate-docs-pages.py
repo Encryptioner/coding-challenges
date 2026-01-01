@@ -61,16 +61,120 @@ def generate_docs_page(challenge_dir):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title} - Documentation</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <link rel="stylesheet" href="../assets/style.css">
     <link rel="stylesheet" href="../assets/docs.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {{
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f9fafb;
+        }}
+        .docs-header {{
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }}
+        .docs-header .container {{
+            max-width: 1200px;
+            margin: 0 auto;
+        }}
+        .docs-header-content {{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }}
+        .challenge-title {{
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            flex: 1;
+        }}
+        .back-button {{
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 0.5rem !important;
+            background: rgba(255, 255, 255, 0.2) !important;
+            color: white !important;
+            padding: 0.75rem 1.25rem !important;
+            border-radius: 0.5rem !important;
+            text-decoration: none !important;
+            font-weight: 500 !important;
+            transition: all 0.2s !important;
+            backdrop-filter: blur(10px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            white-space: nowrap !important;
+        }}
+        .back-button:hover {{
+            background: rgba(255, 255, 255, 0.3) !important;
+            transform: translateX(-4px) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        }}
+        .back-button svg {{
+            transition: transform 0.2s;
+        }}
+        .back-button:hover svg {{
+            transform: translateX(-2px);
+        }}
+        .docs-content.container {{
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            min-height: calc(100vh - 200px);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-radius: 0.5rem;
+            line-height: 1.7;
+        }}
+        @media (max-width: 768px) {{
+            .docs-header {{
+                padding: 1rem;
+            }}
+            .docs-header-content {{
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }}
+            .challenge-title {{
+                font-size: 1.125rem;
+                order: 2;
+            }}
+            .back-button {{
+                padding: 0.625rem 1rem !important;
+                font-size: 0.875rem !important;
+                order: 1;
+            }}
+            .docs-content.container {{
+                padding: 1.5rem 1rem;
+                margin: 1rem;
+            }}
+        }}
+    </style>
 </head>
 <body>
-    <header class="docs-header">
+    <div class="docs-header">
         <div class="container">
-            <a href="../" class="back-link">← Back to Challenges</a>
-            <h1>{title}</h1>
+            <div class="docs-header-content">
+                <a href="../" class="back-button">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    Back to All Challenges
+                </a>
+                <h1 class="challenge-title">{title}</h1>
+            </div>
         </div>
-    </header>
+    </div>
 
     <main class="docs-content container">
         {html_content}

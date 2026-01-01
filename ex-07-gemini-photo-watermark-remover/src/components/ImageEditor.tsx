@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { X, Square, Circle, Undo, Check, Move3D } from 'lucide-react';
+import { X, Square, Circle, Undo, Check } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAppStore } from '@/store/useAppStore';
 import { Region } from '@/types';

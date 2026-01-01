@@ -1,9 +1,0 @@
-# robots.txt for Browser IDE Pro
-User-agent: *
-Allow: /
-
-# Sitemap (update with actual URL when deployed)
-Sitemap: /sitemap.xml
-
-# Crawl-delay
-Crawl-delay: 1

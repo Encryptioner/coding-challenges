@@ -157,7 +157,7 @@ def generate_viewer_html(challenge_dir, challenge_name):
                         </svg>
                         <h3>No Live Demo</h3>
                         <p>This challenge doesn't have a browser-based implementation.</p>
-                        <a href="https://github.com/Encryptioner/coding-challenges/tree/main/{challenge_dir}" class="btn btn-primary" target="_blank">View on GitHub</a>
+                        <a href="https://github.com/Encryptioner/coding-challenges/tree/master/{challenge_dir}" class="btn btn-primary" target="_blank">View on GitHub</a>
                     </div>
                 </div>'''
 
@@ -241,6 +241,227 @@ def generate_viewer_html(challenge_dir, challenge_name):
 
     return html
 
+def generate_docs_only_html(challenge_dir, challenge_name):
+    """Generate documentation-only page"""
+
+    docs_files = find_docs_files(challenge_dir)
+
+    if not docs_files:
+        return None
+
+    # Build navigation
+    nav_items = []
+    for doc in docs_files:
+        icon_svg = get_icon_svg(doc['icon'])
+        # Convert .md to .html for the data-doc attribute
+        html_path = doc['file'].replace('.md', '.html')
+        nav_items.append(f'''
+            <a href="#" class="docs-nav-item" data-doc="{html_path}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    {icon_svg}
+                </svg>
+                {doc['name']}
+            </a>
+        ''')
+
+    nav_html = ''.join(nav_items)
+
+    html = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{challenge_name} - Documentation</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="../assets/style.css">
+    <link rel="stylesheet" href="../assets/docs.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {{
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f9fafb;
+        }}
+        .docs-header {{
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }}
+        .docs-header-content {{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }}
+        .challenge-title {{
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            flex: 1;
+        }}
+        .back-button {{
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 0.5rem !important;
+            background: rgba(255, 255, 255, 0.2) !important;
+            color: white !important;
+            padding: 0.75rem 1.25rem !important;
+            border-radius: 0.5rem !important;
+            text-decoration: none !important;
+            font-weight: 500 !important;
+            transition: all 0.2s !important;
+            backdrop-filter: blur(10px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            white-space: nowrap !important;
+        }}
+        .back-button:hover {{
+            background: rgba(255, 255, 255, 0.3) !important;
+            transform: translateX(-4px) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        }}
+        .back-button svg {{
+            transition: transform 0.2s;
+        }}
+        .back-button:hover svg {{
+            transform: translateX(-2px);
+        }}
+        .docs-simple-view {{
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: white;
+            min-height: calc(100vh - 120px);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }}
+        .docs-simple-view .docs-content {{
+            line-height: 1.7;
+        }}
+        .docs-loading {{
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #6b7280;
+        }}
+        .docs-loading p {{
+            font-size: 1.125rem;
+        }}
+        @media (max-width: 768px) {{
+            .docs-header {{
+                padding: 1rem;
+            }}
+            .docs-header-content {{
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }}
+            .challenge-title {{
+                font-size: 1.125rem;
+                order: 2;
+            }}
+            .back-button {{
+                padding: 0.625rem 1rem !important;
+                font-size: 0.875rem !important;
+                order: 1;
+            }}
+            .docs-simple-view {{
+                padding: 1.5rem 1rem;
+                min-height: calc(100vh - 120px);
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="docs-header">
+        <div class="docs-header-content">
+            <a href="../" class="back-button">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Back to All Challenges
+            </a>
+            <h1 class="challenge-title">{challenge_name}</h1>
+        </div>
+    </div>
+
+    <div class="docs-simple-view">
+        <div class="docs-content">
+            <div class="docs-loading">
+                <p>Loading documentation...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load first documentation file
+        fetch('{docs_files[0]['file'].replace('.md', '.html')}')
+            .then(response => response.text())
+            .then(html => {{
+                const content = document.querySelector('.docs-content');
+                content.innerHTML = html;
+            }})
+            .catch(error => {{
+                const content = document.querySelector('.docs-content');
+                content.innerHTML = '<div class="docs-loading"><p>Error loading documentation.</p></div>';
+                console.error('Error loading docs:', error);
+            }});
+    </script>
+</body>
+</html>
+'''
+
+    return html
+
+def generate_preview_only_html(challenge_dir, challenge_name):
+    """Generate preview-only page"""
+
+    # Check if challenge has a live app
+    has_app = (Path(challenge_dir) / 'index.html').exists()
+
+    if not has_app:
+        return None
+
+    html = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{challenge_name} - Live Preview</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="../assets/style.css">
+    <link rel="stylesheet" href="../assets/docs.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body, html {{
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }}
+        .preview-frame {{
+            width: 100%;
+            height: 100%;
+            border: none;
+        }}
+    </style>
+</head>
+<body>
+    <iframe src="./app.html" class="preview-frame" title="Live Application"></iframe>
+</body>
+</html>
+'''
+
+    return html
+
 def generate_docs_html_files(challenge_dir, output_dir):
     """Generate individual HTML files for each documentation file"""
     docs_files = find_docs_files(challenge_dir)
@@ -265,43 +486,35 @@ def main():
     challenge_dir = sys.argv[1]
     challenge_name = sys.argv[2]
 
-    print(f"Generating interactive viewer for {challenge_name}...")
-
-    # Generate main viewer HTML
-    viewer_html = generate_viewer_html(challenge_dir, challenge_name)
-
-    if not viewer_html:
-        print(f"  No documentation found for {challenge_name}")
-        return
+    print(f"Generating pages for {challenge_name}...")
 
     # Create output directory
     output_dir = f'dist/{challenge_dir}'
     os.makedirs(output_dir, exist_ok=True)
 
-    # Write viewer HTML
-    with open(f'{output_dir}/index.html', 'w', encoding='utf-8') as f:
-        f.write(viewer_html)
+    # Generate docs-only page
+    docs_html = generate_docs_only_html(challenge_dir, challenge_name)
+    if docs_html:
+        with open(f'{output_dir}/docs.html', 'w', encoding='utf-8') as f:
+            f.write(docs_html)
+        print(f"  ✓ docs.html generated")
+    else:
+        print(f"  ! No documentation found for {challenge_name}")
+
+    # Generate preview-only page
+    preview_html = generate_preview_only_html(challenge_dir, challenge_name)
+    if preview_html:
+        with open(f'{output_dir}/preview.html', 'w', encoding='utf-8') as f:
+            f.write(preview_html)
+        print(f"  ✓ preview.html generated")
+    else:
+        print(f"  ! No live app found for {challenge_name}")
 
     # Generate individual doc HTML files
     generate_docs_html_files(challenge_dir, output_dir)
 
-    # Copy app if it exists
-    app_path = Path(challenge_dir) / 'index.html'
-    if app_path.exists():
-        import shutil
-        shutil.copy(app_path, f'{output_dir}/app.html')
-
-        # Copy static assets
-        for asset_dir in ['static', 'css', 'js', 'images', 'assets']:
-            asset_path = Path(challenge_dir) / asset_dir
-            if asset_path.exists():
-                shutil.copytree(
-                    asset_path,
-                    f'{output_dir}/{asset_dir}',
-                    dirs_exist_ok=True
-                )
-
-    print(f"✓ Interactive viewer generated for {challenge_name}")
+    print(f"✓ All pages generated for {challenge_name}")
+    print(f"  Note: Web app files will be copied by build-site.sh")
 
 if __name__ == '__main__':
     main()

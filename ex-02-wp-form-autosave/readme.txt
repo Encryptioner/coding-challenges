@@ -181,7 +181,7 @@ This plugin stores form data in the user's browser using localStorage. No data i
 == Additional Information ==
 
 * For support, visit: https://github.com/your-repo/coding-challenges/issues
-* For documentation, visit: https://github.com/your-repo/coding-challenges/tree/main/ex-02-wp-form-autosave
+* For documentation, visit: https://github.com/your-repo/coding-challenges/tree/master/ex-02-wp-form-autosave
 * For feature requests, visit: https://github.com/your-repo/coding-challenges/issues
 
 == Developer Notes ==

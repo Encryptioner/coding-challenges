@@ -1,0 +1,49 @@
+{
+  "name": "coding-challenges",
+  "version": "1.0.0",
+  "description": "A comprehensive collection of coding challenges from CodingChallenges.fyi and experimental projects",
+  "private": true,
+  "scripts": {
+    "postinstall": "mkdir -p node_modules",
+    "install:all": "pnpm run install:ex-04 && pnpm run install:ex-05 && pnpm run install:ex-07",
+    "install:ex-04": "cd ex-04-mobile-ide-app && pnpm install",
+    "install:ex-05": "cd ex-05-browser-ide-v1 && pnpm install",
+    "install:ex-07": "cd ex-07-gemini-photo-watermark-remover && pnpm install",
+    "build": "pnpm run build:all",
+    "build:all": "pnpm run build:ex-04 && pnpm run build:ex-05 && pnpm run build:ex-07",
+    "build:ex-04": "cd ex-04-mobile-ide-app && pnpm install && pnpm run build",
+    "build:ex-05": "cd ex-05-browser-ide-v1 && pnpm install && pnpm run build",
+    "build:ex-07": "cd ex-07-gemini-photo-watermark-remover && pnpm install && pnpm run build",
+    "clean": "pnpm run clean:all",
+    "clean:all": "pnpm run clean:ex-04 && pnpm run clean:ex-05 && pnpm run clean:ex-07",
+    "clean:ex-04": "rm -rf ex-04-mobile-ide-app/dist ex-04-mobile-ide-app/build ex-04-mobile-ide-app/node_modules",
+    "clean:ex-05": "rm -rf ex-05-browser-ide-v1/dist ex-05-browser-ide-v1/build ex-05-browser-ide-v1/node_modules",
+    "clean:ex-07": "rm -rf ex-07-gemini-photo-watermark-remover/dist ex-07-gemini-photo-watermark-remover/build ex-07-gemini-photo-watermark-remover/node_modules",
+    "deploy": "bash .github/scripts/build-site.sh",
+    "deploy:local": "bash DOCS/deployment/deploy-github-pages.sh",
+    "preview": "cd dist && python3 -m http.server 8000",
+    "site:build": "bash .github/scripts/build-site.sh",
+    "site:preview": "pnpm run site:build && pnpm run preview"
+  },
+  "comments": {
+    "build:all": "Builds all challenges that require a build step (TypeScript, React, Vite, etc.)",
+    "note": "When adding new challenges with build scripts, add them to build:all and create individual build:challenge-name scripts"
+  },
+  "keywords": [
+    "coding-challenges",
+    "learning",
+    "tutorials",
+    "programming"
+  ],
+  "author": "Ankur Mursalin",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Encryptioner/coding-challenges.git"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}

@@ -691,7 +691,7 @@ on: [push, pull_request]
 
 jobs:
   validate:
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 

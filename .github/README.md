@@ -65,6 +65,9 @@ Add to `INDEX.md` file's `Web-Deployable Challenges` section after completion
 ## Local Testing
 
 ```bash
+# Use venv
+source venv/bin/activate
+
 # Install dependencies
 pip install -r .github/requirements.txt
 

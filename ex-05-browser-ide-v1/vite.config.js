@@ -109,7 +109,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'monaco-editor': ['@monaco-editor/react', 'monaco-editor'],
+          'monaco-editor': ['@monaco-editor/react'],
           'terminal': ['xterm', 'xterm-addon-fit', 'xterm-addon-web-links'],
           'git': ['isomorphic-git', '@isomorphic-git/lightning-fs'],
           'vendor': ['react', 'react-dom', 'zustand']

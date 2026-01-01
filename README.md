@@ -12,9 +12,9 @@ In addition to the coding challenges from **CodingChallenges.fyi**, there are so
 - Progress: 25.5%
 
 ### Progress on **Extra Challenges**
-- Completed: 2
-- Total: 4
-- Progress: 50%
+- Completed: 6
+- Total: 7
+- Progress: 85.7%
 
 ### Check completed challenge list in [Index.md](./INDEX.md)
 
@@ -145,6 +145,9 @@ This repository contains implementations for various coding challenges that cove
 2. [WordPress Form Autosave](./ex-02-wp-form-autosave) - Auto-save functionality for WordPress forms
 3. [Google Drive Downloader](./ex-03-google-drive-downloader/) - Download files from a google drive folder link
 4. [Mobile IDE App](./ex-04-mobile-ide-app/) - IDE for mobile use
+5. [Browser IDE v1](./ex-05-browser-ide-v1) - VS Code-like IDE that runs entirely in browser with AI assistant
+6. [Browser IDE v2](./ex-06-browser-ide-v2) - Advanced browser IDE (moved to standalone repo)
+7. [Gemini Photo Watermark Remover](./ex-07-gemini-photo-watermark-remover) - Browser-based PWA for removing watermarks using OpenCV.js
 
 
 ## 🌐 GitHub Pages Deployment

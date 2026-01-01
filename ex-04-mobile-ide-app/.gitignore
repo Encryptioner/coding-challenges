@@ -5,14 +5,24 @@ node_modules/
 package-lock.json
 yarn.lock
 
+# Theia build output
+lib/
+src-gen/
+.browser_modules/
+.theia/
+
 # Build output
 dist/
 build/
+*.tgz
 
-# Build cache
-.vite/
-.turbo/
-.cache/
+# Capacitor
+ios/
+android/
+
+# Coverage
+coverage/
+.nyc_output/
 
 # Environment variables
 .env
@@ -29,6 +39,7 @@ yarn-error.log*
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea
 *.suo
 *.ntvs*
@@ -39,3 +50,7 @@ yarn-error.log*
 # OS files
 .DS_Store
 Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
