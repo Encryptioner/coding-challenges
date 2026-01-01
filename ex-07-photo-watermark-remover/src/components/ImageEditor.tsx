@@ -55,7 +55,7 @@ export function ImageEditor() {
 
     // Only auto-select if no manual regions exist
     if (image.manualRegions.length === 0 && regions.length === 0) {
-      // Create default selection for bottom-right corner (typical Gemini watermark location)
+      // Create default selection for bottom-right corner (typical watermark location)
       const defaultRegion: Region = {
         x: image.dimensions.width * 0.75,
         y: image.dimensions.height * 0.75,
@@ -584,7 +584,7 @@ export function ImageEditor() {
             <strong>Instructions:</strong> Touch and drag to select watermarked regions.
             Click the move button (←→) on the left of a region to activate move mode, then drag to reposition.
             Click the red X button to delete a region.
-            For Gemini watermarks, typically found in the bottom-right corner.
+            Watermarks are typically found in the bottom-right corner.
             Use circle tool for rounded watermarks, rectangle for text watermarks.
           </p>
         </div>

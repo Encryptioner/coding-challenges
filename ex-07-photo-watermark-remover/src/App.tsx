@@ -35,7 +35,7 @@ function App() {
         {/* Header */}
         <header className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            Gemini Photo Watermark Remover
+            Photo Watermark Remover
           </h1>
           <p className="text-muted-foreground text-sm md:text-base">
             100% Free • Client-Side • Privacy-Friendly • Offline Support

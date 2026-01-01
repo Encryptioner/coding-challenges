@@ -147,7 +147,7 @@ This repository contains implementations for various coding challenges that cove
 4. [Mobile IDE App](./ex-04-mobile-ide-app/) - IDE for mobile use
 5. [Browser IDE v1](./ex-05-browser-ide-v1) - VS Code-like IDE that runs entirely in browser with AI assistant
 6. [Browser IDE v2](./ex-06-browser-ide-v2) - Advanced browser IDE (moved to standalone repo)
-7. [Gemini Photo Watermark Remover](./ex-07-gemini-photo-watermark-remover) - Browser-based PWA for removing watermarks using OpenCV.js
+7. [Photo Watermark Remover](./ex-07-photo-watermark-remover) - Browser-based PWA for removing watermarks using OpenCV.js
 
 
 ## 🌐 GitHub Pages Deployment

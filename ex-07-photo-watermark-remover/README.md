@@ -1,4 +1,4 @@
-# Gemini Photo Watermark Remover
+# Photo Watermark Remover
 
 A production-ready, browser-based PWA for removing watermarks from images using OpenCV.js. 100% free, client-side processing, privacy-friendly, and works offline.
 
@@ -49,7 +49,7 @@ A production-ready, browser-based PWA for removing watermarks from images using 
 
 ```bash
 # Clone repository
-cd ex-07-gemini-photo-watermark-remover
+cd ex-07-photo-watermark-remover
 
 # Install dependencies
 pnpm install
@@ -108,7 +108,7 @@ pnpm clean:all        # Clean everything including node_modules
 ## Project Structure
 
 ```
-ex-07-gemini-photo-watermark-remover/
+ex-07-photo-watermark-remover/
 ├── src/
 │   ├── components/          # React components
 │   │   ├── ui/             # shadcn/ui base components

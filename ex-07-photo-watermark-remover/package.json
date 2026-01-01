@@ -1,5 +1,5 @@
 {
-  "name": "gemini-photo-watermark-remover",
+  "name": "photo-watermark-remover",
   "version": "1.0.0",
   "type": "module",
   "description": "100% client-side watermark removal tool using OpenCV.js - Free, offline, privacy-friendly PWA",

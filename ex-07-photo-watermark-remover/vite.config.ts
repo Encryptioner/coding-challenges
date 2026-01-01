@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'robots.txt'],
       manifest: {
-        name: 'Gemini Photo Watermark Remover',
+        name: 'Photo Watermark Remover',
         short_name: 'Watermark Remover',
         description: '100% client-side watermark removal tool using OpenCV',
         theme_color: '#0a0a0a',
