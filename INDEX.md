@@ -9,11 +9,11 @@ This index provides a comprehensive list of all completed challenges in the repo
 - **Progress:** 25.5%
 
 ### Progress on Extra Challenges
-- **Completed:** 3 out of 3
-- **Progress:** 100%
+- **Completed:** 6 out of 7
+- **Progress:** 85.7%
 
 ### Total Progress
-- **Overall Completed:** 27 challenges
+- **Overall Completed:** 30 challenges
 - **Repository Status:** Active development
 
 ---
@@ -77,6 +77,10 @@ This index provides a comprehensive list of all completed challenges in the repo
 |-----------|-------------|---------------|
 | ✓ | [01 - Div Copy Extension](./ex-01-div-copy-extension) | Browser extension for copying div content | JavaScript/HTML/CSS |
 | ✓ | [02 - WordPress Form Autosave](./ex-02-wp-form-autosave) | Auto-save functionality for WordPress forms | JavaScript/PHP |
+| ✓ | [03 - Google Drive Downloader](./ex-03-google-drive-downloader) | Python scripts for downloading files from Google Drive | Python |
+| ✓ | [04 - Mobile IDE App](./ex-04-mobile-ide-app) | Full-featured mobile IDE with VSCode extension compatibility | TypeScript/React/Capacitor |
+| ✓ | [05 - Browser IDE v1](./ex-05-browser-ide-v1) | VS Code-like IDE that runs entirely in browser with AI assistant | TypeScript/React/Monaco |
+| ✓ | [06 - Browser IDE v2](./ex-06-browser-ide-v2) | Advanced browser IDE (moved to standalone repo) | TypeScript/React |
 | ✓ | [07 - Gemini Photo Watermark Remover](./ex-07-gemini-photo-watermark-remover) | Browser-based PWA for removing watermarks using OpenCV.js | TypeScript/React/OpenCV |
 
 ---
@@ -101,7 +105,8 @@ These challenges have live demos available on GitHub Pages:
 3. [77 - Static Site Generator](./77-static-site-generator) - Static site generation
 4. [80 - Optical Character Recognition](./80-optical-character-recognition) - OCR implementation
 5. [82 - Markdown to PDF](./82-markdown-to-pdf) - Document conversion
-6. [07 - Gemini Photo Watermark Remover](./ex-07-gemini-photo-watermark-remover) - PWA for watermark removal using OpenCV.js
+6. [05 - Browser IDE v1](./ex-05-browser-ide-v1) - VS Code-like IDE in browser
+7. [07 - Gemini Photo Watermark Remover](./ex-07-gemini-photo-watermark-remover) - PWA for watermark removal using OpenCV.js
 
 ---
 

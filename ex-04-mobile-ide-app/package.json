@@ -9,7 +9,6 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "prepare": "pnpm run clean && pnpm run build",
     "clean": "theia clean && rimraf lib coverage .nyc_output",
     "build": "theia build --mode development",
     "build:prod": "NODE_ENV=production theia build --mode production && pnpm run copy:assets",

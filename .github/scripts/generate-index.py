@@ -139,9 +139,33 @@ def has_web_interface(folder, web_challenges):
     return folder in web_challenges
 
 def has_live_app(folder):
-    """Check if challenge has a live app (index.html)"""
+    """Check if challenge has a live app (index.html or built dist/build directory)"""
     import os
-    return os.path.exists(os.path.join(folder, 'index.html'))
+    import json
+
+    # Check for direct index.html
+    if os.path.exists(os.path.join(folder, 'index.html')):
+        return True
+
+    # Check for built dist or build directory with index.html
+    if os.path.exists(os.path.join(folder, 'dist', 'index.html')):
+        return True
+    if os.path.exists(os.path.join(folder, 'build', 'index.html')):
+        return True
+
+    # Check if it's a buildable project (has package.json with build script)
+    package_json_path = os.path.join(folder, 'package.json')
+    if os.path.exists(package_json_path):
+        try:
+            with open(package_json_path, 'r') as f:
+                package_data = json.load(f)
+                # Check if it has a build script
+                if 'scripts' in package_data and 'build' in package_data['scripts']:
+                    return True
+        except:
+            pass
+
+    return False
 
 def generate_index_html(challenges, extra_challenges, web_challenges):
     """Generate the main index.html"""
@@ -151,6 +175,31 @@ def generate_index_html(challenges, extra_challenges, web_challenges):
     extra_completed_count = sum(1 for c in extra_challenges if c['completed'])
     total_count = len(challenges)
     total_extra = len(extra_challenges)
+
+    # Count challenges with preview
+    preview_count = 0
+    for challenge in challenges:
+        has_web = has_web_interface(challenge['folder'], web_challenges)
+        if has_web and has_live_app(challenge['folder']):
+            preview_count += 1
+    for challenge in extra_challenges:
+        has_web = has_web_interface(challenge['folder'], web_challenges)
+        if has_web and has_live_app(challenge['folder']):
+            preview_count += 1
+
+    # Count challenges with docs (only web challenges have docs button)
+    docs_count = 0
+    for challenge in challenges:
+        has_web = has_web_interface(challenge['folder'], web_challenges)
+        if has_web:
+            docs_count += 1
+    for challenge in extra_challenges:
+        has_web = has_web_interface(challenge['folder'], web_challenges)
+        if has_web:
+            docs_count += 1
+
+    # Count web challenges
+    web_count = docs_count  # Same as docs count since only web challenges have docs
 
     # Group by section
     sections = {}
@@ -177,7 +226,7 @@ def generate_index_html(challenges, extra_challenges, web_challenges):
     <header class="header">
         <div class="container">
             <h1>🚀 Coding Challenges</h1>
-            <p class="subtitle">Building {total_count} practical tools and applications from scratch</p>
+            <p class="subtitle">Building {total_count + total_extra} practical tools and applications from scratch</p>
             <div class="stats">
                 <div class="stat">
                     <span class="stat-number">{completed_count - extra_completed_count}</span>
@@ -188,11 +237,11 @@ def generate_index_html(challenges, extra_challenges, web_challenges):
                     <span class="stat-label">Extra Challenges</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-number">{completed_count}</span>
+                    <span class="stat-number">{completed_count + extra_completed_count}</span>
                     <span class="stat-label">Total Completed</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-number">{total_count}</span>
+                    <span class="stat-number">{total_count + total_extra}</span>
                     <span class="stat-label">Total Challenges</span>
                 </div>
             </div>
@@ -231,10 +280,12 @@ def generate_index_html(challenges, extra_challenges, web_challenges):
         <section class="filter-section">
             <h2>Filter Challenges</h2>
             <div class="filters">
-                <button class="filter-btn active" data-filter="all">All ({total_count})</button>
-                <button class="filter-btn" data-filter="completed">Completed ({completed_count})</button>
-                <button class="filter-btn" data-filter="web">Web Apps</button>
-                <button class="filter-btn" data-filter="in-progress">In Progress ({total_count - completed_count})</button>
+                <button class="filter-btn active" data-filter="all">All ({total_count + total_extra})</button>
+                <button class="filter-btn" data-filter="completed">Completed ({completed_count + extra_completed_count})</button>
+                <button class="filter-btn" data-filter="web">Web Apps ({web_count})</button>
+                <button class="filter-btn" data-filter="docs">Docs ({docs_count})</button>
+                <button class="filter-btn" data-filter="preview">Preview ({preview_count})</button>
+                <button class="filter-btn" data-filter="in-progress">In Progress ({total_count + total_extra - completed_count - extra_completed_count})</button>
             </div>
         </section>
 '''
@@ -261,7 +312,7 @@ def generate_index_html(challenges, extra_challenges, web_challenges):
             if has_web:
                 docs_url = f"./{challenge['folder']}/docs.html"
                 docs_button = f'''
-                    <a href="{docs_url}" class="card-btn">
+                    <a href="{docs_url}" class="card-btn" target="_blank">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
@@ -273,7 +324,7 @@ def generate_index_html(challenges, extra_challenges, web_challenges):
                 if has_app:
                     preview_url = f"./{challenge['folder']}/preview.html"
                     preview_button = f'''
-                    <a href="{preview_url}" class="card-btn card-btn-primary">
+                    <a href="{preview_url}" class="card-btn card-btn-primary" target="_blank">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
                             <line x1="8" y1="21" x2="16" y2="21"></line>
@@ -284,8 +335,17 @@ def generate_index_html(challenges, extra_challenges, web_challenges):
 
                 web_buttons = docs_button + preview_button
 
+            # Build data-tags
+            tags = []
+            tags.append('completed' if challenge['completed'] else 'in-progress')
+            if has_web:
+                tags.append('web')
+                tags.append('docs')  # Only web challenges have docs button
+            if has_app:
+                tags.append('preview')
+
             html += f'''
-                <div class="challenge-card {completed_class}" data-tags="{'completed' if challenge['completed'] else 'in-progress'} {'web' if has_web else ''}">
+                <div class="challenge-card {completed_class}" data-tags="{' '.join(tags)}">
                     <div class="card-header">
                         <span class="challenge-number">#{challenge['number']}</span>
                         <span class="badge badge-{completed_class}">{completed_badge}</span>
@@ -321,13 +381,54 @@ def generate_index_html(challenges, extra_challenges, web_challenges):
         for challenge in extra_challenges:
             completed_badge = '✓ Completed' if challenge['completed'] else 'In Progress'
             completed_class = 'completed' if challenge['completed'] else 'in-progress'
+            has_web = has_web_interface(challenge['folder'], web_challenges)
+            has_app = has_live_app(challenge['folder']) if has_web else False
+            web_badge = '<span class="badge badge-web">Web App</span>' if has_web else ''
             github_url = f"https://github.com/Encryptioner/coding-challenges/tree/master/{challenge['folder']}"
 
+            # Build web buttons based on what's available
+            web_buttons = ''
+            if has_web:
+                docs_url = f"./{challenge['folder']}/docs.html"
+                docs_button = f'''
+                    <a href="{docs_url}" class="card-btn" target="_blank">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                        Docs
+                    </a>'''
+
+                preview_button = ''
+                if has_app:
+                    preview_url = f"./{challenge['folder']}/preview.html"
+                    preview_button = f'''
+                    <a href="{preview_url}" class="card-btn card-btn-primary" target="_blank">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                        Preview
+                    </a>'''
+
+                web_buttons = docs_button + preview_button
+
+            # Build data-tags for extra challenges
+            tags = []
+            tags.append('completed' if challenge['completed'] else 'in-progress')
+            if has_web:
+                tags.append('web')
+                tags.append('docs')  # Only web challenges have docs button
+            if has_app:
+                tags.append('preview')
+
             html += f'''
-                <div class="challenge-card {completed_class}" data-tags="{'completed' if challenge['completed'] else 'in-progress'}">
+                <div class="challenge-card {completed_class}" data-tags="{' '.join(tags)}">
                     <div class="card-header">
                         <span class="challenge-number">{challenge['number']}</span>
                         <span class="badge badge-{completed_class}">{completed_badge}</span>
+                        {web_badge}
                     </div>
                     <h3 class="card-title">{challenge['name']}</h3>
                     <p class="card-description">{challenge['description']}</p>
@@ -339,6 +440,7 @@ def generate_index_html(challenges, extra_challenges, web_challenges):
                             </svg>
                             View Code
                         </a>
+                        {web_buttons}
                     </div>
                 </div>
 '''

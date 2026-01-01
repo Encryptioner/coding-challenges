@@ -157,7 +157,7 @@ def generate_viewer_html(challenge_dir, challenge_name):
                         </svg>
                         <h3>No Live Demo</h3>
                         <p>This challenge doesn't have a browser-based implementation.</p>
-                        <a href="https://github.com/Encryptioner/coding-challenges/tree/main/{challenge_dir}" class="btn btn-primary" target="_blank">View on GitHub</a>
+                        <a href="https://github.com/Encryptioner/coding-challenges/tree/master/{challenge_dir}" class="btn btn-primary" target="_blank">View on GitHub</a>
                     </div>
                 </div>'''
 
@@ -272,79 +272,146 @@ def generate_docs_only_html(challenge_dir, challenge_name):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{challenge_name} - Documentation</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <link rel="stylesheet" href="../assets/style.css">
     <link rel="stylesheet" href="../assets/docs.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {{
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f9fafb;
+        }}
+        .docs-header {{
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }}
+        .docs-header-content {{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }}
+        .challenge-title {{
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            flex: 1;
+        }}
+        .back-button {{
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 0.5rem !important;
+            background: rgba(255, 255, 255, 0.2) !important;
+            color: white !important;
+            padding: 0.75rem 1.25rem !important;
+            border-radius: 0.5rem !important;
+            text-decoration: none !important;
+            font-weight: 500 !important;
+            transition: all 0.2s !important;
+            backdrop-filter: blur(10px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            white-space: nowrap !important;
+        }}
+        .back-button:hover {{
+            background: rgba(255, 255, 255, 0.3) !important;
+            transform: translateX(-4px) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        }}
+        .back-button svg {{
+            transition: transform 0.2s;
+        }}
+        .back-button:hover svg {{
+            transform: translateX(-2px);
+        }}
+        .docs-simple-view {{
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: white;
+            min-height: calc(100vh - 120px);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }}
+        .docs-simple-view .docs-content {{
+            line-height: 1.7;
+        }}
+        .docs-loading {{
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #6b7280;
+        }}
+        .docs-loading p {{
+            font-size: 1.125rem;
+        }}
+        @media (max-width: 768px) {{
+            .docs-header {{
+                padding: 1rem;
+            }}
+            .docs-header-content {{
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }}
+            .challenge-title {{
+                font-size: 1.125rem;
+                order: 2;
+            }}
+            .back-button {{
+                padding: 0.625rem 1rem !important;
+                font-size: 0.875rem !important;
+                order: 1;
+            }}
+            .docs-simple-view {{
+                padding: 1.5rem 1rem;
+                min-height: calc(100vh - 120px);
+            }}
+        }}
+    </style>
 </head>
 <body>
-    <div class="interactive-viewer">
-        <!-- Sidebar -->
-        <aside class="docs-sidebar">
-            <div class="docs-sidebar-header">
-                <a href="../" class="back-link">← All Challenges</a>
-                <h2>{challenge_name}</h2>
-            </div>
-            <nav class="docs-nav">
-                <div class="docs-nav-section">
-                    <h3>Documentation</h3>
-                    {nav_html}
-                </div>
-            </nav>
-            <div class="docs-sidebar-footer">
-                <a href="./preview.html" class="btn btn-primary">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                        <line x1="8" y1="21" x2="16" y2="21"></line>
-                        <line x1="12" y1="17" x2="12" y2="21"></line>
-                    </svg>
-                    View Preview
-                </a>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="docs-main docs-only-view">
-            <!-- Top Bar -->
-            <div class="docs-topbar">
-                <h1 class="docs-title">Documentation</h1>
-                <div class="view-controls">
-                    <a href="./preview.html" class="btn btn-secondary">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                            <line x1="8" y1="21" x2="16" y2="21"></line>
-                            <line x1="12" y1="17" x2="12" y2="21"></line>
-                        </svg>
-                        Preview
-                    </a>
-                </div>
-            </div>
-
-            <!-- Documentation Content -->
-            <div class="docs-content-wrapper">
-                <div class="docs-content">
-                    <div class="docs-loading">
-                        <p>Loading documentation...</p>
-                    </div>
-                </div>
-            </div>
-        </main>
+    <div class="docs-header">
+        <div class="docs-header-content">
+            <a href="../" class="back-button">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Back to All Challenges
+            </a>
+            <h1 class="challenge-title">{challenge_name}</h1>
+        </div>
     </div>
 
-    <!-- Mobile Menu Button -->
-    <button class="mobile-menu-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-    </button>
+    <div class="docs-simple-view">
+        <div class="docs-content">
+            <div class="docs-loading">
+                <p>Loading documentation...</p>
+            </div>
+        </div>
+    </div>
 
-    <!-- Mobile Sidebar Overlay -->
-    <div class="sidebar-overlay"></div>
-
-    <script src="../assets/docs-viewer.js"></script>
+    <script>
+        // Load first documentation file
+        fetch('{docs_files[0]['file'].replace('.md', '.html')}')
+            .then(response => response.text())
+            .then(html => {{
+                const content = document.querySelector('.docs-content');
+                content.innerHTML = html;
+            }})
+            .catch(error => {{
+                const content = document.querySelector('.docs-content');
+                content.innerHTML = '<div class="docs-loading"><p>Error loading documentation.</p></div>';
+                console.error('Error loading docs:', error);
+            }});
+    </script>
 </body>
 </html>
 '''
@@ -366,34 +433,18 @@ def generate_preview_only_html(challenge_dir, challenge_name):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{challenge_name} - Live Preview</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <link rel="stylesheet" href="../assets/style.css">
     <link rel="stylesheet" href="../assets/docs.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        .preview-only-view {{
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }}
-        .preview-header {{
-            background: #fff;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 1rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }}
-        .preview-header h1 {{
+        body, html {{
             margin: 0;
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #1f2937;
-        }}
-        .preview-frame-wrapper {{
-            flex: 1;
-            position: relative;
+            padding: 0;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
         }}
         .preview-frame {{
@@ -401,77 +452,10 @@ def generate_preview_only_html(challenge_dir, challenge_name):
             height: 100%;
             border: none;
         }}
-        .preview-controls {{
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }}
-        .btn {{
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            text-decoration: none;
-            transition: all 0.2s;
-        }}
-        .btn-secondary {{
-            background: #f3f4f6;
-            color: #374151;
-        }}
-        .btn-secondary:hover {{
-            background: #e5e7eb;
-        }}
-        .btn-primary {{
-            background: #4a90e2;
-            color: white;
-        }}
-        .btn-primary:hover {{
-            background: #357abd;
-        }}
-        .back-link {{
-            color: #6b7280;
-            text-decoration: none;
-            font-size: 0.875rem;
-            margin-right: 1rem;
-        }}
-        .back-link:hover {{
-            color: #4a90e2;
-        }}
     </style>
 </head>
 <body>
-    <div class="preview-only-view">
-        <!-- Header -->
-        <div class="preview-header">
-            <div style="display: flex; align-items: center;">
-                <a href="../" class="back-link">← All Challenges</a>
-                <h1>{challenge_name}</h1>
-            </div>
-            <div class="preview-controls">
-                <a href="./docs.html" class="btn btn-secondary">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                    </svg>
-                    Documentation
-                </a>
-                <a href="https://github.com/Encryptioner/coding-challenges/tree/main/{challenge_dir}" class="btn btn-primary" target="_blank">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                    </svg>
-                    GitHub
-                </a>
-            </div>
-        </div>
-
-        <!-- Preview Frame -->
-        <div class="preview-frame-wrapper">
-            <iframe src="./app.html" class="preview-frame" title="Live Application"></iframe>
-        </div>
-    </div>
+    <iframe src="./app.html" class="preview-frame" title="Live Application"></iframe>
 </body>
 </html>
 '''

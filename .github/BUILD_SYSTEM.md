@@ -30,6 +30,19 @@ cp .github/templates/.gitignore.web my-new-challenge/.gitignore
 
 ### Local Development
 
+**Using npm scripts (recommended):**
+
+```bash
+# Build and preview in one command
+pnpm site:preview
+
+# Or build and preview separately
+pnpm site:build     # Build the site
+pnpm preview        # Serve on http://localhost:8000
+```
+
+**Manual commands:**
+
 1. **Build the site:**
    ```bash
    source venv/bin/activate
@@ -41,14 +54,14 @@ cp .github/templates/.gitignore.web my-new-challenge/.gitignore
    cd dist && python3 -m http.server 8000
    ```
 
-3. **What happens:**
-   - Detects web challenges from `INDEX.md`
-   - For each challenge with `package.json`:
-     - Auto-detects package manager (pnpm/yarn/npm)
-     - Installs dependencies (if needed)
-     - Runs `npm run build` (if build script exists)
-   - Copies built files to `dist/challenge-name/`
-   - Generates docs and preview pages
+**What happens during build:**
+- Detects web challenges from `INDEX.md`
+- For each challenge with `package.json`:
+  - Auto-detects package manager (pnpm/yarn/npm)
+  - Installs dependencies (if needed)
+  - Runs `npm run build` (if build script exists)
+- Copies built files to `dist/challenge-name/`
+- Generates docs and preview pages
 
 ### GitHub Actions Deployment
 
