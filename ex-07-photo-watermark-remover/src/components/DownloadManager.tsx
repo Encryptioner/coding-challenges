@@ -90,23 +90,26 @@ export function DownloadManager() {
             onClick={() => setPreviewImage(image)}
             className="flex-1"
             variant="outline"
+            size="sm"
           >
-            <Eye className="w-4 h-4 mr-2" />
-            Preview
+            <Eye className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Preview</span>
           </Button>
           <Button
             onClick={() => downloadImage(image.id)}
             className="flex-1"
             variant="default"
+            size="sm"
           >
-            <Download className="w-4 h-4 mr-2" />
-            Download
+            <Download className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Download</span>
           </Button>
           <Button
             onClick={() => handleDelete(image.id)}
             variant="ghost"
             size="icon"
             className={deletingImageId === image.id ? 'bg-red-600 hover:bg-red-700' : 'hover:bg-destructive/10 hover:text-destructive'}
+            title={deletingImageId === image.id ? 'Click again to confirm delete' : 'Delete result'}
           >
             <Trash2 className="w-4 h-4" />
           </Button>
@@ -151,20 +154,21 @@ export function DownloadManager() {
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full sm:w-auto">
           {processedImages.length > 0 && (
             <Button
               onClick={() => setShowClearConfirmation(true)}
               variant="destructive"
               size="lg"
+              className="flex-1 sm:flex-initial"
             >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Clear All
+              <Trash2 className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Clear All</span>
             </Button>
           )}
-          <Button onClick={() => downloadAll()} size="lg">
-            <Package className="w-4 h-4 mr-2" />
-            Download All as ZIP
+          <Button onClick={() => downloadAll()} size="lg" className="flex-1 sm:flex-initial">
+            <Package className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Download All as ZIP</span>
           </Button>
         </div>
       </div>

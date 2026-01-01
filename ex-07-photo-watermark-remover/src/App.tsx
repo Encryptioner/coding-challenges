@@ -100,8 +100,19 @@ function App() {
           <p className="mb-2">
             Built with OpenCV.js • React • TypeScript
           </p>
-          <p className="text-xs">
+          <p className="text-xs mb-2">
             This tool is for personal use only. Please respect copyright and intellectual property rights.
+          </p>
+          <p className="text-xs">
+            Made by{' '}
+            <a
+              href="https://encryptioner.github.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground transition-colors underline-offset-2 hover:underline"
+            >
+              Ankur Mursalin
+            </a>
           </p>
         </footer>
       </div>

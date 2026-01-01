@@ -263,3 +263,5 @@ MIT License - See LICENSE file for details
 ---
 
 **Built with ❤️ using OpenCV.js, React, and TypeScript**
+
+Made by [Ankur Mursalin](https://encryptioner.github.io)

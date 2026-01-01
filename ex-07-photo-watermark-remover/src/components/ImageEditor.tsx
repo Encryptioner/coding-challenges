@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { X, Square, Circle, Undo, Check } from 'lucide-react';
+import { X, Square, Circle, Undo, Check, ChevronDown } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAppStore } from '@/store/useAppStore';
 import { Region } from '@/types';
@@ -30,6 +30,7 @@ export function ImageEditor() {
   const [tool, setTool] = useState<SelectionTool>('rect');
   const [regions, setRegions] = useState<Region[]>([]);
   const [moveActiveRegion, setMoveActiveRegion] = useState<number | null>(null);
+  const [showInstructions, setShowInstructions] = useState(false);
   const [selection, setSelection] = useState<SelectionState>({
     isDrawing: false,
     startX: 0,
@@ -56,16 +57,19 @@ export function ImageEditor() {
     // Only auto-select if no manual regions exist
     if (image.manualRegions.length === 0 && regions.length === 0) {
       // Create default selection for bottom-right corner (typical watermark location)
+      // This creates a small precise region that:
+      // - Touches the bottom edge of the image
+      // - Leaves space on the right for the delete button (red X)
       const defaultRegion: Region = {
-        x: image.dimensions.width * 0.75,
-        y: image.dimensions.height * 0.75,
-        width: image.dimensions.width * 0.2,
-        height: image.dimensions.height * 0.2,
-        type: 'manual-rect',
+        x: image.dimensions.width * 0.89,      // x-coordinate: Starts at 82% from left (leaves 18% to right edge)
+        y: image.dimensions.height * 0.92,     // y-coordinate: Starts at 92% from top (leaves 8% to bottom edge)
+        width: image.dimensions.width * 0.08,  // width: 8% of image width (ends at 90%, leaving 10% space for delete button)
+        height: image.dimensions.height * 0.08, // height: 8% of image height (ends at 100%, touching bottom edge)
+        type: 'manual-rect',                   // Rectangle shape (use 'manual-circle' for circular selection)
       };
 
       setRegions([defaultRegion]);
-      logger.info('Auto-selected bottom-right corner for watermark');
+      logger.info('Auto-selected bottom-right corner for watermark (82-90% horizontal, 92-100% vertical, touching bottom)');
     }
   }, [image]);
 
@@ -501,7 +505,10 @@ export function ImageEditor() {
           <div>
             <h2 className="text-xl font-bold">Select Watermark Region</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              {image.name} - Draw to select watermarked areas
+              {image.name}
+            </p>
+            <p className="text-xs text-blue-400 mt-0.5">
+              ✓ Small region pre-selected in bottom-right corner - adjust size/position as needed
             </p>
           </div>
           <Button variant="ghost" size="icon" onClick={handleCancel}>
@@ -578,15 +585,36 @@ export function ImageEditor() {
           </div>
         </div>
 
-        {/* Instructions */}
-        <div className="p-4 border-t border-border bg-secondary/30">
-          <p className="text-sm text-muted-foreground">
-            <strong>Instructions:</strong> Touch and drag to select watermarked regions.
-            Click the move button (←→) on the left of a region to activate move mode, then drag to reposition.
-            Click the red X button to delete a region.
-            Watermarks are typically found in the bottom-right corner.
-            Use circle tool for rounded watermarks, rectangle for text watermarks.
-          </p>
+        {/* Instructions - Collapsable */}
+        <div className="border-t border-border bg-secondary/30">
+          <button
+            onClick={() => setShowInstructions(!showInstructions)}
+            className="w-full p-4 flex items-center justify-between text-left hover:bg-secondary/50 transition-colors"
+          >
+            <span className="text-sm font-medium text-foreground">
+              📖 How to Select Regions
+            </span>
+            <ChevronDown
+              className={`w-4 h-4 transition-transform ${showInstructions ? 'rotate-180' : ''}`}
+            />
+          </button>
+
+          {showInstructions && (
+            <div className="px-4 pb-4 space-y-2 border-t border-border/50">
+              <p className="text-sm text-muted-foreground">
+                <strong className="text-foreground">Default Selection:</strong> A small region (8% of image) in the bottom-right corner is pre-selected. Resize, move, or replace it as needed.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <strong className="text-foreground">Draw:</strong> Drag on canvas to create new regions. <strong>Move:</strong> Click the circle with arrows (←→↑↓) on the left side of a region to activate move mode, then drag. <strong>Delete:</strong> Click the red square (X) on top-right of a region.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <strong className="text-foreground">Tools:</strong> Use <strong>Rectangle</strong> (⬜) for text watermarks, <strong>Circle</strong> (⭕) for logo watermarks.
+              </p>
+              <p className="text-sm text-yellow-500">
+                <strong>💡 Tip:</strong> Draw tight, precise regions around watermarks for best removal results!
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
