@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Download, Package, Image as ImageIcon, Eye, X, Trash2 } from 'lucide-react';
+import { Download, Package, Image as ImageIcon, Eye, X, Trash2, Share2 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { Button } from './ui/button';
 import { ProcessedImage } from '@/types';
@@ -28,6 +28,43 @@ export function DownloadManager() {
       setDeletingImageId(imageId);
       // Auto-hide confirmation after 3 seconds
       setTimeout(() => setDeletingImageId(null), 3000);
+    }
+  };
+
+  // Check if Web Share API is available
+  const canShare = () => {
+    return typeof navigator !== 'undefined' &&
+      navigator.share !== undefined &&
+      navigator.canShare !== undefined;
+  };
+
+  // Helper function to handle sharing
+  const handleShare = async (image: ProcessedImage) => {
+    if (!canShare() || !image.processedUrl) return;
+
+    try {
+      // Fetch the processed image blob
+      const response = await fetch(image.processedUrl);
+      const blob = await response.blob();
+
+      // Get file extension from original name or default to jpg
+      const fileExtension = image.name.split('.').pop() || 'jpg';
+      const fileName = `${image.name.replace(/\.[^/.]+$/, '')}-watermark-removed.${fileExtension}`;
+
+      // Create file from blob
+      const file = new File([blob], fileName, { type: blob.type });
+
+      // Check if we can share this file
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'Watermark Removed Image',
+          text: `Check out this image with watermark removed: ${image.name}`,
+        });
+      }
+    } catch (error) {
+      // User cancelled or error occurred - silently handle
+      console.log('Share cancelled or failed:', error);
     }
   };
 
@@ -104,6 +141,18 @@ export function DownloadManager() {
             <Download className="w-4 h-4 sm:mr-2" />
             <span className="hidden sm:inline">Download</span>
           </Button>
+          {canShare() && (
+            <Button
+              onClick={() => handleShare(image)}
+              className="flex-1"
+              variant="outline"
+              size="sm"
+              title="Share image"
+            >
+              <Share2 className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Share</span>
+            </Button>
+          )}
           <Button
             onClick={() => handleDelete(image.id)}
             variant="ghost"
@@ -305,8 +354,19 @@ export function DownloadManager() {
               className="bg-green-600 hover:bg-green-700"
             >
               <Download className="w-4 h-4 mr-2" />
-              Download This Image
+              Download Image
             </Button>
+            {canShare() && (
+              <Button
+                onClick={() => {
+                  handleShare(previewImage);
+                }}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <Share2 className="w-4 h-4 mr-2" />
+                Share Image
+              </Button>
+            )}
           </div>
         </div>
       )}
