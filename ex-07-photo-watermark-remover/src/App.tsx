@@ -35,7 +35,7 @@ function App() {
         {/* Header */}
         <header className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            Gemini Photo Watermark Remover
+            Photo Watermark Remover
           </h1>
           <p className="text-muted-foreground text-sm md:text-base">
             100% Free • Client-Side • Privacy-Friendly • Offline Support
@@ -100,8 +100,19 @@ function App() {
           <p className="mb-2">
             Built with OpenCV.js • React • TypeScript
           </p>
-          <p className="text-xs">
+          <p className="text-xs mb-2">
             This tool is for personal use only. Please respect copyright and intellectual property rights.
+          </p>
+          <p className="text-xs">
+            Made by{' '}
+            <a
+              href="https://encryptioner.github.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground transition-colors underline-offset-2 hover:underline"
+            >
+              Ankur Mursalin
+            </a>
           </p>
         </footer>
       </div>

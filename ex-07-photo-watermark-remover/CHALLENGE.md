@@ -1,4 +1,4 @@
-# Challenge: Gemini Photo Watermark Remover
+# Challenge: Photo Watermark Remover
 
 ## Overview
 

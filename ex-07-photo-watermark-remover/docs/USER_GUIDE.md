@@ -1,6 +1,6 @@
-# User Guide: Gemini Photo Watermark Remover
+# User Guide: Photo Watermark Remover
 
-Complete guide for using the Gemini Photo Watermark Remover application.
+Complete guide for using the Photo Watermark Remover application.
 
 ## Table of Contents
 
@@ -411,9 +411,6 @@ A: They stay in your browser until you close the tab. Nothing is saved permanent
 
 **Q: Is this legal to use?**
 A: Yes, but only use it on content you own or have permission to modify.
-
-**Q: Why is it called "Gemini" Photo Watermark Remover?**
-A: The name refers to the project inspiration, though the implementation uses OpenCV, not Google's Gemini AI.
 
 ---
 

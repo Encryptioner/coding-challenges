@@ -56,7 +56,14 @@ export function ImageUploader() {
             </p>
           </div>
 
-          <Button variant="outline" size="lg" onClick={(e) => e.stopPropagation()}>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={(e) => {
+              e.stopPropagation();
+              document.getElementById('file-input')?.click();
+            }}
+          >
             <ImageIcon className="w-4 h-4 mr-2" />
             Select Images
           </Button>

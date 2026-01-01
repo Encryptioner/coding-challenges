@@ -14,7 +14,7 @@ Currently, the following challenges require building:
 |-----------|------------|---------------|
 | ex-04-mobile-ide-app | Theia/TypeScript | `pnpm run build:ex-04` |
 | ex-05-browser-ide-v1 | React/Vite | `pnpm run build:ex-05` |
-| ex-07-gemini-photo-watermark-remover | TypeScript/React/Vite | `pnpm run build:ex-07` |
+| ex-07-photo-watermark-remover | TypeScript/React/Vite | `pnpm run build:ex-07` |
 
 ## Available Commands
 
@@ -157,7 +157,7 @@ coverage/
 
 **Reference templates:**
 - `ex-05-browser-ide-v1/.gitignore` - Vite/React projects
-- `ex-07-gemini-photo-watermark-remover/.gitignore` - TypeScript/Vite
+- `ex-07-photo-watermark-remover/.gitignore` - TypeScript/Vite
 - `ex-04-mobile-ide-app/.gitignore` - Theia projects
 
 ### 3. Update Main package.json

@@ -81,7 +81,7 @@ This index provides a comprehensive list of all completed challenges in the repo
 | ✓ | [04 - Mobile IDE App](./ex-04-mobile-ide-app) | Full-featured mobile IDE with VSCode extension compatibility | TypeScript/React/Capacitor |
 | ✓ | [05 - Browser IDE v1](./ex-05-browser-ide-v1) | VS Code-like IDE that runs entirely in browser with AI assistant | TypeScript/React/Monaco |
 | ✓ | [06 - Browser IDE v2](./ex-06-browser-ide-v2) | Advanced browser IDE (moved to standalone repo) | TypeScript/React |
-| ✓ | [07 - Gemini Photo Watermark Remover](./ex-07-gemini-photo-watermark-remover) | Browser-based PWA for removing watermarks using OpenCV.js | TypeScript/React/OpenCV |
+| ✓ | [07 - Photo Watermark Remover](./ex-07-photo-watermark-remover) | Browser-based PWA for removing watermarks using OpenCV.js | TypeScript/React/OpenCV |
 
 ---
 
@@ -106,7 +106,7 @@ These challenges have live demos available on GitHub Pages:
 4. [80 - Optical Character Recognition](./80-optical-character-recognition) - OCR implementation
 5. [82 - Markdown to PDF](./82-markdown-to-pdf) - Document conversion
 6. [05 - Browser IDE v1](./ex-05-browser-ide-v1) - VS Code-like IDE in browser
-7. [07 - Gemini Photo Watermark Remover](./ex-07-gemini-photo-watermark-remover) - PWA for watermark removal using OpenCV.js
+7. [07 - Photo Watermark Remover](./ex-07-photo-watermark-remover) - PWA for watermark removal using OpenCV.js
 
 ---
 

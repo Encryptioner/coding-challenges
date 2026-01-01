@@ -40,7 +40,7 @@ pnpm site:preview
 | `pnpm build` | Build all challenges (ex-04, ex-05, ex-07) |
 | `pnpm build:ex-04` | Build Mobile IDE App |
 | `pnpm build:ex-05` | Build Browser IDE v1 |
-| `pnpm build:ex-07` | Build Gemini Photo Watermark Remover |
+| `pnpm build:ex-07` | Build Photo Watermark Remover |
 
 ### Clean Commands
 
