@@ -101,6 +101,7 @@ These challenges have live demos available on GitHub Pages:
 3. [77 - Static Site Generator](./77-static-site-generator) - Static site generation
 4. [80 - Optical Character Recognition](./80-optical-character-recognition) - OCR implementation
 5. [82 - Markdown to PDF](./82-markdown-to-pdf) - Document conversion
+6. [07 - Gemini Photo Watermark Remover](./ex-07-gemini-photo-watermark-remover) - PWA for watermark removal using OpenCV.js
 
 ---
 

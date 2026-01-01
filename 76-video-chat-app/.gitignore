@@ -13,6 +13,7 @@ build/
 .vite/
 .turbo/
 .cache/
+.parcel-cache/
 
 # Environment variables
 .env

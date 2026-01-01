@@ -138,6 +138,11 @@ def has_web_interface(folder, web_challenges):
     """Check if challenge has a web interface"""
     return folder in web_challenges
 
+def has_live_app(folder):
+    """Check if challenge has a live app (index.html)"""
+    import os
+    return os.path.exists(os.path.join(folder, 'index.html'))
+
 def generate_index_html(challenges, extra_challenges, web_challenges):
     """Generate the main index.html"""
 
@@ -246,21 +251,38 @@ def generate_index_html(challenges, extra_challenges, web_challenges):
             completed_badge = '✓ Completed' if challenge['completed'] else 'In Progress'
             completed_class = 'completed' if challenge['completed'] else 'in-progress'
             has_web = has_web_interface(challenge['folder'], web_challenges)
+            has_app = has_live_app(challenge['folder']) if has_web else False
             web_badge = '<span class="badge badge-web">Web App</span>' if has_web else ''
 
             github_url = f"https://github.com/Encryptioner/coding-challenges/tree/master/{challenge['folder']}"
-            demo_url = f"./{challenge['folder']}/" if has_web else None
 
-            demo_button = f'''
-                    <a href="{demo_url}" class="card-btn card-btn-primary">
+            # Build web buttons based on what's available
+            web_buttons = ''
+            if has_web:
+                docs_url = f"./{challenge['folder']}/docs.html"
+                docs_button = f'''
+                    <a href="{docs_url}" class="card-btn">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                            <polyline points="15 3 21 3 21 9"></polyline>
-                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
                         </svg>
-                        Live Demo
-                    </a>
-''' if demo_url else ''
+                        Docs
+                    </a>'''
+
+                preview_button = ''
+                if has_app:
+                    preview_url = f"./{challenge['folder']}/preview.html"
+                    preview_button = f'''
+                    <a href="{preview_url}" class="card-btn card-btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                        Preview
+                    </a>'''
+
+                web_buttons = docs_button + preview_button
 
             html += f'''
                 <div class="challenge-card {completed_class}" data-tags="{'completed' if challenge['completed'] else 'in-progress'} {'web' if has_web else ''}">
@@ -278,7 +300,7 @@ def generate_index_html(challenges, extra_challenges, web_challenges):
                             </svg>
                             View Code
                         </a>
-                        {demo_button}
+                        {web_buttons}
                     </div>
                 </div>
 '''

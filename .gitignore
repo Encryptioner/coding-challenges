@@ -33,10 +33,37 @@ Thumbs.db
 test-output/
 *.log
 
-# Dist directory
+# Build directories
 dist/
+build/
+out/
+
+# Dependency directories
+node_modules/
+
 # Python virtual environment
 venv/
+__pycache__/
+*.pyc
+
+# Build caches
+.cache/
+.parcel-cache/
+.vite/
+.next/
+.nuxt/
+.turbo/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Package manager files
+# This repository uses pnpm - only pnpm-lock.yaml should be tracked
+package-lock.json
+yarn.lock
+# pnpm-lock.yaml - DO NOT ignore (required for reproducible builds)
 
 # Claude IDE
 .claude/*
