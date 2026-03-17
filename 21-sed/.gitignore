@@ -1,2 +1,16 @@
-*
-!.gitignore
+# Binaries
+/sed
+
+# Object files
+*.o
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+/browser-ide/

@@ -1,2 +1,20 @@
-*
-!.gitignore
+# Binaries
+/webserver
+/ircclient
+/sed
+
+# Object files
+*.o
+
+# Go specific
+*.sum
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -5,20 +5,20 @@ This index provides a comprehensive list of all completed challenges in the repo
 ## Statistics
 
 ### Progress on CodingChallenges.fyi
-- **Completed:** 24 out of 94
-- **Progress:** 25.5%
+- **Completed:** 27 out of 94
+- **Progress:** 28.7%
 
 ### Progress on Extra Challenges
 - **Completed:** 6 out of 7
 - **Progress:** 85.7%
 
 ### Custom Challenges
-- **Documented:** 3 additional challenges (Docker, Browser, Ethereum)
-- **Status:** Documentation phase, ready for implementation
+- **Completed:** 3 additional challenges (Docker, Browser, Ethereum)
+- **Status:** Documentation complete, implementations added
 
 ### Total Progress
-- **Overall Completed:** 30 official challenges
-- **Total with Custom:** 33 challenges (including 3 custom)
+- **Overall Completed:** 33 official challenges
+- **Total with Custom:** 36 challenges (including 3 custom)
 - **Repository Status:** Active development
 
 ---
@@ -37,12 +37,15 @@ This index provides a comprehensive list of all completed challenges in the repo
 | ✓ | [07 - Calculator](./07-calculator) | Command-line calculator | C |
 | ✓ | [08 - Redis Server](./08-redis-server) | In-memory data structure store | C |
 | ✓ | [09 - grep](./09-grep) | Pattern matching tool | C |
+| ✓ | [11 - Web Server](./11-web-server) | HTTP server with TCP sockets, static file serving, and routing | Go |
 | ✓ | [14 - Shell](./14-shell) | Command-line shell | C |
+| ✓ | [21 - sed](./21-sed) | Stream editor for text parsing and transformation | C |
 
 ### Network & Communication
 
 | # | Challenge | Description | Language/Tech |
 |---|-----------|-------------|---------------|
+| ✓ | [16 - IRC Client](./16-irc-client) | Real-time IRC chat client with terminal UI | Go |
 | ✓ | [17 - Memcached Server](./17-memcached-server) | Distributed memory caching | Go |
 | ✓ | [19 - Discord Bot](./19-discord-bot) | Automated Discord bot | JavaScript/Node.js |
 | ✓ | [22 - DNS Resolver](./22-dns-resolver) | Domain name resolution | Go |
@@ -51,6 +54,7 @@ This index provides a comprehensive list of all completed challenges in the repo
 
 | # | Challenge | Description | Language/Tech |
 |---|-----------|-------------|---------------|
+| ✓ | [11 - Web Server](./11-web-server) | HTTP server with TCP sockets, static file serving, and routing | Go |
 | ✓ | [26 - Git](./26-git) | Version control system | C |
 | ✓ | [43 - Tetris](./43-tetris) | Block-stacking game | JavaScript |
 | ✓ | [47 - Chrome Extension](./47-chrome-extension) | Browser extension | JavaScript/HTML/CSS |
