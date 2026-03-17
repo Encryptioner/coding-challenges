@@ -2,287 +2,132 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Quick Reference
+
+| Topic | docs/Agent/ Documentation |
+|-------|---------------------------|
+| **Project Details** | [PROJECT_DETAILS.md](./docs/Agent/PROJECT_DETAILS.md) - Monorepo structure, tech stack, deployment system |
+| **Coding Standards** | [CODING_STANDARDS.md](./docs/Agent/CODING_STANDARDS.md) - Language patterns, testing, git standards |
+| **Agent Boundaries** | [AGENT_BOUNDARIES.md](./docs/Agent/AGENT_BOUNDARIES.md) - Action tiers, what requires approval |
+| **Architecture Decisions** | [ARCHITECTURE_DECISIONS.md](./docs/Agent/ARCHITECTURE_DECISIONS.md) - 10 key ADRs |
+
+---
+
 ## Repository Overview
 
-This is a monorepo containing implementations for 94 coding challenges from [CodingChallenges.fyi](https://codingchallenges.fyi/challenges/intro), plus additional experimental challenges. Each challenge lives in its own numbered directory (e.g., `01-wc-tool`, `14-shell`) or prefixed with `ex-` for experimental challenges. Challenges may use different programming languages and technologies based on what's most appropriate for the task.
+This is a monorepo containing 94+ coding challenges from [CodingChallenges.fyi](https://codingchallenges.fyi/challenges/intro), plus experimental challenges. Each challenge is an independent project in its own directory (`NN-challenge-name/` or `ex-NN-challenge-name/`).
 
-## Repository Structure
+**Key Characteristics:**
+- **Challenge Independence** (ADR-001): Each challenge owns its build system, dependencies, and tech stack
+- **Documentation-First** (ADR-002): Tutorial-style docs, 600-900+ lines per file
+- **Domain-Driven Language** (ADR-003): C/Rust for systems, Go for network, JS/TS for web
+- **GitHub Pages Deployment** (ADR-004): Web challenges get auto-deployed interactive demos
 
-- **CodingChallenges.fyi challenges:** Numbered folders `NN-challenge-name/` (e.g., `14-shell/`, `01-wc-tool/`)
-- **Extra challenges:** Folders prefixed with `ex-NN-challenge-name/` (e.g., `ex-01-div-copy-extension/`)
-- Each challenge is an independent project with its own build system, dependencies, and documentation
-- Web-based challenges can be deployed to GitHub Pages for live demos
-- See [INDEX.md](./INDEX.md) for a comprehensive list of completed challenges
-
-## GitHub Pages Deployment
-
-This repository includes an automated GitHub Pages deployment system that creates an interactive website showcasing all challenges.
-
-### Deployment System Overview
-
-**Location:** `.github/pages/`, `.github/scripts/`, `.github/workflow-templates/`
-
-**Features:**
-- Main index page with filterable challenge grid
-- Interactive split-pane documentation viewers for web challenges
-- Automatic markdown-to-HTML conversion
-- Live demos embedded in iframes
-- Mobile-responsive design
-
-**Scripts:**
-- `DOCS/deployment/deploy-github-pages.sh` - Local deployment verification and testing
-- `DOCS/deployment/enable-auto-deploy.sh` - Guide for activating auto-deployment
-- `.github/scripts/build-site.sh` - Main build orchestrator
-- `.github/scripts/generate-index.py` - Creates main index from README.md
-- `.github/scripts/generate-interactive-viewer.py` - Builds split-pane viewers
-- `.github/scripts/generate-docs-pages.py` - Converts markdown documentation
-
-**Testing Deployment Locally:**
-```bash
-# Verify deployment is ready
-./DOCS/deployment/deploy-github-pages.sh
-
-# Build site manually
-.github/scripts/build-site.sh
-
-# Preview locally
-cd dist && python3 -m http.server 8000
-```
-
-**Deployment Documentation:**
-- `DOCS/deployment/SETUP.md` - First-time setup and activation
-- `DOCS/deployment/WORKFLOW.md` - Quick workflow reference
-- `DOCS/deployment/DEPLOYMENT.md` - Complete deployment guide
-
-### Web-Based Challenges
-
-Web-based challenges (those with browser implementations) get special treatment in deployment:
-
-**Structure for Web Challenges:**
-```
-NN-challenge-name/
-├── index.html              # Main app (required for live demo)
-├── README.md               # Overview documentation
-├── CHALLENGE.md            # Challenge requirements
-├── docs/                   # Tutorial documentation
-│   ├── implementation.md
-│   ├── examples.md
-│   └── algorithms.md
-└── static/                 # Assets (CSS, JS, images)
-    ├── css/
-    ├── js/
-    └── images/
-```
-
-**Adding a Web Challenge to Deployment:**
-
-1. Implement the challenge with an `index.html` file OR a build script that outputs to `dist/` or `build/`
-2. If using a build tool (Vite, React, etc.), add build scripts to main `package.json` (see Build Process section)
-3. Add to `INDEX.md` file's `Web-Deployable Challenges` section after completion
-4. Ensure documentation files exist (README.md, CHALLENGE.md, docs/)
-5. Test locally: `pnpm deploy:local` or `./DOCS/deployment/deploy-github-pages.sh`
-
-**Deployed URL Structure:**
-```
-https://[username].github.io/coding-challenges/
-├── /                            # Main index (all challenges)
-├── /NN-challenge-name/          # Interactive viewer
-│   ├── index.html               # Viewer entry point
-│   ├── app.html                 # Live implementation
-│   ├── README.html              # Overview docs
-│   └── docs/*.html              # Tutorial docs
-```
-
-**Current Web Challenges:**
-See [INDEX.md](./INDEX.md) for the complete list of web-deployable challenges.
-
-### Deployment Documentation
-
-**Key Files:**
-- `DOCS/deployment/SETUP.md` - First-time setup and activation
-- `DOCS/deployment/WORKFLOW.md` - Daily workflow reference
-- `DOCS/deployment/DEPLOYMENT.md` - Complete deployment guide
-- `.github/README.md` - GitHub configuration overview
-
-**When Working on Challenges:**
-- For web challenges: Consider adding to GitHub Pages deployment
-- For CLI tools: Focus on comprehensive README and docs/
-- All challenges: Create CHALLENGE.md, README.md, and docs/ directory
-- Test locally before pushing if adding to deployment
+See [INDEX.md](./INDEX.md) for all completed challenges.
 
 ## Working with Challenges
 
 ### Starting a New Challenge
 
-When implementing a new challenge:
-1. Navigate to or create the appropriate numbered folder (e.g., `01-wc-tool/`) or experimental folder (`ex-NN-challenge-name/`)
-2. For CodingChallenges.fyi challenges: Fetch details from `https://codingchallenges.fyi/challenges/challenge-name/`
-3. Create the required documentation structure:
-   - `CHALLENGE.md` - Challenge requirements and specifications (uppercase)
-   - `README.md` - Implementation documentation
-   - `docs/` directory with tutorial-style documentation
-4. Implement the solution in the appropriate language/technology
+1. Create/rename numbered folder: `NN-challenge-name/` or `ex-NN-challenge-name/`
+2. Fetch requirements from `https://codingchallenges.fyi/challenges/challenge-name/`
+3. Create documentation structure:
+   - `CHALLENGE.md` - Requirements and specifications
+   - `README.md` - Implementation overview and usage
+   - `docs/` - Tutorial documentation (implementation.md, examples.md, algorithms.md)
+4. Implement with appropriate language/technology
 5. Create build system (Makefile, package.json, etc.)
-6. Create comprehensive test suite
-7. Update `INDEX.md` & add the challenge to INDEX.md with summary details
+6. Create test suite
+7. Update INDEX.md and main README.md
 
 ### Build Process for Web Challenges
 
-**IMPORTANT:** For challenges that require a build step (TypeScript, React, Vite, Webpack, etc.):
+**IMPORTANT:** Only add build scripts for challenges that REQUIRE compilation (TypeScript, React, Vite, Webpack, etc.). Plain Node.js apps running with `node server.js` do NOT need build scripts.
 
-1. **Add to Main package.json:**
-   - Add individual build script: `"build:challenge-name": "cd challenge-name && pnpm install && pnpm run build"`
-   - Add to `build:all` script chain
-   - Add corresponding clean script: `"clean:challenge-name": "rm -rf challenge-name/dist challenge-name/build challenge-name/node_modules"`
-   - Add to `clean:all` script chain
-
-2. **Example:**
+1. Add to root `package.json`:
    ```json
-   "install:all": "... && pnpm run install:new-challenge",
-   "install:new-challenge": "cd new-challenge && pnpm install",
-   "build:all": "pnpm run build:ex-04 && pnpm run build:ex-05 && pnpm run build:new-challenge",
-   "build:new-challenge": "cd new-challenge && pnpm install && pnpm run build",
-   "clean:all": "... && pnpm run clean:new-challenge",
-   "clean:new-challenge": "rm -rf new-challenge/dist new-challenge/build new-challenge/node_modules"
+   "build:challenge-name": "cd challenge-name && pnpm install && pnpm run build",
+   "clean:challenge-name": "rm -rf challenge-name/dist challenge-name/node_modules"
    ```
+2. Update `build:all` and `clean:all` script chains
+3. Create `.gitignore`: `dist/`, `build/`, `node_modules/`
+4. Test: `pnpm build:challenge && pnpm deploy:local`
 
-3. **Build Output:**
-   - Ensure build outputs to `dist/` or `build/` directory
-   - The deployment script automatically detects and copies built files
+**Never commit build artifacts.** Generated files belong in `.gitignore`, not git.
 
-4. **Create .gitignore:**
-   - ALWAYS create a `.gitignore` file for buildable challenges
-   - Ignore build output directories: `dist/`, `build/`, `lib/`, `src-gen/`
-   - Ignore `node_modules/`, coverage, logs, environment files
-   - See existing challenges (ex-05, ex-07) for reference templates
+### GitHub Pages Deployment
 
-5. **Testing:**
-   ```bash
-   pnpm install:all        # Install deps for all challenges
-   pnpm build              # Build all challenges
-   pnpm build:challenge    # Build specific challenge
-   pnpm deploy:local       # Test deployment locally
-   ```
+Web challenges get automatic deployment with interactive documentation viewers. See [PROJECT_DETAILS.md](./docs/Agent/PROJECT_DETAILS.md) for:
+- Deployment system architecture
+- Local testing (`pnpm deploy:local`)
+- Build script requirements
+- URL structure
 
-**IMPORTANT:** Only add challenges with actual build requirements. Backend Node.js apps that run with `node server.js` do NOT need build scripts.
+## Documentation Requirements
 
-**Never commit build artifacts:** Generated files (`dist/`, `lib/`, `src-gen/`, etc.) should be in `.gitignore`, not in git.
+Every challenge MUST include:
+- **CHALLENGE.md** - Requirements, features, test cases, implementation guide
+- **README.md** - Overview, features, build/install, usage, testing
+- **docs/** directory - Tutorial-style docs (600-900+ lines each):
+  - `implementation.md` - Design decisions, code walkthrough
+  - `examples.md` - Practical examples and scenarios
+  - `algorithms.md` or `internals.md` - Deep dive into algorithms/architecture
 
-### Challenge Independence
+See [CODING_STANDARDS.md](./docs/Agent/CODING_STANDARDS.md) for documentation style guidelines.
 
-Each challenge is self-contained:
-- Has its own build system (Makefile, package.json, Cargo.toml, etc.)
-- Manages its own dependencies
-- Contains its own documentation
-- May use a different tech stack than other challenges
+## Language Selection
 
-### Language and Technology Choice
+Choose language based on challenge domain (ADR-003):
+- **System tools** (wc, shell, grep): C, Rust, Go
+- **Network services** (DNS, web servers): Go, Rust
+- **Web applications**: JavaScript, TypeScript, React
+- **Data processing**: Python, JavaScript
+- **Learning objectives**: Personal growth goals
 
-Challenges can be implemented in any appropriate language. Consider:
-- The nature of the challenge (systems programming → C/Rust, web → JS/Go, etc.)
-- Learning objectives
-- Platform compatibility requirements
+See [CODING_STANDARDS.md](./docs/Agent/CODING_STANDARDS.md) for language-specific patterns.
 
-### Instructions
+## Agent Boundaries
 
-Challenges should be implemented as tutorial style. Consider:
-- Be concise. Implement like a top class software engineer and teacher
-- Adding necessary doc. However, it must not be overwhelming and unnecessary long
+Before taking actions, check [AGENT_BOUNDARIES.md](./docs/Agent/AGENT_BOUNDARIES.md):
 
-## Documentation Standards
+**Tier 1 - Autonomous** (Just do it):
+- Read files, write code, run tests
+- Create/update documentation
+- Run build scripts, local deployment testing
+- Create commits
 
-Each challenge MUST include the following documentation:
+**Tier 2 - Ask Approval** (Get consent first):
+- Delete files or directories
+- Modify CLAUDE.md or docs/Agent/ files
+- Push commits, create PRs
+- Deploy to production
 
-### Required Files
-
-1. **CHALLENGE.md** - Challenge specification and requirements
-   - Original challenge description and goals
-   - Features to implement
-   - Test cases and acceptance criteria
-   - Step-by-step implementation guide
-   - Links to related resources
-
-2. **README.md** - Implementation documentation
-   - Overview of the implementation
-   - Feature list with checkmarks
-   - Build/installation instructions
-   - Usage examples with code blocks
-   - Command-line options and flags
-   - Platform-specific notes (if applicable)
-   - Testing instructions
-   - Project structure explanation
-
-3. **docs/** - Tutorial-style documentation directory
-   - Each challenge should have comprehensive tutorial documentation
-   - Typical docs include:
-     - `implementation.md` - Design decisions and code walkthrough
-     - `examples.md` - Practical usage examples and scenarios
-     - `algorithms.md` or `internals.md` - Deep dive into algorithms/architecture
-   - Documentation should be educational and approachable
-   - Include code examples, diagrams (ASCII art), and step-by-step explanations
-   - Aim for 600-900+ lines per doc file for thorough coverage
-
-### Documentation Style
-
-- Write in tutorial style: explain concepts, not just facts
-- Use clear headings and table of contents
-- Include practical examples with expected output
-- Add code snippets with syntax highlighting (markdown)
-- Use tables for comparing options/features
-- Include troubleshooting sections where relevant
-- Cross-reference between documents
-
-### Example Structure
-
-```
-NN-challenge-name/
-├── CHALLENGE.md           # Challenge requirements (required)
-├── README.md              # Implementation overview (required)
-├── main.c / main.py       # Main implementation
-├── Makefile / build files # Build system
-├── test.sh                # Test suite
-└── docs/                  # Tutorial documentation (required)
-    ├── implementation.md  # Design and code walkthrough
-    ├── examples.md        # Practical examples
-    └── algorithms.md      # Deep dive into algorithms
-```
-
-### Reference Implementations
-
-See [INDEX.md](./INDEX.md) for best documented challenges and reference implementations.
+**Tier 3 - Prohibited** (Never do):
+- `git push --force`, `git reset --hard`
+- Delete `.git` directory
+- Commit build artifacts (dist/, build/, node_modules/)
 
 ## Testing
 
-Challenges should include tests where appropriate. The 14-shell project uses a `test.sh` script that can be run via `make test`.
-
-## Distribution and Packaging
-
-For distributable tools, follow the 14-shell pattern:
-- Use `build-and-package.sh` script to create distribution packages
-- Include installation/uninstallation scripts
-- Generate tar.gz archives with checksums
-- Package all necessary documentation
+- Include tests where appropriate
+- Follow language-specific testing patterns in [CODING_STANDARDS.md](./docs/Agent/CODING_STANDARDS.md)
+- CLI tools: manual testing scripts (test.sh with Makefile)
+- Web challenges: Playwright E2E tests encouraged
 
 ## Progress Tracking
 
 When completing a challenge:
-1. **Update `INDEX.md`:**
-   - Add the challenge to the appropriate category table
-   - Include challenge number, name, description, and tech stack
-   - Update statistics (Completed count, Progress percentage)
-   - If it's a web challenge, add to "Web-Deployable Challenges" section
+1. **INDEX.md**: Add to appropriate category table, update statistics
+2. **README.md**: Add to numbered list, update stats
+3. **Build scripts** (if needed): Update root package.json
+4. **Verify**: CHALLENGE.md, README.md, docs/ exist; web challenges have index.html or dist/
 
-2. **Update `README.md`:**
-   - Add to the numbered list in the appropriate section
-   - For extra challenges, add to "Extra Challenges" section
-   - Update statistics at the top (match with INDEX.md)
+## Key ADRs
 
-3. **Add Build Scripts (if needed):**
-   - If challenge requires build (TypeScript, React, Vite, etc.), update main `package.json`
-   - Add `build:challenge-name` and `clean:challenge-name` scripts
-   - Update `build:all` and `clean:all` chains
-   - See "Build Process for Web Challenges" section above
+- **ADR-001**: Challenge Independence - Each challenge is self-contained
+- **ADR-002**: Documentation-First - Tutorial-style, comprehensive docs
+- **ADR-003**: Language Selection by Domain - Match language to problem domain
+- **ADR-004**: GitHub Pages for Web Challenges - Auto-deployment with interactive viewers
+- **ADR-008**: Build Artifact Exclusion - Never commit generated files
 
-4. **Ensure Documentation:**
-   - Challenge folder has CHALLENGE.md, README.md, and docs/
-   - For web challenges, ensure index.html or dist/ output exists
+See [ARCHITECTURE_DECISIONS.md](./docs/Agent/ARCHITECTURE_DECISIONS.md) for all 10 ADRs.
