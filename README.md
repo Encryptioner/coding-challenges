@@ -7,9 +7,9 @@ In addition to the coding challenges from **CodingChallenges.fyi**, there are so
 ## Statistics
 
 ### Progress on **CodingChallenges.fyi**
-- Completed: 24
+- Completed: 27
 - Total: 94
-- Progress: 25.5%
+- Progress: 28.7%
 
 ### Progress on **Extra Challenges**
 - Completed: 6
