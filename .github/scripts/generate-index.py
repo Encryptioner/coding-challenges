@@ -214,6 +214,14 @@ def generate_index_html(challenges, extra_challenges, web_challenges):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G8ZWMTEDM1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){{dataLayer.push(arguments);}}
+      gtag('js', new Date());
+      gtag('config', 'G-G8ZWMTEDM1');
+    </script>
     <title>Coding Challenges - {completed_count + extra_completed_count} Implementations</title>
     <meta name="description" content="A comprehensive collection of coding challenges from CodingChallenges.fyi and experimental projects - building practical tools and applications from scratch.">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
