@@ -242,6 +242,7 @@ def generate_viewer_html(challenge_dir, challenge_name):
     <!-- Mobile Sidebar Overlay -->
     <div class="sidebar-overlay"></div>
 
+    <script src="../assets/analytics.js"></script>
     <script src="../assets/docs-viewer.js"></script>
 </body>
 </html>
@@ -414,6 +415,7 @@ def generate_docs_only_html(challenge_dir, challenge_name):
         </div>
     </div>
 
+    <script src="../assets/analytics.js"></script>
     <script>
         // Load first documentation file
         fetch('{docs_files[0]['file'].replace('.md', '.html')}')
@@ -426,6 +428,16 @@ def generate_docs_only_html(challenge_dir, challenge_name):
                 const content = document.querySelector('.docs-content');
                 content.innerHTML = '<div class="docs-loading"><p>Error loading documentation.</p></div>';
                 console.error('Error loading docs:', error);
+                if (window.Analytics) {{
+                    window.Analytics.trackEvent({{
+                        name: 'error_occurred',
+                        params: {{
+                            category: 'docs_fetch',
+                            action: 'load_doc',
+                            error: window.Analytics.sanitizeError(error instanceof Error ? error.message : String(error)),
+                        }},
+                    }});
+                }}
             }});
     </script>
 </body>

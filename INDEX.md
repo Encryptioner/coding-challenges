@@ -5,15 +5,20 @@ This index provides a comprehensive list of all completed challenges in the repo
 ## Statistics
 
 ### Progress on CodingChallenges.fyi
-- **Completed:** 24 out of 94
-- **Progress:** 25.5%
+- **Completed:** 27 out of 94
+- **Progress:** 28.7%
 
 ### Progress on Extra Challenges
 - **Completed:** 6 out of 7
 - **Progress:** 85.7%
 
+### Custom Challenges
+- **Completed:** 3 additional challenges (Docker, Browser, Ethereum)
+- **Status:** Documentation complete, implementations added
+
 ### Total Progress
-- **Overall Completed:** 30 challenges
+- **Overall Completed:** 33 official challenges
+- **Total with Custom:** 36 challenges (including 3 custom)
 - **Repository Status:** Active development
 
 ---
@@ -32,12 +37,15 @@ This index provides a comprehensive list of all completed challenges in the repo
 | ✓ | [07 - Calculator](./07-calculator) | Command-line calculator | C |
 | ✓ | [08 - Redis Server](./08-redis-server) | In-memory data structure store | C |
 | ✓ | [09 - grep](./09-grep) | Pattern matching tool | C |
+| ✓ | [11 - Web Server](./11-web-server) | HTTP server with TCP sockets, static file serving, and routing | Go |
 | ✓ | [14 - Shell](./14-shell) | Command-line shell | C |
+| ✓ | [21 - sed](./21-sed) | Stream editor for text parsing and transformation | C |
 
 ### Network & Communication
 
 | # | Challenge | Description | Language/Tech |
 |---|-----------|-------------|---------------|
+| ✓ | [16 - IRC Client](./16-irc-client) | Real-time IRC chat client with terminal UI | Go |
 | ✓ | [17 - Memcached Server](./17-memcached-server) | Distributed memory caching | Go |
 | ✓ | [19 - Discord Bot](./19-discord-bot) | Automated Discord bot | JavaScript/Node.js |
 | ✓ | [22 - DNS Resolver](./22-dns-resolver) | Domain name resolution | Go |
@@ -46,6 +54,7 @@ This index provides a comprehensive list of all completed challenges in the repo
 
 | # | Challenge | Description | Language/Tech |
 |---|-----------|-------------|---------------|
+| ✓ | [11 - Web Server](./11-web-server) | HTTP server with TCP sockets, static file serving, and routing | Go |
 | ✓ | [26 - Git](./26-git) | Version control system | C |
 | ✓ | [43 - Tetris](./43-tetris) | Block-stacking game | JavaScript |
 | ✓ | [47 - Chrome Extension](./47-chrome-extension) | Browser extension | JavaScript/HTML/CSS |
@@ -71,6 +80,20 @@ This index provides a comprehensive list of all completed challenges in the repo
 
 ---
 
+## Custom Challenge Implementations
+
+These are additional challenges beyond the official CodingChallenges.fyi list, created for deeper learning and exploration of advanced topics.
+
+| Challenge | Description | Language/Tech | Status |
+|-----------|-------------|---------------|--------|
+| [23 - Docker](./23-docker) | Container runtime with namespaces, cgroups, chroot, and Docker Hub integration | Go | Documentation |
+| [25 - Browser](./25-browser) | Web browser with HTML parsing, CSS rendering, JavaScript engine, and DOM manipulation | TypeScript/JavaScript | Documentation |
+| [31 - Ethereum](./31-ethereum) | Blockchain with blocks, transactions, mining, consensus, smart contracts, and EVM | Go | Documentation |
+
+**Note**: The numbering (23, 25, 31) references the corresponding challenge concepts from other sources, not the official CodingChallenges.fyi numbering for those positions.
+
+---
+
 ## Extra Challenges
 
 | Challenge | Description | Language/Tech |
@@ -92,6 +115,7 @@ This index provides a comprehensive list of all completed challenges in the repo
 - **Go:** 5 challenges (load balancer, Memcached, DNS resolver, SMTP server, rate limiter)
 - **JavaScript/Node.js:** 11 challenges (Discord bot, Tetris, Chrome extension, Notion, video chat, static site generator, OCR, Markdown to PDF, Markdown presentation, and extra challenges)
 - **Python:** 1 challenge (spell checker)
+- **Custom:** 3 additional challenges (Docker, Browser, Ethereum in Go/TypeScript)
 
 ### By Difficulty Level
 - **Beginner:** System tools (wc, cut, grep)
@@ -107,6 +131,7 @@ These challenges have live demos available on GitHub Pages:
 5. [82 - Markdown to PDF](./82-markdown-to-pdf) - Document conversion
 6. [05 - Browser IDE v1](./ex-05-browser-ide-v1) - VS Code-like IDE in browser
 7. [07 - Photo Watermark Remover](./ex-07-photo-watermark-remover) - PWA for watermark removal using OpenCV.js
+8. [25 - Browser (Custom)](./25-browser) - Web browser with HTML parsing, CSS rendering, and JS execution (deployable)
 
 ---
 
@@ -159,9 +184,12 @@ Each completed challenge includes:
 
 ### Most Complex Implementations
 1. **26-git** - Version control system implementation
-2. **08-redis-server** - In-memory data store with protocol support
-3. **93-rate-limiter** - Multiple rate limiting algorithms
-4. **76-video-chat-app** - Real-time WebRTC communication
+2. **31-ethereum (Custom)** - Blockchain with smart contracts, EVM, and P2P networking
+3. **23-docker (Custom)** - Container runtime with namespaces, cgroups, and Registry API
+4. **25-browser (Custom)** - Web browser with HTML parser, CSS engine, and JavaScript bridge
+5. **08-redis-server** - In-memory data store with protocol support
+6. **93-rate-limiter** - Multiple rate limiting algorithms
+7. **76-video-chat-app** - Real-time WebRTC communication
 
 ### Educational Value
 All challenges are implemented with tutorial-style documentation, making them excellent learning resources for:

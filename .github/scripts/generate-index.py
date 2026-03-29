@@ -475,6 +475,7 @@ def generate_index_html(challenges, extra_challenges, web_challenges):
         </div>
     </footer>
 
+    <script src="assets/analytics.js"></script>
     <script src="assets/script.js"></script>
 </body>
 </html>

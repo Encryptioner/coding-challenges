@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .test-result {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .test-result.success {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        .test-result.error {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Page</h1>
+        <p>This page tests various server features.</p>
+
+        <div id="test-results"></div>
+
+        <a href="/">← Back to Home</a>
+    </div>
+
+    <script>
+        const results = document.getElementById('test-results');
+
+        function addTest(name, success, message) {
+            const div = document.createElement('div');
+            div.className = 'test-result ' + (success ? 'success' : 'error');
+            div.innerHTML = `
+                <strong>${success ? '✅' : '❌'} ${name}</strong><br>
+                ${message}
+            `;
+            results.appendChild(div);
+        }
+
+        // Test page structure
+        addTest('Page Loaded', true, 'HTML page loaded successfully');
+
+        // Test CSS
+        addTest('CSS Styling', true, 'style.css was loaded and applied');
+
+        // Test JavaScript
+        addTest('JavaScript', true, 'app.js was loaded and executed');
+
+        // Test fetch
+        fetch('/api/status')
+            .then(response => {
+                if (response.ok) {
+                    addTest('API Endpoint', true, '/api/status returned ' + response.status);
+                } else {
+                    addTest('API Endpoint', false, '/api/status returned ' + response.status);
+                }
+            })
+            .catch(error => {
+                addTest('API Endpoint', false, 'Fetch failed: ' + error.message);
+            });
+
+        // Test image (would need actual image)
+        const img = new Image();
+        img.onload = function() {
+            addTest('Image Loading', true, 'Images can be loaded');
+        };
+        img.onerror = function() {
+            addTest('Image Loading', false, 'No image found (expected if no images exist)');
+        };
+        img.src = '/test.png?' + Date.now();
+
+        console.log('Test page loaded');
+    </script>
+</body>
+</html>

@@ -1,10 +1,62 @@
 // Interactive Documentation Viewer
 
+// ── Doc-path → section name mapping ─────────────────────────────────────────
+
+/** @type {Record<string, 'overview'|'challenge'|'implementation'|'examples'|'algorithms'|'tutorial'|'api'>} */
+const DOC_SECTION_MAP = {
+    'README.html': 'overview',
+    'challenge.html': 'challenge',
+    'docs/implementation.html': 'implementation',
+    'docs/examples.html': 'examples',
+    'docs/algorithms.html': 'algorithms',
+    'docs/tutorial.html': 'tutorial',
+    'docs/api.html': 'api',
+};
+
+// ── Analytics helpers ─────────────────────────────────────────────────────────
+
+/** @returns {{ trackEvent: Function, sanitizeError: Function } | null} */
+function analytics() {
+    return window.Analytics || null;
+}
+
+/**
+ * Derive the challenge_id from the page URL.
+ * URL pattern: /coding-challenges/<challenge-folder>/docs.html
+ * Returns the folder name, e.g. "ex-04-mobile-ide-app".
+ * @returns {string}
+ */
+function getChallengeId() {
+    const parts = window.location.pathname.split('/').filter(Boolean);
+    // The challenge folder is the second-to-last segment before docs.html
+    // e.g. ["coding-challenges", "ex-04-mobile-ide-app", "docs.html"]
+    if (parts.length >= 2) {
+        return parts[parts.length - 2] || '';
+    }
+    return '';
+}
+
+// ── Pane-resize debounce ─────────────────────────────────────────────────────
+
+/** @type {ReturnType<typeof setTimeout> | null} */
+let paneResizeTimer = null;
+
+function trackPaneResized() {
+    if (paneResizeTimer !== null) clearTimeout(paneResizeTimer);
+    paneResizeTimer = setTimeout(() => {
+        analytics()?.trackEvent({ name: 'pane_resized' });
+        paneResizeTimer = null;
+    }, 500);
+}
+
+// ── Main class ───────────────────────────────────────────────────────────────
+
 class DocsViewer {
     constructor() {
         this.currentView = 'split'; // 'docs', 'app', 'split'
         this.currentDoc = null;
         this.docsData = {};
+        this.challengeId = getChallengeId();
         this.init();
     }
 
@@ -13,6 +65,7 @@ class DocsViewer {
         this.setupSidebar();
         this.setupResizer();
         this.setupMobileMenu();
+        this.setupBackLink();
         this.loadInitialDoc();
     }
 
@@ -27,6 +80,11 @@ class DocsViewer {
                 // Update active button
                 viewButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
+
+                analytics()?.trackEvent({
+                    name: 'view_mode_changed',
+                    params: { mode: /** @type {'docs'|'app'|'split'} */ (view) },
+                });
             });
         });
     }
@@ -53,12 +111,27 @@ class DocsViewer {
                 docsPane.classList.add('hidden');
                 if (resizer) resizer.style.display = 'none';
                 container.classList.add('app-only');
+                // Track preview_loaded when app pane first becomes visible
+                this.trackPreviewIfNeeded();
                 break;
             case 'split':
                 if (resizer) resizer.style.display = 'block';
                 container.classList.add('split-view');
+                this.trackPreviewIfNeeded();
                 break;
         }
+    }
+
+    trackPreviewIfNeeded() {
+        if (this._previewTracked) return;
+        const iframe = document.querySelector('.app-frame');
+        if (!iframe) return;
+
+        this._previewTracked = true;
+        analytics()?.trackEvent({
+            name: 'preview_loaded',
+            params: { challenge_id: this.challengeId },
+        });
     }
 
     setupSidebar() {
@@ -73,6 +146,13 @@ class DocsViewer {
                 // Update active item
                 navItems.forEach(nav => nav.classList.remove('active'));
                 item.classList.add('active');
+
+                // Track doc section viewed
+                const section = DOC_SECTION_MAP[docPath] || 'overview';
+                analytics()?.trackEvent({
+                    name: 'doc_section_viewed',
+                    params: { challenge_id: this.challengeId, section },
+                });
 
                 // Close mobile menu if open
                 this.closeMobileMenu();
@@ -116,6 +196,8 @@ class DocsViewer {
                 isResizing = false;
                 document.body.style.cursor = '';
                 document.body.style.userSelect = '';
+                // Debounced: fires once per drag gesture
+                trackPaneResized();
             }
         });
     }
@@ -127,14 +209,30 @@ class DocsViewer {
 
         if (menuBtn) {
             menuBtn.addEventListener('click', () => {
+                const willOpen = !sidebar.classList.contains('open');
                 sidebar.classList.toggle('open');
                 overlay.classList.toggle('active');
+
+                analytics()?.trackEvent({
+                    name: 'mobile_menu_toggled',
+                    params: { opened: willOpen },
+                });
             });
         }
 
         if (overlay) {
             overlay.addEventListener('click', () => {
                 this.closeMobileMenu();
+            });
+        }
+    }
+
+    setupBackLink() {
+        // The back link (.back-link or .back-button) lives in the sidebar header
+        const backLink = document.querySelector('.back-link, .back-button');
+        if (backLink) {
+            backLink.addEventListener('click', () => {
+                analytics()?.trackEvent({ name: 'back_to_index' });
             });
         }
     }
@@ -187,6 +285,14 @@ class DocsViewer {
                     <p>Failed to load ${docPath}. Please try again.</p>
                 </div>
             `;
+            analytics()?.trackEvent({
+                name: 'error_occurred',
+                params: {
+                    category: 'docs_fetch',
+                    action: 'load_doc',
+                    error: analytics().sanitizeError(error instanceof Error ? error.message : String(error)),
+                },
+            });
         }
     }
 
@@ -223,8 +329,17 @@ class DocsViewer {
 
             button.addEventListener('click', async () => {
                 const code = block.textContent;
+                // Detect language from class (e.g. "language-bash")
+                const langClass = Array.from(block.classList).find(c => c.startsWith('language-'));
+                const language = langClass ? langClass.replace('language-', '') : 'unknown';
+
                 try {
                     await navigator.clipboard.writeText(code);
+                    analytics()?.trackEvent({
+                        name: 'code_copied',
+                        params: { challenge_id: this.challengeId, language },
+                    });
+
                     button.innerHTML = `
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="20 6 9 17 4 12"></polyline>
@@ -272,6 +387,13 @@ class DocsViewer {
             a.href = `#${heading.id}`;
             a.textContent = heading.textContent;
             a.style.paddingLeft = heading.tagName === 'H3' ? '1rem' : '0';
+
+            a.addEventListener('click', () => {
+                analytics()?.trackEvent({
+                    name: 'toc_link_clicked',
+                    params: { challenge_id: this.challengeId, heading: heading.textContent.trim() },
+                });
+            });
 
             li.appendChild(a);
             tocList.appendChild(li);
