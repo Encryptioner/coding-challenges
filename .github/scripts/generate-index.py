@@ -470,7 +470,8 @@ def generate_index_html(challenges, extra_challenges, web_challenges):
                 <a href="https://encryptioner.github.io" target="_blank">Website</a> •
                 <a href="https://www.linkedin.com/in/mir-mursalin-ankur" target="_blank">LinkedIn</a> •
                 <a href="https://twitter.com/AnkurMursalin" target="_blank">X (Twitter)</a> •
-                <a href="https://nerddevs.com/author/ankur/" target="_blank">Blog</a>
+                <a href="https://nerddevs.com/author/ankur/" target="_blank">Blog</a> •
+                <a href="https://www.supportkori.com/mirmursalinankur" target="_blank" rel="noopener noreferrer">Support my work ☕</a>
             </p>
         </div>
     </footer>
