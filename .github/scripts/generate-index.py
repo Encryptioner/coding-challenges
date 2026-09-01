@@ -223,6 +223,7 @@ def generate_index_html(challenges, extra_challenges, web_challenges):
       gtag('config', 'G-G8ZWMTEDM1');
     </script>
     <title>Coding Challenges - {completed_count + extra_completed_count} Implementations</title>
+    <meta name="author" content="Mir Mursalin Ankur">
     <meta name="description" content="A comprehensive collection of coding challenges from CodingChallenges.fyi and experimental projects - building practical tools and applications from scratch.">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="assets/style.css">

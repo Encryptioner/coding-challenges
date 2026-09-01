@@ -69,6 +69,7 @@ def generate_docs_page(challenge_dir):
       gtag('config', 'G-G8ZWMTEDM1');
     </script>
     <title>{title} - Documentation</title>
+    <meta name="author" content="Mir Mursalin Ankur">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <link rel="stylesheet" href="../assets/style.css">
     <link rel="stylesheet" href="../assets/docs.css">

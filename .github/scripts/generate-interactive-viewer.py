@@ -175,6 +175,7 @@ def generate_viewer_html(challenge_dir, challenge_name):
       gtag('config', 'G-G8ZWMTEDM1');
     </script>
     <title>{challenge_name} - Interactive Documentation</title>
+    <meta name="author" content="Mir Mursalin Ankur">
     <link rel="stylesheet" href="../assets/style.css">
     <link rel="stylesheet" href="../assets/docs.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -289,6 +290,7 @@ def generate_docs_only_html(challenge_dir, challenge_name):
       gtag('config', 'G-G8ZWMTEDM1');
     </script>
     <title>{challenge_name} - Documentation</title>
+    <meta name="author" content="Mir Mursalin Ankur">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <link rel="stylesheet" href="../assets/style.css">
     <link rel="stylesheet" href="../assets/docs.css">
